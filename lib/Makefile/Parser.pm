@@ -1,8 +1,8 @@
 #: Makefile/Parser.pm
 #: Implementation for Makefile::Parser
-#: v0.11
+#: v0.12
 #: Copyright (c) 2005 Agent Zhang
-#: 2005-09-24 2005-10-20
+#: 2005-09-24 2005-10-28
 
 package Makefile::Parser;
 
@@ -12,7 +12,7 @@ use strict;
 
 #our $Debug = 0;
 our $Strict = 0;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $Error;
 
 # usage: $class->new;
@@ -659,7 +659,7 @@ None by default.
 =head1 CODE COVERAGE
 
 I use L<Devel::Cover> to test the code coverage of my tests, below is the 
-L<Devel::Cover> report on this module's test suite for version 0.11:
+L<Devel::Cover> report on this module's test suite:
 
     ---------------------------- ------ ------ ------ ------ ------ ------ ------
     File                           stmt   bran   cond    sub    pod   time  total
@@ -671,7 +671,7 @@ L<Devel::Cover> report on this module's test suite for version 0.11:
 =head1 REPOSITORY
 
 For the very latest version of this module, check out the source from
-L<https://svn.openfoundry.org/makefileparser> (Subversion). There is
+L<https://svn.berlios.de/svnroot/repos/makefileps> (Subversion). There is
 anonymous access to all.
 
 =head1 TODO
