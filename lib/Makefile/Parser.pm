@@ -2,7 +2,7 @@
 #: Implementation for Makefile::Parser
 #: v0.12
 #: Copyright (c) 2005 Agent Zhang
-#: 2005-09-24 2005-10-28
+#: 2005-09-24 2005-11-04
 
 package Makefile::Parser;
 
@@ -680,34 +680,56 @@ The following syntax will be implemented at the first priority:
 
 =over
 
-=item Serious support for "Recursively expanded" variables in GUN make
+=item *
 
-=item Provide a make tool named ``plmake'' that uses Makefile::Parser
+Serious support for "Recursively expanded" variables in GUN make
+
+=item *
+
+Provide a make tool named ``plmake'' that uses Makefile::Parser
 
 This stuff can be served as a good integrated test.
 
-=item Import environment variables
+=item *
+
+Import environment variables
 
 A quick example on Win32:
 
     C:\> set RM_F=perl -MExtUtils::Command -e rm_f
     C:\> nmake clean
 
-=item Comments that span multiple lines via trailing backslash
+=item *
 
-=item Lines that don't contain just comments
+Comments that span multiple lines via trailing backslash
 
-=item Literal "#" escaped by a leading backslash
+=item *
 
-=item The include directive
+Lines that don't contain just comments
 
-=item Look for 'GNUmakefile' and 'makefile' automatically
+=item *
 
-=item MAKEFILES Variable
+Literal "#" escaped by a leading backslash
 
-=item MAKEFILE_LIST Variable
+=item *
 
-=item .VARIABLES Variable
+The include directive
+
+=item *
+
+Look for 'GNUmakefile' and 'makefile' automatically
+
+=item *
+
+MAKEFILES Variable
+
+=item *
+
+MAKEFILE_LIST Variable
+
+=item *
+
+.VARIABLES Variable
 
 =back
 
