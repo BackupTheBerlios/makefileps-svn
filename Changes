@@ -3,7 +3,7 @@ Revision history for Perl extension Makefile::Parser.
 0.12 10/28/2005
 	- Move the SVN repository to
 	  https://svn.berlios.de/svnroot/repos/makefileps
-
+	- I began to use SVK to work on the SVN stuff.
 
 0.11 10/17/2005
         - User-defined variable names are defined as /\w+/
