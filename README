@@ -24,6 +24,8 @@ This module requires these other modules and libraries:
 
   Test::More (for testing purpose only)
 
+Test::More is usually included in Perl's standard installation.
+
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2005 Agent Zhang
