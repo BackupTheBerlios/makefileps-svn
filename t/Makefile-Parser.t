@@ -19,7 +19,7 @@ my $pack = 'Makefile::Parser';
 my $mk = $pack->new;
 ok $mk, 'object defined';
 isa_ok $mk, 'Makefile::Parser';
-ok $mk->parse("$dir/Makefile");
+ok $mk->parse_file("$dir/Makefile");
 is $mk->{_file}, "$dir/Makefile";
 can_ok $mk, 'error';
 ok !defined $pack->error;
@@ -140,15 +140,16 @@ del t\tmp
 _EOC_
 is $tar->colon_type, ':';
 
-ok !defined($mk->parse('Makefile.bar.bar')), 'object not defined';
+ok !defined($mk->parse_file('Makefile.bar.bar')), 'object not defined';
 like(Makefile::Parser->error, qr/Cannot open Makefile.bar.bar for reading:.*/);
 
-ok !$mk->parse('Makefile.bar.bar');
+ok !$mk->parse_file('Makefile.bar.bar');
 ok defined $mk, 'object defined';
 like(Makefile::Parser->error, qr/Cannot open Makefile.bar.bar for reading:.*/);
 
 chdir('./t');
 $mk = $pack->new;
+$mk->parse_file;
 $tar = $mk->target('test');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
@@ -156,6 +157,7 @@ is $tar->name, 'test';
 is $mk->{_file}, "Makefile";
 
 $mk = $pack->new;
+$mk->parse_file;
 $tar = $mk->target;
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
@@ -163,24 +165,28 @@ is $tar->name, 'all';
 is $mk->{_file}, "Makefile";
 
 $mk = $pack->new;
+$mk->parse_file;
 $var = $mk->var('IDU_LIB');
 ok $var;
 is $var, 'inc\\Idu.pm';
 is $mk->{_file}, "Makefile";
 
 $mk = $pack->new;
+$mk->parse_file;
 my @vars = $mk->vars;
 ok @vars > 5;
 ok $vars[0];
 is $mk->{_file}, "Makefile";
 
 $mk = $pack->new;
+$mk->parse_file;
 @tars = $mk->targets;
 ok @tars > 5;
 isa_ok $tars[0], 'Makefile::Target';
 is $mk->{_file}, "Makefile";
 
 $mk = $pack->new;
+$mk->parse_file;
 @tars = $mk->roots;
 ok @tars > 5;
 is join(' ', sort @tars),
@@ -189,6 +195,7 @@ is join(' ', sort @tars),
 is $mk->{_file}, "Makefile";
 
 my $mk2 = $mk->new;
+$mk2->parse_file;
 isa_ok $mk, 'Makefile::Parser';
 
 chdir('..');
@@ -199,7 +206,7 @@ chdir('..');
 
 #warn "!!! Makefile2 !!!\n";
 my $ps = Makefile::Parser->new;
-$ps->parse('t/Makefile2');
+$ps->parse_file('t/Makefile2');
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'all clean';
@@ -235,7 +242,7 @@ is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2
 ####
 
 #warn "!!! Makefile3 !!!\n";
-ok $ps->parse('t/Makefile3');
+ok $ps->parse_file('t/Makefile3');
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'all clean';
@@ -270,7 +277,7 @@ is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2
 
 #warn "!!! Mafefile4 !!!\n";
 
-$ps->parse('t/Makefile4');
+$ps->parse_file('t/Makefile4');
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'all clean';
@@ -300,7 +307,7 @@ is join(' ', @depends), 'ast++.sum.c';
 is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2.obj';
 
 #warn "!!! Makefile5 !!!\n";
-ok $ps->parse('t/Makefile5');
+ok $ps->parse_file('t/Makefile5');
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'abc';

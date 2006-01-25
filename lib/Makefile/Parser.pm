@@ -7,7 +7,8 @@
 package Makefile::Parser;
 
 use strict;
-#use warnings;
+use warnings;
+use Carp qw(carp croak);
 #use Data::Dumper;
 
 #our $Debug = 0;
@@ -29,12 +30,33 @@ sub new {
     return $self;
 }
 
-# usage: $obj->parse($filename);
-sub parse {
+sub parse_file {
     my ($self, $file) = @_;
     $file ||= 'Makefile';
 
+    my $in;
+    if (not open $in, $file) {
+        $Error = "Cannot open $file for reading: $!";
+        return undef;
+    }
     $self->{_file} = $file;
+    my $status = $self->parse($in);
+    close $in;
+    return $status;
+}
+
+sub parse {
+    my ($self, $src) = @_;
+    carp "$self, $src" if not $src;
+
+    my $in;
+    if (ref $src and ref($src) eq 'GLOB') {
+        $in = $src;
+    } else {
+        $self->{_file} = 'STRING';
+        open $in, '<', \$src;
+    }
+
     $self->{_vars} = {};
     undef $self->{_tars};
     undef $self->{_default};
@@ -42,11 +64,6 @@ sub parse {
     $self->{_imps} = [];
 
     my $rvars = $self->{_vars};
-    my $in;
-    unless (open $in, $file) {
-        $Error = "Cannot open $file for reading: $!";
-        return undef;
-    }
 
     use constant {
         S_IDLE       => 0,
@@ -216,32 +233,27 @@ sub solve_imp {
 
 sub var {
     my ($self, $var) = @_;
-    $self->parse if !defined $self->{_file};
     return $self->{_vars}->{$var};
 }
 
 sub vars {
     my $self = shift;
-    $self->parse if !defined $self->{_file};
     return keys %{$self->{_vars}};
 }
 
 sub target {
     my ($self, $tar_name) = @_;
-    $self->parse if !defined $self->{_file};
     return $self->{_default} if !defined $tar_name;
     return $self->{_tars}->{$tar_name};
 }
 
 sub targets {
     my $self = shift;
-    $self->parse if !defined $self->{_file};
     return values %{$self->{_tars}};
 }
 
 sub roots {
     my $self = shift;
-    $self->parse if !defined $self->{_file};
     my %depends = %{$self->{_depends}};
     my %tars = %{$self->{_tars}};
     my @roots = ();
@@ -321,8 +333,8 @@ Makefile::Parser - A Simple Parser for Makefiles
 
   $parser = Makefile::Parser->new;
 
-  # Equivalent to ->parse('Makefile');
-  $parser->parse or
+  # Equivalent to ->parse_file('Makefile');
+  $parser->parse_file or
       die Makefile::Parser->error;
 
   # Get last value assigned to the specified variable 'CC':
@@ -352,7 +364,7 @@ Makefile::Parser - A Simple Parser for Makefiles
   @cmds = $tar->commands;
 
   # Parse another file using the same Parser object:
-  $parser->parse('Makefile.old') or
+  $parser->parse_file('Makefile.old') or
     die Makefile::Parser->error;
 
   # Get the target who is specified by variable EXE_FILE
@@ -505,30 +517,36 @@ This class provides the main interface to the Makefile parser.
 
 =over
 
-=item $class-E<gt>new()
+=item $obj = $class->new()
 
 It's the constructor for the Parser class. You may provide the path
 of your Makefile as the argument which . It
-is worth mentioning that the constructor will I<not> call ->parse method
-internally, so please remember calling ->parse after you construct
-the parser object.
+is worth mentioning that the constructor will I<not> call C<parse> method
+or C<parse_file> method internally, so please remember calling ->parse after
+you construct the parser object.
 
-=item $obj-E<gt>parse(I<Makefile-name>)
+=item $status = Makefile::Parser->parse( $source_string )
 
-This method parse the specified Makefile (default to 'Makefile').
+Parse the source of a Makefile contained in a string. If you want to parse
+the source contained in a disk file, use the C<parse_file> method instead.
+The returned $status value indicates success or failure.
 
-When an error occurs during the parsing procedure, ->parse will return
+=item $status = Makefile::Parser->parse_file( $Makefile_name )
+
+This method parses the specified Makefile (default to 'Makefile').
+
+When an error occurs during the parsing procedure, C<parse_file> will return
 undef. Otherwise, a reference to Parser object itself is returned.
 It is recommended to check the return value every time you call this
-method. The detailed error info can be obtained by calling the ->error
+method. The detailed error info can be obtained by calling the C<error>
 method.
 
-=item $obj-E<gt>error
+=item $errstr = $obj->error()
 
 It returns the error info set by the most recent failing operation, such
 as a parsing failure.
 
-=item $obj-E<gt>var($variable_name)
+=item $value = $obj->var($variable_name)
 
 The var method returns the value of the given variable. Since the value of
 variables can be reset multiple times in the Makefile, so what you get
@@ -537,12 +555,12 @@ variable reassignment can be handled appropriately during parsing since
 the whole parsing process is a one-pass operation compared to the multiple-pass
 strategy used by the CPAN module L<Make>.
 
-=item $obj-E<gt>vars
+=item @vars = $obj->vars()
 
 This will return all the variables defined in the Makefile. The order may be
 quite different from the order they appear in the Makefile.
 
-=item $obj-E<gt>target($target_name)
+=item $target = $obj->target($target_name)
 
 This method returns a Makefile::Target object with the name specified.
 It will returns undef if the rules for the given target is not described
@@ -562,7 +580,7 @@ this, please use the following code:
 but this code will break if you have reassigned values to variable MY_LIB in
 your Makefile.
 
-=item $obj-E<gt>targets
+=item @targets = $obj->targets
 
 This returns all the targets in Makefile. The order can be completely
 different from the order they appear in Makefile. So the following code
@@ -577,9 +595,9 @@ Please use the following syntax instead:
 
 The type of the returned list is an array of Makefile::Target objects.
 
-=item $obj-E<gt>roots
+=item @roots = $obj->roots
 
-The -E<gt>roots method returns the "root targets" in Makefile. The targets
+The C<roots> method returns the "root targets" in Makefile. The targets
 which there're no other targets depends on are called the I<root targets>.
 For example, I<install>, I<uninstall>, and I<veryclean>
 are all root targets in the Makefile generated by the I<ExtUtils::MakeMaker>
