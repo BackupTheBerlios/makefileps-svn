@@ -2,7 +2,7 @@
 #: Implementation for Makefile::Parser
 #: v0.12
 #: Copyright (c) 2005 Agent Zhang
-#: 2005-09-24 2005-11-04
+#: 2005-09-24 2006-01-25
 
 package Makefile::Parser;
 
@@ -48,7 +48,14 @@ sub parse {
         return undef;
     }
 
-    my $state = 'S_IDLE';
+    use constant {
+        S_IDLE       => 0,
+        S_CMD        => 1,
+        S_IN_CMD     => 2,
+        S_IN_VAL     => 3,
+        S_IN_DEPENDS => 4,
+    };
+    my $state = S_IDLE;
     my ($var, $value, $tar_name, $tar, $colon_type, $depends, $cmd);
     my @cmds;
     my %tars;
@@ -65,35 +72,35 @@ sub parse {
         # expand the value of use-defined variables:
         s/\$[\{\(](\w+)[\}\)]/exists $rvars->{$1} ? $rvars->{$1} : $&/ge;
 
-        if (($state eq 'S_IDLE' or $state eq 'S_CMD') and /^(\w+) \s* :?= \s* (.*)$/xo) {
+        if (($state == S_IDLE or $state == S_CMD) and /^(\w+) \s* :?= \s* (.*)$/xo) {
             $var = $1;
             $value = $2 || '';
             if ($value =~ s/\s+\\$//o) {
-                $state = 'S_IN_VAL' ;
+                $state = S_IN_VAL;
             } else {
                 $value =~ s/\^\\$/\\/;
                 $rvars->{$var} = $value;
                 #warn "$var <=> $value\n";
-                $state = 'S_IDLE';
+                $state = S_IDLE;
             }
             #warn "$1 * $2 * $3";
         }
-        elsif ($state eq 'S_IN_VAL' and /^\s+ (.*)$/xo) {
+        elsif ($state == S_IN_VAL and /^\s+ (.*)$/xo) {
             #warn $1;
             $value .= " $1";
             if ($value !~ s/\s+\\$//o) {
-                $state = 'S_IDLE' ;
+                $state = S_IDLE;
                 $value =~ s/\^\\$/\\/;
                 $rvars->{$var} = $value;
                 #warn "$var <=> $value\n";
             }
         }
-        elsif (($state eq 'S_IDLE' or $state eq 'S_CMD') and /^(\.\w+) (\.\w+) \s* (::?)\s*$/xo) {
+        elsif (($state == S_IDLE or $state == S_CMD) and /^(\.\w+) (\.\w+) \s* (::?)\s*$/xo) {
             $_ = "%$2 $3 %$1\n";
             #warn $_;
             redo;
         }
-        elsif (($state eq 'S_IDLE' or $state eq 'S_CMD') and /^(\S[^:]*) (::?) \s* (.*)$/xo) {
+        elsif (($state == S_IDLE or $state == S_CMD) and /^(\S[^:]*) (::?) \s* (.*)$/xo) {
             $tar_name = $1;
             $colon_type = $2;
             $depends = $3;
@@ -113,38 +120,38 @@ sub parse {
                 $first_tar = 0;
             }
             if ($depends =~ s/\s+\\$//o) {
-                $state = 'S_IN_DEPENDS';
+                $state = S_IN_DEPENDS;
             } else {
                 $depends =~ s/\^\\$/\\/;
-                $state = 'S_CMD';
+                $state = S_CMD;
             }
             my @depends = split /\s+/, $depends;
             map { $self->{_depends}->{$_} = 1 } @depends;
             $tar->add_depend(@depends);
         }
-        elsif ($state eq 'S_IN_DEPENDS' and /^\s+ (.*)$/xo) {
+        elsif ($state == S_IN_DEPENDS and /^\s+ (.*)$/xo) {
             $depends = $1;
             if ($depends !~ s/\s+\\$//o) {
                 $depends =~ s/\^\\$/\\/;
                 my @depends = split /\s+/, $depends;
                 map { $self->{_depends}->{$_} = 1 } @depends;
                 $tar->add_depend(@depends);
-                $state = 'S_CMD';
+                $state = S_CMD;
             }
         }
-        elsif ($state eq 'S_CMD' and /^\s+(.*)/o) {
+        elsif ($state == S_CMD and /^\s+(.*)/o) {
             $cmd = $1;
             if ($cmd =~ s/\s+\\$//o) {
-                $state = 'S_IN_CMD';
+                $state = S_IN_CMD;
             } else {
                 $tar->add_command($cmd);
             }
         }
-        elsif ($state eq 'S_IN_CMD' and /^\s+(.*)/o) {
+        elsif ($state == S_IN_CMD and /^\s+(.*)/o) {
             $cmd .= " $1";
             if ($cmd !~ s/\s+\\$//o) {
                 $tar->add_command($cmd);
-                $state = 'S_CMD';
+                $state = S_CMD;
             }
         }
         elsif ($Strict) {
