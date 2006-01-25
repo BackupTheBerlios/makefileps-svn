@@ -24,7 +24,7 @@ sub new {
         _vars    => {},       # all the definitions of variables
         _tars    => undef,    # all the targets
         _default => undef,    # default target
-        _depends => {},       # all the dependencies
+        _prereqs => {},       # all the prerequisites
         _imps    => [],       # targets in implicit rules
     }, $class;
     return $self;
@@ -60,7 +60,7 @@ sub parse {
     $self->{_vars} = {};
     undef $self->{_tars};
     undef $self->{_default};
-    $self->{_depends} = {};
+    $self->{_prereqs} = {};
     $self->{_imps} = [];
 
     my $rvars = $self->{_vars};
@@ -70,10 +70,10 @@ sub parse {
         S_CMD        => 1,
         S_IN_CMD     => 2,
         S_IN_VAL     => 3,
-        S_IN_DEPENDS => 4,
+        S_IN_PREREQ  => 4,
     };
     my $state = S_IDLE;
-    my ($var, $value, $tar_name, $tar, $colon_type, $depends, $cmd);
+    my ($var, $value, $tar_name, $tar, $colon_type, $prereqs, $cmd);
     my @cmds;
     my %tars;
     %$rvars = ();
@@ -120,7 +120,7 @@ sub parse {
         elsif (($state == S_IDLE or $state == S_CMD) and /^(\S[^:]*) (::?) \s* (.*)$/xo) {
             $tar_name = $1;
             $colon_type = $2;
-            $depends = $3;
+            $prereqs = $3;
             $tar_name =~ s/^\s+|\s+$//;
 
             # Ignore .SUFFIXES currently:
@@ -136,23 +136,23 @@ sub parse {
                 $self->{_default} = $tar;
                 $first_tar = 0;
             }
-            if ($depends =~ s/\s+\\$//o) {
-                $state = S_IN_DEPENDS;
+            if ($prereqs =~ s/\s+\\$//o) {
+                $state = S_IN_PREREQ;
             } else {
-                $depends =~ s/\^\\$/\\/;
+                $prereqs =~ s/\^\\$/\\/;
                 $state = S_CMD;
             }
-            my @depends = split /\s+/, $depends;
-            map { $self->{_depends}->{$_} = 1 } @depends;
-            $tar->add_depend(@depends);
+            my @prereqs = split /\s+/, $prereqs;
+            map { $self->{_prereqs}->{$_} = 1 } @prereqs;
+            $tar->add_depend(@prereqs);
         }
-        elsif ($state == S_IN_DEPENDS and /^\s+ (.*)$/xo) {
-            $depends = $1;
-            if ($depends !~ s/\s+\\$//o) {
-                $depends =~ s/\^\\$/\\/;
-                my @depends = split /\s+/, $depends;
-                map { $self->{_depends}->{$_} = 1 } @depends;
-                $tar->add_depend(@depends);
+        elsif ($state == S_IN_PREREQ and /^\s+ (.*)$/xo) {
+            $prereqs = $1;
+            if ($prereqs !~ s/\s+\\$//o) {
+                $prereqs =~ s/\^\\$/\\/;
+                my @prereqs = split /\s+/, $prereqs;
+                map { $self->{_prereqs}->{$_} = 1 } @prereqs;
+                $tar->add_depend(@prereqs);
                 $state = S_CMD;
             }
         }
@@ -185,9 +185,9 @@ sub parse {
 
 sub post_parse {
     my $self = shift;
-    my $rdepends = $self->{_depends};
+    my $rprereqs = $self->{_prereqs};
     my $rimps = $self->{_imps};
-    for (keys %$rdepends) {
+    for (keys %$rprereqs) {
         next if /%/;
         #warn "Trying to match implicit rules one by one against $_...\n";
         $self->solve_imp($_);
@@ -213,12 +213,12 @@ sub solve_imp {
             my $dep;
             my @deps = map {
                 s/%/$matched_part/;
-                $self->{_depends}->{$_} = 1;
+                $self->{_prereqs}->{$_} = 1;
                 #warn "Recursively solving dependent gole $_...\n";
                 $self->solve_imp($_);
                 $dep = $_;
                 $_
-            } $obj->depends;
+            } $obj->prereqs;
             $tar->add_depend(@deps);
             my @cmds = map {
                 s/\$</$dep/g;
@@ -254,13 +254,13 @@ sub targets {
 
 sub roots {
     my $self = shift;
-    my %depends = %{$self->{_depends}};
+    my %prereqs = %{$self->{_prereqs}};
     my %tars = %{$self->{_tars}};
     my @roots = ();
     my ($key, $val);
     while (($key, $val) = each %tars) {
         #next if $key =~ m/%/;
-        next if $depends{$key};
+        next if $prereqs{$key};
         push @roots, $key;
     }
     return @roots;
@@ -285,7 +285,7 @@ sub new {
         _name => shift,
         _colon_type => shift,
         _commands  => [],
-        _depends => [],
+        _prereqs => [],
     };
     return bless $self, $class;
 }
@@ -298,12 +298,12 @@ sub colon_type {
     return shift->{_colon_type};
 }
 
-sub depends {
-    return @{shift->{_depends}};
+sub prereqs {
+    return @{shift->{_prereqs}};
 }
 
 sub add_depend {
-    push @{shift->{_depends}}, @_;
+    push @{shift->{_prereqs}}, @_;
 }
 
 sub commands {
@@ -358,7 +358,7 @@ Makefile::Parser - A Simple Parser for Makefiles
   print $tar->name;
 
   # Get the dependencies for the target 'install':
-  @depends = $tar->depends;
+  @prereqs = $tar->prereqs;
 
   # Access the shell command used to build the current target.
   @cmds = $tar->commands;
@@ -598,7 +598,7 @@ The type of the returned list is an array of Makefile::Target objects.
 =item @roots = $obj->roots
 
 The C<roots> method returns the "root targets" in Makefile. The targets
-which there're no other targets depends on are called the I<root targets>.
+which there're no other targets $se on are called the I<root targets>.
 For example, I<install>, I<uninstall>, and I<veryclean>
 are all root targets in the Makefile generated by the I<ExtUtils::MakeMaker>
 module. On the other hand, I<clean> and I<test> are not, which may be
@@ -639,7 +639,7 @@ Iterate the Makefile AST to apply implicit rules in the following form:
 =item solve_imp($depend)
 
 Solve implicit rules as many as possible using one target name that appears
-in other target's dependency list.
+in other target's prerequisites.
 
 =back
 
@@ -665,9 +665,9 @@ doesn't make much sense to me if the user has a need to call it manually.
 
 It will return the name of the current Target object.
 
-=item $obj-E<gt>depends
+=item @prereqs = $obj->prereqs
 
-You can get the list dependencies for the current target. If no dependencies are
+You can get the list of prerequisites the current target depends on. If no prerequisites are
 specified in the Makefile for the target, an empty array will be returned.
 
 =item $obj-E<gt>commands

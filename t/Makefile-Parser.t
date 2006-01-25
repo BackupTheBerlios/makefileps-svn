@@ -64,9 +64,9 @@ isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'all';
 my @deps = qw/inc\\Idu.pm hex2bin.exe bin2hex.exe t_dir C\\idu.dll C\\idu.lib
               C\idui.exe inc\\Disasm.pm/;
-my @depends = $tar->depends;
-is scalar(@depends), scalar(@deps);
-is join(' ', @depends), join(' ', @deps);
+my @prereqs = $tar->prereqs;
+is scalar(@prereqs), scalar(@deps);
+is join(' ', @prereqs), join(' ', @deps);
 is join("\n", $tar->commands), '';
 is $tar->colon_type, '::';
 
@@ -78,9 +78,9 @@ ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, $mk->var('IDU_LIB');
 @deps = ($mk->var('IDU_TT'), $mk->var('GLOB_AST'), $mk->var('STAT_AST'));
-@depends = $tar->depends;
-is scalar(@depends), scalar(@deps);
-is join(' ', @depends), join(' ', @deps);
+@prereqs = $tar->prereqs;
+is scalar(@prereqs), scalar(@deps);
+is join(' ', @prereqs), join(' ', @deps);
 is join("\n", $tar->commands), 'astt -o inc\Idu.pm -t ' . join(' ', @deps);
 is $tar->colon_type, ':';
 
@@ -88,9 +88,9 @@ $tar = $mk->target('foo');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'foo';
-@depends = $tar->depends;
-is scalar(@depends), 3;
-is join(' ', @depends), "a b \\";
+@prereqs = $tar->prereqs;
+is scalar(@prereqs), 3;
+is join(' ', @prereqs), "a b \\";
 is $tar->colon_type, ':';
 
 $tar = $mk->target('foo2');
@@ -98,17 +98,17 @@ ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'foo2';
 is $tar, 'foo2';
-@depends = $tar->depends;
-is scalar(@depends), 5;
-is join(' ', @depends), "a b c d \\";
+@prereqs = $tar->prereqs;
+is scalar(@prereqs), 5;
+is join(' ', @prereqs), "a b c d \\";
 is $tar->colon_type, ':';
 
 $tar = $mk->target('t_dir');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 't_dir';
-@depends = $tar->depends;
-is scalar(@depends), 0;
+@prereqs = $tar->prereqs;
+is scalar(@prereqs), 0;
 is join("\n", $tar->commands), "cd t\n\$(MAKE) /nologo\ncd..";
 is $tar->colon_type, ':';
 
@@ -116,8 +116,8 @@ $tar = $mk->target('run_test');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'run_test';
-@depends = $tar->depends;
-is scalar(@depends), 0;
+@prereqs = $tar->prereqs;
+is scalar(@prereqs), 0;
 my $var = $mk->var('T_FILES');
 is join("\n", $tar->commands)."\n", <<"_EOC_";
 set HARNESS_OK_SLOW = 1
@@ -130,9 +130,9 @@ ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 't\cpat_cover.ast.t';
 @deps = qw(coptest.tt t\pat_cover.ast.ast);
-@depends = $tar->depends;
-is scalar(@depends), scalar(@deps);
-is join(' ', @depends), join(' ', @deps);
+@prereqs = $tar->prereqs;
+is scalar(@prereqs), scalar(@deps);
+is join(' ', @prereqs), join(' ', @deps);
 is join("\n", $tar->commands)."\n", <<'_EOC_';
 echo $ast = { 'ast_file', 't/pat_cover.ast.ast' }; > t\tmp
 astt -o t\cpat_cover.ast.t -t coptest.tt t\tmp t\pat_cover.ast.ast
@@ -215,15 +215,15 @@ $tar = $ps->target('sum2.exe');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'sum2.exe';
-@depends = $tar->depends;
-is join(' ', @depends), 'sum2.obj';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'sum2.obj';
 
 $tar = $ps->target('sum2.obj');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'sum2.obj';
-@depends = $tar->depends;
-is join(' ', @depends), 'sum2.asm';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'sum2.asm';
 
 $tar = $ps->target('ast++.sum.o');
 ok $tar;
@@ -231,8 +231,8 @@ isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'ast++.sum.o';
 my @cmds = $tar->commands;
 is join("\n", @cmds), 'cl /L ast++.sum.lib ast++.sum.c > ast++.sum.o';
-@depends = $tar->depends;
-is join(' ', @depends), 'ast++.sum.c';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'ast++.sum.c';
 
 @tars = $ps->targets;
 is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2.obj';
@@ -251,22 +251,22 @@ $tar = $ps->target('sum2.exe');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'sum2.exe';
-@depends = $tar->depends;
-is join(' ', @depends), 'sum2.obj';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'sum2.obj';
 
 $tar = $ps->target('sum2.obj');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'sum2.obj';
-@depends = $tar->depends;
-is join(' ', @depends), 'sum2.asm';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'sum2.asm';
 
 $tar = $ps->target('ast++.sum.o');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'ast++.sum.o';
-@depends = $tar->depends;
-is join(' ', @depends), 'ast++.sum.c';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'ast++.sum.c';
 
 @tars = $ps->targets;
 is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2.obj';
@@ -286,22 +286,22 @@ $tar = $ps->target('sum2.exe');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'sum2.exe';
-@depends = $tar->depends;
-is join(' ', @depends), 'sum2.obj';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'sum2.obj';
 
 $tar = $ps->target('sum2.obj');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'sum2.obj';
-@depends = $tar->depends;
-is join(' ', @depends), 'sum2.asm';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'sum2.asm';
 
 $tar = $ps->target('ast++.sum.o');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'ast++.sum.o';
-@depends = $tar->depends;
-is join(' ', @depends), 'ast++.sum.c';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'ast++.sum.c';
 
 @tars = $ps->targets;
 is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2.obj';
@@ -316,14 +316,14 @@ $tar = $ps->target('abc');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'abc';
-@depends = $tar->depends;
-is join(' ', @depends), 'foo.obj';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), 'foo.obj';
 is join("\n", $tar->commands), 'link 5 5 $(MAKE) $(CC)  > abc';
 
 $tar = $ps->target('foo.obj');
 ok $tar;
 isa_ok $tar, 'Makefile::Target';
 is $tar->name, 'foo.obj';
-@depends = $tar->depends;
-is join(' ', @depends), '';
+@prereqs = $tar->prereqs;
+is join(' ', @prereqs), '';
 is join("\n", $tar->commands), 'echo foo.obj';
