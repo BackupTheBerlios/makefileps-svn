@@ -49,13 +49,10 @@ sub build {
     $changed = 1 if not @prereqs;
     #warn "  Prereqs: @prereqs";
     for my $prereq (@prereqs) {
-        if ( not -f $prereq or
-             not -f $goal or
-             -M $prereq < -M $goal
-            ) {
+        $changed += build($prereq);
+        if (-f $prereq and -f $goal and -M $prereq < -M $goal) {
             warn $goal, '(', -M $goal, ") : $prereq (", -M $prereq, ')' if $DEBUG;
-            warn "  building prereq $prereq...\n" if $DEBUG;
-            $changed += build($prereq);
+            $changed = 1;
         }
     }
     if ($changed or not -f $goal) {
@@ -116,6 +113,8 @@ Multiple target rules not supported.
 =item *
 
 $(MAKE), $(CC), etc. not set by default
+
+=back
 
 =head1 AUTHOR
 
