@@ -1,0 +1,86 @@
+#!perl
+#: plmake
+#: 2006-01-25 2006-01-25
+
+use strict;
+use warnings;
+
+use Makefile::Parser;
+use Getopt::Std;
+
+my %opts;
+getopts('f:', \%opts);
+
+my $infile = $opts{f} || 'Makefile';
+
+my $make = Makefile::Parser->new;
+$make->parse_file($infile) or die $make->error;
+
+@_ = $make->target if not @_;
+for my $goal (@_) {
+    my $status = build($goal);
+    if ($status == 0) {
+        info("Nothing to be done for `$goal'");
+    }
+}
+
+sub build {
+    my $goal = shift;
+    my $tar = $make->target($goal);
+    if (not $tar) {
+        if (-f $goal) {
+            return 0;
+        } else {
+            error("No rule to make target `$tar'");
+        }
+    }
+    for my $prereq ($tar->prereqs) {
+        if (-f $prereq and -f $goal and -M $prereq < -M $goal) {
+            build($prereq);
+        }
+    }
+    for my $cmd ($tar->commands) {
+        print "$cmd\n";
+        system($cmd);
+    }
+}
+
+sub error {
+    my $msg = shift;
+    die "make: $msg.  Stop.\n";
+}
+
+sub info {
+    my $msg = shift;
+    print "make: $msg.\n";
+    exit(0);
+}
+
+0;
+__END__
+
+=head1 NAME
+
+plmake - A make utility that uses Makefile::Parser
+
+=head1 SYNOPSIS
+
+    plmake
+    plmake -f Makefile.old
+
+=head1 DESCRIPTION
+
+=head1 OPTIONS
+
+=head1 AUTHOR
+
+Agent Zhang, E<lt>agent2002@126.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2005 Agent Zhang.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
