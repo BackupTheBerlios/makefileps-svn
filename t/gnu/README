@@ -1,0 +1,10 @@
+To run the GNU test suit provided by Makefile::Parser,
+the following steps should be followed:
+
+  * Set the GNU_MAKE environment to the gnu make 
+    utility you want to test. If GNU_MAKE is not 
+    set, then 'make' will be used.
+  * Ensure the current directory is the foler where
+    this README file is in.
+  * Enter the following command to start the tester:
+      prove -I../.. -r
