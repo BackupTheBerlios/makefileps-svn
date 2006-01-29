@@ -1,7 +1,9 @@
 #: comments.t
 #: 2006-01-29 2006-01-29
 
-use t::Parser tests => 3;
+use t::Parser;
+
+plan tests => 3 * blocks;
 
 run {
     my $block = shift;

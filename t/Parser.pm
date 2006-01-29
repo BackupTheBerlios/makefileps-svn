@@ -21,6 +21,7 @@ our @EXPORT = qw( run_exe );
 
 sub run_exe($) {
     my $block = shift;
+    my $name = $block->name;
     my $makefile = $block->makefile;
     my $stdout2   = $block->stdout;
     my $stderr2   = $block->stderr;
@@ -46,10 +47,10 @@ sub run_exe($) {
     my ($output, $stdout, $stderr) =
         ("@$routput", "@$rstdout", "@$rstderr",);
     #warn "\nfull: $output\nstderr: $stderr\nstdout: $stdout\n";
-    is $errcode, $errcode2, 'Error Code' if defined $errcode2;
-    is $output, $output2, 'Full Output Buffer' if defined $output2;
-    is $stdout, $stdout2, 'stdout' if defined $stdout2;
-    is $stderr, $stderr2, 'stderr' if defined $stderr2;
+    is $errcode, $errcode2, "Error Code - $name" if defined $errcode2;
+    is $output, $output2, "Full Output Buffer - $name" if defined $output2;
+    is $stdout, $stdout2, "stdout - $name" if defined $stdout2;
+    is $stderr, $stderr2, "stderr - $name" if defined $stderr2;
 }
 
 package t::Parser::Filter;
