@@ -60,6 +60,8 @@ arg4 is defined
 --- error_code
 0
 
+
+
 === variable in infdef
 Test expansion of variables inside ifdef
 --- source

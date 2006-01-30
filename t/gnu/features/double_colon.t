@@ -54,6 +54,8 @@ bbb
 --- error_code
 0
 
+
+
 === dcolon rule, not a goal, in parallel
 As above, in parallel.
 --- source quote eval: $::source
@@ -65,6 +67,8 @@ bbb
 --- stderr
 --- error_code
 0
+
+
 
 === dcolon rule, is a goal
 A simple double-colon rule that is the goal target
@@ -78,6 +82,8 @@ bbb
 --- error_code
 0
 
+
+
 === dcolon rule, is a goal, parallel
 As above, in parallel
 --- source quote eval: $::source
@@ -90,6 +96,8 @@ bbb
 --- stderr
 --- error_code
 0
+
+
 
 === dcolon rules run individually
 Each double-colon rule is supposed to be run individually
@@ -106,6 +114,8 @@ foo FIRST
 --- error_code
 0
 
+
+
 === dcolon rules run individually, in parallel
 Again, in parallel.
 --- source quote eval: $::source
@@ -120,6 +130,8 @@ foo FIRST
 --- error_code
 0
 
+
+
 === dcolon rules run individually
 Each double-colon rule is supposed to be run individually
 --- source quote eval: $::source
@@ -132,6 +144,8 @@ foo SECOND
 --- stderr
 --- error_code
 0
+
+
 
 === dcolon rules run individually, in parallel
 Again, in parallel.
@@ -147,6 +161,8 @@ foo SECOND
 --- error_code
 0
 
+
+
 === circular dependency
 Test circular dependency check; PR/1671
 --- source quote eval: $::source
@@ -158,6 +174,8 @@ oops
 $t::Parser::MAKE: Circular d <- d dependency dropped.
 --- error_code
 0
+
+
 
 === strange one
 I don't grok why this is different than the above, but it is...

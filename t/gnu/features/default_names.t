@@ -51,6 +51,8 @@ It chose GNUmakefile
 --- error_code
 0
 
+
+
 === Only `makefile' and `Makefile'
 When only `makefile' and `Makefile' are present in the current directory,
 `makefile' is favored.
@@ -66,6 +68,8 @@ It chose makefile
 --- stderr
 --- error_code
 0
+
+
 
 === Single `Makefile'
 --- pre

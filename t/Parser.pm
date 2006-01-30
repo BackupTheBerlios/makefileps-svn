@@ -42,6 +42,8 @@ sub run_test_make ($) {
     my ($errcode, $output, $stdout, $stderr) =
         run_make($block, $filename);
 
+    process_post($block);
+
     clean();
     chdir $saved_cwd;
     #warn "\nfull: $output\nstderr: $stderr\nstdout: $stdout\n";
@@ -65,7 +67,8 @@ sub create_file ($$) {
 }
 
 sub process_pre ($) {
-    my $code = $_[0]->pre;
+    my $block = shift;
+    my $code = $block->pre;
     return if not $code;
     eval $code;
     confess "error in `pre' section: $@" if $@;
@@ -143,6 +146,14 @@ sub process_output ($$$$$) {
     is $output, $output2, "Full Output Buffer - $name" if defined $output2;
     is $stdout, $stdout2, "stdout - $name" if defined $stdout2;
     is $stderr, $stderr2, "stderr - $name" if defined $stderr2;
+}
+
+sub process_post ($) {
+    my $block = shift;
+    my $code = $block->post;
+    return if not $code;
+    eval $code;
+    confess "error in `post' section: $@" if $@;
 }
 
 sub clean {
