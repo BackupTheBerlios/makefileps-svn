@@ -5,13 +5,19 @@
 #: 2006-01-29 2006-01-30
 
 use t::Parser;
+use File::Temp;
 
-our $IS_UNIX;
+our $CASE_OK;
 
 BEGIN {
-    if ($^O =~ /Solaris|UNIX|Linux|[a-z]+bsd|Darwin/i) {
-        $IS_UNIX = 1;
-    }
+    # Haven't hack out a better way to figure out whether the current platform
+    #   distinguishes character case in file name. :(
+    my $me = $0;
+    #warn "ME: $me";
+    $me =~ s/[a-z]+/uc($&)/ge or
+    $me =~ s/[A-Z]+/lc($&)/ge;
+    $CASE_OK = not -f $me;
+    #warn "CASE OK: $CASE_OK";
 }
 
 plan tests => 3 * blocks;
@@ -33,7 +39,7 @@ create_file("makefile", "SECOND: ; \@echo It chose makefile\n");
 # DOS/WIN32 platforms preserve case, but Makefile is the same file as makefile.
 # Just test what we can here (avoid Makefile versus makefile test).
 #
-if ($::IS_UNIX) {
+if ($::CASE_OK) {
     # Create another makefile called "Makefile"
     create_file("Makefile", "THIRD: ; \@echo It chose Makefile\n");
 }
@@ -51,7 +57,7 @@ When only `makefile' and `Makefile' are present in the current directory,
 --- pre
 create_file("makefile", "SECOND: ; \@echo It chose makefile\n");
 
-if ($::IS_UNIX) {
+if ($::CASE_OK) {
     create_file("Makefile", "THIRD: ; \@echo It chose Makefile\n");
 }
 
