@@ -33,7 +33,9 @@ sub run_test_make ($) {
 
     my $filename = $block->filename;
     my $source   = $block->source;
-    $filename = create_file($filename, $source);
+    $filename = create_file($filename, $source) if $source;
+
+    process_pre($block);
     process_touch($block);
     process_utouch($block);
 
@@ -55,10 +57,18 @@ sub create_file ($$) {
     } else {
         open $fh, "> $filename" or
             confess("can't open $filename for writing: $!");
+        mark_temp($filename);
     }
     print $fh $content;
     close $fh;
     return $filename;
+}
+
+sub process_pre ($) {
+    my $code = $_[0]->pre;
+    return if not $code;
+    eval $code;
+    confess "error in `pre' section: $@" if $@;
 }
 
 sub process_touch ($) {
@@ -74,8 +84,12 @@ sub touch (@)
       my $fh;
       open $fh, ">> $name" and print $fh "\n" and close $fh
 	      or confess("couldn't touch $name: $!");
-      push @TempFiles, $name;
+      mark_temp($name);
   }
+}
+
+sub mark_temp {
+    push @TempFiles, @_;
 }
 
 sub process_utouch ($) {
@@ -102,7 +116,10 @@ sub run_make($$) {
     my $options  = $block->options || '';
     my $goals    = $block->goals || '';
 
-    my $cmd = "$MAKE_PATH -f $filename $goals $options";
+    if ($filename) {
+        $options = "-f $filename $options";
+    }
+    my $cmd = "$MAKE_PATH $options $goals";
     my( $success, $errcode, $routput, $rstdout, $rstderr ) =
             IPC::Cmd::run( command => $cmd, verbose => 0 );
     local $" = '';

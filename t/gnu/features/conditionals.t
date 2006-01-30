@@ -10,8 +10,9 @@ run { run_test_make $_[0]; }
 __DATA__
 
 === Check GNU make conditionals
-Attempt various different flavors of GNU make conditionals.";
+Attempt various different flavors of GNU make conditionals.
 --- source
+
 objects = foo.obj
 arg1 = first
 arg2 = second
