@@ -1,13 +1,16 @@
 #: double_colon.t
-#: Test handling of double-colon rules.";
-#: We test these features:
-#:   - Multiple commands for the same (double-colon) target
-#:   - Different prerequisites for targets: only out-of-date
-#:     ones are rebuilt.
-#:   - Double-colon targets that aren't the goal target.
 #:
-#: Then we do the same thing for parallel builds: double-colon
-#: targets should always be built serially.";
+#: Description:
+#:   Test handling of double-colon rules.
+#: Details:
+#:   We test these features:
+#:     - Multiple commands for the same (double-colon) target
+#:     - Different prerequisites for targets: only out-of-date
+#:       ones are rebuilt.
+#:     - Double-colon targets that aren't the goal target.
+#:   Then we do the same thing for parallel builds: double-colon
+#:   targets should always be built serially.
+#:
 #: 2006-01-30 2006-01-30
 
 use t::Parser;

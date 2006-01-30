@@ -1,4 +1,10 @@
 #: conditionals.t
+#:
+#: Description:
+#:   Check GNU make conditionals.
+#: Details:
+#:   Attempt various different flavors of GNU make conditionals.
+#:
 #: 2006-01-29 2006-01-30
 
 use t::Parser;

@@ -1,7 +1,11 @@
 #: default_names.t
-#: Check default makefile names
+#:
+#: Description:
+#:   Check default makefile names
+#: Details:
 #:   This script tests to make sure that Make looks for
 #:   default makefiles in the correct order (GNUmakefile, makefile, Makefile)
+#:
 #: 2006-01-29 2006-01-30
 
 use t::Parser;
