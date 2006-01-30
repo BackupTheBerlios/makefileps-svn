@@ -5,7 +5,7 @@ use t::Parser;
 
 plan tests => 3 * blocks;
 
-run { run_exe $_[0]; }
+run { run_test_make $_[0]; }
 
 __DATA__
 

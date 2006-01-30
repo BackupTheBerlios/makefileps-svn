@@ -14,7 +14,7 @@ build_requires  ('Test::Base');
 build_requires  ('IPC::Cmd');
 build_requires  ('IPC::Run');
 build_requires  ('File::Temp');
-#build_requires  ('File::Compare');
+build_requires  ('Cwd');
 
 makemaker_args  (
     test => { TESTS => join ' ', "t/*.t t/*/*.t", "t/*/*/*.t" }, # , "perl5/*/t/*.t" },

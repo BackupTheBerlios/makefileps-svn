@@ -39,7 +39,7 @@ d :: d ; @echo oops
 
 _EOC_
 
-run { run_exe $_[0]; }
+run { run_test_make $_[0]; }
 
 __DATA__
 
@@ -154,8 +154,8 @@ Test circular dependency check; PR/1671
 --- stdout
 ok
 oops
---- stderr
-make: Circular d <- d dependency dropped.
+--- stderr quote eval
+$t::Parser::MAKE: Circular d <- d dependency dropped.
 --- error_code
 0
 
