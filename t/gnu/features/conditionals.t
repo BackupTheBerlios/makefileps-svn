@@ -1,20 +1,17 @@
 #: conditionals.t
-#: 2006-01-29 2006-01-29
+#: 2006-01-29 2006-01-30
 
 use t::Parser;
 
 plan tests => 3 * blocks;
 
-run {
-    my $block = shift;
-    run_exe $block;
-};
+run { run_exe $_[0]; }
 
 __DATA__
 
 === Check GNU make conditionals
 Attempt various different flavors of GNU make conditionals.";
---- makefile
+--- source
 objects = foo.obj
 arg1 = first
 arg2 = second
@@ -64,7 +61,7 @@ arg4 is defined
 
 === variable in infdef
 Test expansion of variables inside ifdef
---- makefile
+--- source
 
 foo = 1
 

@@ -1,14 +1,11 @@
 #: comments.t
-#: 2006-01-29 2006-01-29
+#: 2006-01-29 2006-01-30
 
 use t::Parser;
 
 plan tests => 3 * blocks;
 
-run {
-    my $block = shift;
-    run_exe $block;
-};
+run { run_exe $_[0]; }
 
 __DATA__
 
@@ -16,7 +13,7 @@ __DATA__
 The following test creates a makefile to test comments
 and comment continuation to the next line using a
 backslash within makefiles.
---- makefile
+--- source
 # Test comment vs semicolon parsing and line continuation
 target: # this ; is just a comment \
 	@echo This is within a comment. 

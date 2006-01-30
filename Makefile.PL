@@ -13,6 +13,7 @@ build_requires  ('Test::More');
 build_requires  ('Test::Base');
 build_requires  ('IPC::Cmd');
 build_requires  ('IPC::Run');
+build_requires  ('File::Temp');
 #build_requires  ('File::Compare');
 
 makemaker_args  (
