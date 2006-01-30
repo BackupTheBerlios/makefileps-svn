@@ -49,16 +49,15 @@ run { run_test_make $_[0]; }
 __DATA__
 
 === echo both the command and the string to be echoed
---- source quote eval:  $::source
---- touch  quote eval:  $::example
+--- source quote eval:      $::source
+--- touch  quote eval:      $::example
 --- stdout
 echo This makefile did not clean the dir... good
 This makefile did not clean the dir... good
 --- stderr
 --- error_code
 0
---- post
-ok -f $::example, "File $::example preserved - ".$block->name();
+--- found quote eval:  $::example
 
 
 
@@ -70,8 +69,7 @@ ok -f $::example, "File $::example preserved - ".$block->name();
 --- stderr
 --- error_code
 0
---- post
-ok (not -f $::example), "File $::example removed - ".$block->name;
+--- not_found quote eval:  $::example
 
 
 
@@ -85,8 +83,8 @@ $::delete_command $::example
 --- stderr
 --- error_code
 0
---- post
-ok -f $::example, "File $::example preserved - ".$block->name;
+--- found quote eval:   $::example
+
 
 
 === quiet mode, only execute the echo command
@@ -98,5 +96,4 @@ This makefile did not clean the dir... good
 --- stderr
 --- error_code
 0
---- post
-ok -f $::example, "File $::example preserved - ".$block->name;
+--- found quote eval:   $::example

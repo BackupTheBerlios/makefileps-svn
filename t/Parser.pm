@@ -39,16 +39,18 @@ sub run_test_make ($) {
     process_touch($block);
     process_utouch($block);
 
-    my ($errcode, $output, $stdout, $stderr) =
+    my ($errcode, $full_output, $stdout, $stderr) =
         run_make($block, $filename);
 
     process_post($block);
+    process_found($block);
+    process_not_found($block);
 
     clean();
     chdir $saved_cwd;
-    #warn "\nfull: $output\nstderr: $stderr\nstdout: $stdout\n";
+    #warn "\nstderr: $stderr\nstdout: $stdout\n";
 
-    process_output($block, $errcode, $output, $stdout, $stderr);
+    process_output($block, $errcode, $stdout, $stderr);
 }
 
 sub create_file ($$) {
@@ -129,12 +131,11 @@ sub run_make($$) {
     return ($errcode, "@$routput", "@$rstdout", "@$rstderr");
 }
 
-sub process_output ($$$$$) {
-    my ($block, $errcode, $output, $stdout, $stderr) = @_;
+sub process_output ($$$$) {
+    my ($block, $errcode, $stdout, $stderr) = @_;
 
     my $stdout2  = $block->stdout;
     my $stderr2  = $block->stderr;
-    my $output2  = $block->output;
     my $errcode2 = $block->error_code;
 
     if ($errcode2 and $errcode2 =~ /\d+/s) {
@@ -143,7 +144,6 @@ sub process_output ($$$$$) {
 
     my $name = $block->name;
     is $errcode, $errcode2, "Error Code - $name" if defined $errcode2;
-    is $output, $output2, "Full Output Buffer - $name" if defined $output2;
     is $stdout, $stdout2, "stdout - $name" if defined $stdout2;
     is $stderr, $stderr2, "stderr - $name" if defined $stderr2;
 }
@@ -154,6 +154,26 @@ sub process_post ($) {
     return if not $code;
     eval $code;
     confess "error in `post' section: $@" if $@;
+}
+
+sub process_found ($) {
+    my $block = shift;
+    my $buf = $block->found;
+    return if not $buf;
+    my @files = split /\s+/s, $buf;
+    for my $file (@files) {
+        ok -f $file, "File $file should be found - " . $block->name();
+    }
+}
+
+sub process_not_found ($) {
+    my $block = shift;
+    my $buf = $block->not_found;
+    return if not $buf;
+    my @files = split /\s+/s, $buf;
+    for my $file (@files) {
+        ok ! -f $file, "File $file should NOT be found - " . $block->name();
+    }
 }
 
 sub clean {
