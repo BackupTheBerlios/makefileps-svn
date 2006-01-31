@@ -28,7 +28,7 @@
 #:   the -s option and check that make did not echo the echo
 #:   command before printing the message.
 #:
-#: 2006-01-30 2006-01-30
+#: 2006-01-30 2006-01-31
 
 use t::Parser;
 
@@ -44,38 +44,45 @@ clean:
 \t\@$delete_command $example
 _EOC_
 
+filters {
+    source     => [qw< quote eval >],
+    touch      => [qw< quote eval >],
+    found      => [qw< quote eval >],
+    not_found  => [qw< quote eval >],
+};
+
 run { run_test_make $_[0]; }
 
 __DATA__
 
 === echo both the command and the string to be echoed
---- source quote eval:      $::source
---- touch  quote eval:      $::example
+--- source:      $::source
+--- touch:       $::example
 --- stdout
 echo This makefile did not clean the dir... good
 This makefile did not clean the dir... good
 --- stderr
 --- error_code
 0
---- found quote eval:  $::example
+--- found:       $::example
 
 
 
 === take action, no command echo
---- source quote eval:  $::source
---- touch  quote eval:  $::example
---- goals:              clean
+--- source:      $::source
+--- touch:       $::example
+--- goals:       clean
 --- stdout
 --- stderr
 --- error_code
 0
---- not_found quote eval:  $::example
+--- not_found:   $::example
 
 
 
 === no action taken, echo command only
---- source quote eval:  $::source
---- touch  quote eval:  $::example
+--- source:      $::source
+--- touch:       $::example
 --- options:            -n
 --- goals:              clean
 --- stdout quote eval
@@ -83,17 +90,17 @@ $::delete_command $::example
 --- stderr
 --- error_code
 0
---- found quote eval:   $::example
+--- found:       $::example
 
 
 
 === quiet mode, only execute the echo command
---- source quote eval:  $::source
---- touch  quote eval:  $::example
---- options:            -s
+--- source:      $::source
+--- touch:       $::example
+--- options:     -s
 --- stdout quote eval
 This makefile did not clean the dir... good
 --- stderr
 --- error_code
 0
---- found quote eval:   $::example
+--- found:       $::example

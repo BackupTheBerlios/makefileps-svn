@@ -11,7 +11,7 @@
 #:   Then we do the same thing for parallel builds: double-colon
 #:   targets should always be built serially.
 #:
-#: 2006-01-30 2006-01-30
+#: 2006-01-30 2006-01-31
 
 use t::Parser;
 
@@ -42,13 +42,17 @@ d :: d ; @echo oops
 
 _EOC_
 
+filters {
+    source     => [qw< quote eval >],
+};
+
 run { run_test_make $_[0]; }
 
 __DATA__
 
 === dcolon rule, not a goal
 A simple double-colon rule that isn't the goal target
---- source quote eval: $::source
+--- source:            $::source
 --- goals:             all
 --- stdout
 aaa
@@ -61,7 +65,7 @@ bbb
 
 === dcolon rule, not a goal, in parallel
 As above, in parallel.
---- source quote eval: $::source
+--- source:            $::source
 --- options:           -j10
 --- goals:             all
 --- stdout
@@ -75,7 +79,7 @@ bbb
 
 === dcolon rule, is a goal
 A simple double-colon rule that is the goal target
---- source quote eval: $::source
+--- source:            $::source
 --- goals:             bar
 --- stdout
 aaa
@@ -89,7 +93,7 @@ bbb
 
 === dcolon rule, is a goal, parallel
 As above, in parallel
---- source quote eval: $::source
+--- source:            $::source
 --- options:           -j10
 --- goals:             bar
 --- stdout
@@ -104,7 +108,7 @@ bbb
 
 === dcolon rules run individually
 Each double-colon rule is supposed to be run individually
---- source quote eval: $::source
+--- source:            $::source
 --- utouch
 -5 f2.h
 --- touch
@@ -121,7 +125,7 @@ foo FIRST
 
 === dcolon rules run individually, in parallel
 Again, in parallel.
---- source quote eval: $::source
+--- source:            $::source
 --- options:           -j10
 --- utouch:            -5 f2.h
 --- touch:             foo
@@ -137,7 +141,7 @@ foo FIRST
 
 === dcolon rules run individually
 Each double-colon rule is supposed to be run individually
---- source quote eval: $::source
+--- source:            $::source
 --- utouch:            -5 f1.h
 --- touch:             foo
 --- goals:             foo
@@ -152,7 +156,7 @@ foo SECOND
 
 === dcolon rules run individually, in parallel
 Again, in parallel.
---- source quote eval: $::source
+--- source:            $::source
 --- options:           -j10
 --- utouch:            -5 f1.h
 --- touch:             foo
@@ -168,7 +172,7 @@ foo SECOND
 
 === circular dependency
 Test circular dependency check; PR/1671
---- source quote eval: $::source
+--- source:            $::source
 --- goals:             d
 --- stdout
 ok
@@ -183,7 +187,7 @@ $t::Parser::MAKE: Circular d <- d dependency dropped.
 === strange one
 I don't grok why this is different than the above, but it is...
 Hmm... further testing indicates this might be timing-dependent?
---- source quote eval: $::source
+--- source:            $::source
 --- goals:             biz
 --- options:           -j10
 --- stdout

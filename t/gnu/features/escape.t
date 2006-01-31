@@ -1,0 +1,102 @@
+#: escape.t
+#:
+#: Description:
+#:   Test various types of escaping in makefiles.
+#: Details:
+#:   Make sure that escaping of `:' works in target names.
+#:   Make sure escaping of whitespace works in target names.
+#:   Make sure that escaping of '#' works.
+#:
+#: 2006-01-31 2006-01-31
+
+use t::Parser;
+
+plan tests => 3 * blocks;
+
+our $source = <<'_EOC_';
+$(path)foo : ; @echo cp $^ $@
+
+foo\ bar: ; @echo touch $@
+
+sharp: foo\#bar.ext
+foo\#bar.ext: ; @echo foo\#bar.ext = $@
+_EOC_
+
+filters {
+    source     => [qw< quote eval >],
+};
+
+run { run_test_make $_[0]; }
+
+__DATA__
+
+=== empty `$^' trimmied
+--- source:               $::source
+--- stdout
+cp foo
+--- stderr
+--- error_code
+0
+
+
+
+=== unquoted `:' in target name
+This one should fail, since the ":" is unquoted.
+--- source:               $::source
+--- options:              path=p:
+--- filename:             Makefile
+--- stdout
+--- stderr
+Makefile:1: *** target pattern contains no `%'.  Stop.
+--- error_code
+512
+
+
+
+=== escaped `:' in target name
+This one should work, since we escape the ":".
+--- source:               $::source
+--- options:              'path=p\\:'
+--- filename:             Makefile
+--- stdout
+cp p:foo
+--- stderr
+--- error_code
+0
+
+
+
+=== escape char for `:' gets escaped
+This one should fail, since the escape char is escaped.
+--- source:               $::source
+--- options:              'path=p\\\\:'
+--- filename:             Makefile
+--- stdout
+--- stderr
+Makefile:1: *** target pattern contains no `%'.  Stop.
+--- error_code
+512
+
+
+
+=== escaped white space in target name
+This one should work
+--- source:               $::source
+--- goals:                'foo bar'
+--- stderr
+--- stdout
+touch foo bar
+--- error_code
+0
+
+
+
+=== escaped comments
+Test escaped comments
+--- source:               $::source
+--- goals:                sharp
+--- stdout
+foo#bar.ext = foo#bar.ext
+--- stderr
+--- error_code
+0
