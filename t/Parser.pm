@@ -1,6 +1,6 @@
 #: t/Parser.pm
 #: Tester based on Test::Base
-#: 2006-01-29 2006-01-30
+#: 2006-01-29 2006-01-31
 
 package t::Parser;
 use Test::Base -Base;
@@ -176,7 +176,7 @@ sub process_not_found ($) {
     }
 }
 
-sub clean {
+sub clean () {
     for my $tmpfile (@TempFiles) {
         unlink $tmpfile;
     }
@@ -184,7 +184,7 @@ sub clean {
 }
 
 END {
-    &clean;
+    clean();
 }
 
 package t::Parser::Filter;
