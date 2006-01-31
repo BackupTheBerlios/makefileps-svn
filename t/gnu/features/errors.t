@@ -24,20 +24,18 @@ plan tests => 4 * blocks;
 
 no_diff();
 
-(my $rm = $0) =~ s[errors\.t$][../../rm_file.pl]i;
-$rm = File::Spec->rel2abs( $rm ) ;
-our $delete_command    = "$^X $rm";
+util_path '../..';
 
 our $cleanit_error     = "unable to remove `cleanit'";
 our $delete_error_code = 1;
 
-our $source = <<_EOC_;
+our $source = <<'_EOC_';
 clean:
-\t-$delete_command cleanit
-\t$delete_command foo
+	-$(RM_F) cleanit
+	$(RM_F) foo
 clean2: 
-\t$delete_command cleanit
-\t$delete_command foo
+	$(RM_F) cleanit
+	$(RM_F) foo
 _EOC_
 
 run { run_test_make $_[0]; }
@@ -51,11 +49,11 @@ This file, therefore, should not exist if the test PASSES.
 --- source quote eval:    $::source
 --- touch:                foo
 --- stdout quote eval
-$::delete_command cleanit
-$::delete_command foo
+$::RM_F cleanit
+$::RM_F foo
 --- stderr quote eval
 $::cleanit_error
-$t::Parser::MAKE: [clean] Error $::delete_error_code (ignored)
+$::MAKE: [clean] Error $::delete_error_code (ignored)
 --- error_code
 0
 --- not_found:            foo
@@ -67,11 +65,11 @@ $t::Parser::MAKE: [clean] Error $::delete_error_code (ignored)
 --- source quote eval:    $::source
 --- touch:                foo
 --- stdout quote eval
-$::delete_command cleanit
-$::delete_command foo
+$::RM_F cleanit
+$::RM_F foo
 --- stderr quote eval
 $::cleanit_error
-$t::Parser::MAKE: [clean2] Error $::delete_error_code (ignored)
+$::MAKE: [clean2] Error $::delete_error_code (ignored)
 --- error_code
 0
 --- not_found:             foo

@@ -5,14 +5,26 @@
 package t::Parser;
 use Test::Base -Base;
 
-our @EXPORT = qw( run_test_make );
+our @EXPORT = qw( run_test_make util_path $RM_F $ECHO_ENV $MAKE );
 
 use File::Temp qw[ tempdir tempfile ];
 use Cwd ();
+use File::Spec ();
 use IPC::Run;
 use IPC::Cmd;
 use Text::Balanced qw[ extract_delimited extract_multiple ];
-use Data::Dumper::Simple;
+use FindBin;
+#use Data::Dumper::Simple;
+
+our $UTIL_PATH = 't';
+our $ECHO_ENV;
+our $RM_F;
+
+sub util_path ($) {
+    $UTIL_PATH = File::Spec->catdir($FindBin::Bin, $_[0]);
+    $ECHO_ENV = "$^X " . File::Spec->catfile($UTIL_PATH, 'echo_env.pl');
+    $RM_F     = "$^X " . File::Spec->catfile($UTIL_PATH, 'rm_f.pl');
+}
 
 sub clean_env () {
   # Get a clean environment
@@ -60,6 +72,7 @@ sub run_test_make ($) {
 
     my $filename = $block->filename;
     my $source   = $block->source;
+    preprocess($source);
     $filename = create_file($filename, $source) if $source;
 
     process_pre($block);
@@ -78,6 +91,12 @@ sub run_test_make ($) {
     #warn "\nstderr: $stderr\nstdout: $stdout\n";
 
     process_output($block, $errcode, $stdout, $stderr);
+}
+
+sub preprocess ($) {
+    return if not defined $_[0];
+    $_[0] =~ s/\$ [ { \( ] ECHO_ENV [ \) } ]/$ECHO_ENV/gsx;
+    $_[0] =~ s/\$ [ { \( ] RM_F [ \) } ]/$RM_F/gsx;
 }
 
 sub create_file ($$) {

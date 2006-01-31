@@ -1,3 +1,8 @@
+#: rm_f.pl
+#: 2006-01-30 2006-01-31
+
+# WARNING: don't modify this script, since the test suit depends on it. -- agent
+
 use strict;
 use warnings;
 

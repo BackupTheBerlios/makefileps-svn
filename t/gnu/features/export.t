@@ -13,6 +13,8 @@ use t::Parser;
 
 plan tests => 3 * blocks;
 
+util_path '../..';
+
 filters {
     source     => [qw< quote eval >],
 };
@@ -45,8 +47,8 @@ ifdef EXPORT_ALL_PSEUDO
 endif
 
 all:
-	@echo "FOO=$(FOO) BAR=$(BAR) BAZ=$(BAZ) BOZ=$(BOZ) BITZ=$(BITZ) BOTZ=$(BOTZ)"
-	@echo "FOO=$$FOO BAR=$$BAR BAZ=$$BAZ BOZ=$$BOZ BITZ=$$BITZ BOTZ=$$BOTZ"
+	@echo FOO=$(FOO) BAR=$(BAR) BAZ=$(BAZ) BOZ=$(BOZ) BITZ=$(BITZ) BOTZ=$(BOTZ)
+	@$(ECHO_ENV) FOO BAR BAZ BOZ BITZ BOTZ
 
 _EOC_
 
