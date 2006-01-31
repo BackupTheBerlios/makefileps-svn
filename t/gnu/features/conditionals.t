@@ -68,7 +68,7 @@ arg4 is defined
 
 
 
-=== variable in infdef
+=== variable in ifdef
 Test expansion of variables inside ifdef
 --- source
 

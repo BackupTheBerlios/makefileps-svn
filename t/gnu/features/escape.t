@@ -56,7 +56,7 @@ Makefile:1: *** target pattern contains no `%'.  Stop.
 === escaped `:' in target name
 This one should work, since we escape the ":".
 --- source:               $::source
---- options:              'path=p\\:'
+--- options:              'path=p\:'
 --- filename:             Makefile
 --- stdout
 cp p:foo
@@ -69,7 +69,7 @@ cp p:foo
 === escape char for `:' gets escaped
 This one should fail, since the escape char is escaped.
 --- source:               $::source
---- options:              'path=p\\\\:'
+--- options:              "path=p\\:"
 --- filename:             Makefile
 --- stdout
 --- stderr

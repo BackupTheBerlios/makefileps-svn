@@ -19,6 +19,7 @@ build_requires  ('File::Temp');
 build_requires  ('File::Spec');
 build_requires  ('ExtUtils::Command');
 build_requires  ('Cwd');
+build_requires  ('Text::Balanced');
 
 makemaker_args  (
     test => { TESTS => "t/*.t t/*/*/*.t" },

@@ -11,6 +11,8 @@ use File::Temp qw[ tempdir tempfile ];
 use Cwd ();
 use IPC::Run;
 use IPC::Cmd;
+use Text::Balanced qw[ extract_delimited extract_multiple ];
+#use Data::Dumper::Simple;
 
 our ($MAKE_PATH, $MAKE);
 BEGIN {
@@ -122,13 +124,30 @@ sub run_make($$) {
     my $goals    = $block->goals || '';
 
     if ($filename) {
-        $options = "-f $filename $options";
+        $options = "-f '$filename' $options";
     }
-    my $cmd = "$MAKE_PATH $options $goals";
+    my $cmd = [ $MAKE_PATH, split_args($options), split_args($goals) ];
+    #warn Dumper($cmd);
     my( $success, $errcode, $routput, $rstdout, $rstderr ) =
             IPC::Cmd::run( command => $cmd, verbose => 0 );
     local $" = '';
     return ($errcode, "@$routput", "@$rstdout", "@$rstderr");
+}
+
+sub split_args ($) {
+    my @flds = extract_multiple(
+        $_[0],
+        [ sub { extract_delimited($_[0], q{"'}) } ],
+        undef,
+        0,
+    );
+    #warn Dumper(@flds);
+    for (@flds) { 
+        s/^\s+|\s+$//g;
+        s/^'(.*)'$/$1/g;
+        s/^"(.*)"$/$1/g;
+    }
+    return @flds;
 }
 
 sub process_output ($$$$) {
