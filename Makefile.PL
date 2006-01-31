@@ -21,7 +21,7 @@ build_requires  ('ExtUtils::Command');
 build_requires  ('Cwd');
 
 makemaker_args  (
-    test => { TESTS => "t/*.t t/*/*.t t/*/*/*.t" },
+    test => { TESTS => "t/*.t t/*/*/*.t" },
 );
 
 &WriteAll;

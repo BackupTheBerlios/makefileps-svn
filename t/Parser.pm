@@ -143,6 +143,12 @@ sub process_output ($$$$) {
     }
 
     my $name = $block->name;
+
+    # fixed the problem due to recursive invoking of `make':
+    $stdout =~ s/^$MAKE\[\d+\]: (?:Leaving|Entering) directory [^\n]+\n//gsm;
+    $stdout =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
+    $stderr =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
+
     is $errcode, $errcode2, "Error Code - $name" if defined $errcode2;
     is $stdout, $stdout2, "stdout - $name" if defined $stdout2;
     is $stderr, $stderr2, "stderr - $name" if defined $stderr2;
