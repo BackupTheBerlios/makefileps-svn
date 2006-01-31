@@ -21,11 +21,12 @@ use FindBin;
 our $UTIL_PATH;
 our $ECHO_ENV;
 our $RM_F;
+our $PERL;
 
 sub util_path ($) {
     $UTIL_PATH = File::Spec->catdir($FindBin::Bin, $_[0]);
-    $ECHO_ENV = "$^X " . File::Spec->catfile($UTIL_PATH, 'echo_env.pl');
-    $RM_F     = "$^X " . File::Spec->catfile($UTIL_PATH, 'rm_f.pl');
+    $ECHO_ENV = "$PERL " . File::Spec->catfile($UTIL_PATH, 'echo_env.pl');
+    $RM_F     = "$PERL " . File::Spec->catfile($UTIL_PATH, 'rm_f.pl');
 }
 
 sub clean_env () {
@@ -64,6 +65,13 @@ sub set_make ($$) {
 }
 
 BEGIN {
+    if ($^O =~ / /) {
+        $PERL = 'perl';
+    } else {
+        $PERL = $^X;
+    }
+    #warn $PERL;
+
     set_make('MAKE_PATH', 'make');
 
     # Get a clean environment
@@ -104,8 +112,13 @@ sub run_test_make ($) {
 
 sub preprocess ($) {
     return if not defined $_[0];
-    $_[0] =~ s/\$ [ { \( ] ECHO_ENV [ \) } ]/$ECHO_ENV/gsx;
-    $_[0] =~ s/\$ [ { \( ] RM_F [ \) } ]/$RM_F/gsx;
+    subs_var($_[0], 'ECHO_ENV', $ECHO_ENV);
+    subs_var($_[0], 'RM_F',     $RM_F    );
+    subs_var($_[0], 'PERL',     $PERL    );
+}
+
+sub subs_var ($$$) {
+    $_[0] =~ s/\$ [ { \( ] $_[1] [ \) } ]/$_[2]/gsx;
 }
 
 sub create_file ($$) {
