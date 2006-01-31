@@ -17,6 +17,10 @@ use t::Parser;
 
 plan tests => 3 * blocks;
 
+filters {
+    source     => [qw< quote eval >],
+};
+
 our $source = <<'_EOC_';
 
 all: baz
@@ -41,10 +45,6 @@ d :: ; @echo ok
 d :: d ; @echo oops
 
 _EOC_
-
-filters {
-    source     => [qw< quote eval >],
-};
 
 run { run_test_make $_[0]; }
 

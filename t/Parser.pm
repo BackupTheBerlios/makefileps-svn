@@ -12,7 +12,29 @@ use Cwd ();
 use IPC::Run;
 use IPC::Cmd;
 use Text::Balanced qw[ extract_delimited extract_multiple ];
-#use Data::Dumper::Simple;
+use Data::Dumper::Simple;
+
+sub clean_env () {
+  # Get a clean environment
+
+  my %makeENV = ();
+  # Pull in benign variables from the user's environment
+  #
+  foreach (# UNIX-specific things
+           'TZ', 'LANG', 'TMPDIR', 'HOME', 'USER', 'LOGNAME', 'PATH',
+           # Purify things
+           'PURIFYOPTIONS',
+           # Windows NT-specific stuff
+           'Path', 'SystemRoot',
+           # DJGPP-specific stuff
+           'DJDIR', 'DJGPP', 'SHELL', 'COMSPEC', 'HOSTNAME', 'LFN',
+           'FNCASE', '387', 'EMU387', 'GROUP'
+          ) {
+    $makeENV{$_} = $ENV{$_} if $ENV{$_};
+  }
+  $ENV = ();
+  %ENV = %makeENV;
+}
 
 our ($MAKE_PATH, $MAKE);
 BEGIN {
@@ -22,6 +44,9 @@ BEGIN {
     } else {
         $MAKE = 'make';
     }
+
+    # Get a clean environment
+    clean_env();
 }
 
 our @TempFiles;
@@ -126,7 +151,7 @@ sub run_make($$) {
     if ($filename) {
         $options = "-f '$filename' $options";
     }
-    my $cmd = [ $MAKE_PATH, split_args($options), split_args($goals) ];
+    my $cmd = [ split_args($MAKE_PATH), split_args($options), split_args($goals) ];
     #warn Dumper($cmd);
     my( $success, $errcode, $routput, $rstdout, $rstderr ) =
             IPC::Cmd::run( command => $cmd, verbose => 0 );
@@ -135,19 +160,22 @@ sub run_make($$) {
 }
 
 sub split_args ($) {
+    my $text = shift;
     my @flds = extract_multiple(
-        $_[0],
-        [ sub { extract_delimited($_[0], q{"'}) } ],
+        $text,
+        [ sub { extract_delimited($_[0], q{"'}) }, qr/\S+/ ],
         undef,
         0,
     );
     #warn Dumper(@flds);
-    for (@flds) { 
+    my @res = grep { 
         s/^\s+|\s+$//g;
         s/^'(.*)'$/$1/g;
         s/^"(.*)"$/$1/g;
-    }
-    return @flds;
+        $_;
+    } @flds;
+    #warn Dumper(@res);
+    return @res;
 }
 
 sub process_output ($$$$) {

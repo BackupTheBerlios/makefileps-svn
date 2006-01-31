@@ -13,6 +13,10 @@ use t::Parser;
 
 plan tests => 3 * blocks;
 
+filters {
+    source     => [qw< quote eval >],
+};
+
 our $source = <<'_EOC_';
 $(path)foo : ; @echo cp $^ $@
 
@@ -21,10 +25,6 @@ foo\ bar: ; @echo touch $@
 sharp: foo\#bar.ext
 foo\#bar.ext: ; @echo foo\#bar.ext = $@
 _EOC_
-
-filters {
-    source     => [qw< quote eval >],
-};
 
 run { run_test_make $_[0]; }
 

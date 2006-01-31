@@ -6,10 +6,12 @@
 #:   This script tests to make sure that Make looks for
 #:   default makefiles in the correct order (GNUmakefile, makefile, Makefile)
 #:
-#: 2006-01-29 2006-01-30
+#: 2006-01-29 2006-01-31
 
 use t::Parser;
 use File::Temp;
+
+plan tests => 3 * blocks;
 
 our $CASE_OK;
 
@@ -23,8 +25,6 @@ BEGIN {
     $CASE_OK = not -f $me;
     #warn "CASE OK: $CASE_OK";
 }
-
-plan tests => 3 * blocks;
 
 run { run_test_make $_[0]; }
 
