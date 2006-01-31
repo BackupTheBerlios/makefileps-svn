@@ -9,11 +9,9 @@
 # t::Parser cleans out our environment for us during startup 
 # so we don't have to worry about that here.
 
-use t::Parser;
+use t::Parser::Gnu;
 
 plan tests => 3 * blocks;
-
-util_path '../..';
 
 filters {
     source     => [qw< quote eval >],

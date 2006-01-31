@@ -8,7 +8,7 @@
 #:
 #: 2006-01-29 2006-01-31
 
-use t::Parser;
+use t::Parser::Gnu;
 use File::Temp;
 
 plan tests => 3 * blocks;

@@ -15,16 +15,12 @@
 #:   command is given with the -i option instead of the '-' in
 #:   front of the command.  They should run the same.
 #:
-#: 2006-01-30 2006-01-30
+#: 2006-01-30 2006-01-31
 
-use t::Parser;
+use t::Parser::Gnu;
 use File::Spec;
 
 plan tests => 4 * blocks;
-
-no_diff();
-
-util_path '../..';
 
 our $cleanit_error     = "unable to remove `cleanit'";
 our $delete_error_code = 1;

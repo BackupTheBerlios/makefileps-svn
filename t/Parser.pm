@@ -5,18 +5,20 @@
 package t::Parser;
 use Test::Base -Base;
 
-our @EXPORT = qw( run_test_make util_path $RM_F $ECHO_ENV $MAKE );
+our @EXPORT = qw(
+    run_test_make util_path set_make
+    $RM_F $ECHO_ENV $MAKE
+);
 
 use File::Temp qw[ tempdir tempfile ];
 use Cwd ();
 use File::Spec ();
-use IPC::Run;
 use IPC::Cmd;
 use Text::Balanced qw[ extract_delimited extract_multiple ];
 use FindBin;
 #use Data::Dumper::Simple;
 
-our $UTIL_PATH = 't';
+our $UTIL_PATH;
 our $ECHO_ENV;
 our $RM_F;
 
@@ -40,22 +42,29 @@ sub clean_env () {
            'Path', 'SystemRoot',
            # DJGPP-specific stuff
            'DJDIR', 'DJGPP', 'SHELL', 'COMSPEC', 'HOSTNAME', 'LFN',
-           'FNCASE', '387', 'EMU387', 'GROUP'
+           'FNCASE', '387', 'EMU387', 'GROUP',
+           'GNU_MAKE_PATH', 'MAKE_PATH',
           ) {
     $makeENV{$_} = $ENV{$_} if $ENV{$_};
   }
-  $ENV = ();
+  %ENV = ();
   %ENV = %makeENV;
 }
 
-our ($MAKE_PATH, $MAKE);
-BEGIN {
-    $MAKE_PATH = $ENV{MAKE_PATH} || 'make';
+our ($MAKE, $MAKE_PATH);
+
+sub set_make ($$) {
+    my ($env_name, $default) = @_;
+    $MAKE_PATH = $ENV{$env_name} || $MAKE_PATH || $default;
     if ($MAKE_PATH =~ /\w*make\w*/i) {
         $MAKE = $&;
     } else {
         $MAKE = 'make';
     }
+}
+
+BEGIN {
+    set_make('MAKE_PATH', 'make');
 
     # Get a clean environment
     clean_env();

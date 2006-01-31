@@ -30,11 +30,9 @@
 #:
 #: 2006-01-30 2006-01-31
 
-use t::Parser;
+use t::Parser::Gnu;
 
 plan tests => 4 * blocks;
-
-util_path '../..';
 
 our $example        = "EXAMPLE_FILE";
 our $delete_command = "$^X -MExtUtils::Command -e rm_f";

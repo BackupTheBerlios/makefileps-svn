@@ -13,9 +13,9 @@
 #:   text on the line which should never execute since it should be
 #:   within a comment
 #:
-#: 2006-01-29 2006-01-30
+#: 2006-01-29 2006-01-31
 
-use t::Parser;
+use t::Parser::Gnu;
 
 plan tests => 3 * blocks;
 

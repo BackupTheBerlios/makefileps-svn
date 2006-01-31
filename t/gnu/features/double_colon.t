@@ -13,7 +13,7 @@
 #:
 #: 2006-01-30 2006-01-31
 
-use t::Parser;
+use t::Parser::Gnu;
 
 plan tests => 3 * blocks;
 
@@ -178,7 +178,7 @@ Test circular dependency check; PR/1671
 ok
 oops
 --- stderr quote eval
-$t::Parser::MAKE: Circular d <- d dependency dropped.
+$::MAKE: Circular d <- d dependency dropped.
 --- error_code
 0
 

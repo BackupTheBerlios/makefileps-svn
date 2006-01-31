@@ -9,7 +9,7 @@
 #:
 #: 2006-01-31 2006-01-31
 
-use t::Parser;
+use t::Parser::Gnu;
 
 plan tests => 3 * blocks;
 
