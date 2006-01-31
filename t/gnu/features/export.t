@@ -11,11 +11,9 @@
 
 use t::Parser::Gnu;
 
-plan tests => 3 * blocks;
+no_diff();
 
-filters {
-    source     => [qw< quote eval >],
-};
+plan tests => 3 * blocks;
 
 our $makefile = <<'_EOC_';
 
@@ -55,7 +53,7 @@ run { run_test_make $_[0]; }
 __DATA__
 
 === basics
---- source:         $::makefile
+--- source quote eval:         $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
@@ -63,11 +61,13 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 --- error_code
 0
 
-=== vars inherited from others exported
+
+
+=== vars from the outer-most environment are exported
 make sure vars inherited from the parent are exported
---- pre:            $ENV{FOO} = 1;
---- post:           delete $ENV{FOO};
---- source:         $::makefile
+--- pre:                       $ENV{FOO} = 1;
+--- post:                      delete $ENV{FOO};
+--- source quote eval:         $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO=foo BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
@@ -75,50 +75,63 @@ FOO=foo BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 --- error_code
 0
 
-# TEST 2: global export.  Explicit unexport takes precedence.
-
-&run_make_with_options($makefile,"EXPORT_ALL=1",&get_logfile,0);
-
-$answer = "FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
-FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=\n";
-
-&compare_output($answer,&get_logfile(1));
-
-# TEST 3: global unexport.  Explicit export takes precedence.
-
-&run_make_with_options($makefile,"UNEXPORT_ALL=1",&get_logfile,0);
-
-$answer = "FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
-FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=\n";
-
-&compare_output($answer,&get_logfile(1));
-
-# TEST 4: both: in the above makefile the unexport comes last so that rules.
-
-&run_make_with_options($makefile,"EXPORT_ALL=1 UNEXPORT_ALL=1",&get_logfile,0);
-
-$answer = "FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
-FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=\n";
-
-&compare_output($answer,&get_logfile(1));
-
-# TEST 5: test the pseudo target.
-
-&run_make_with_options($makefile,"EXPORT_ALL_PSEUDO=1",&get_logfile,0);
-
-$answer = "FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
-FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=\n";
-
-&compare_output($answer,&get_logfile(1));
 
 
-# TEST 6: Test the expansion of variables inside export
+=== global export
+global export.  Explicit unexport takes precedence.
+--- options:                   EXPORT_ALL=1
+--- source quote eval:         $::makefile
+--- stdout
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=
+--- stderr
+--- error_code
+0
 
-$makefile2 = &get_tmpfile;
 
-open(MAKEFILE, "> $makefile2");
 
-print MAKEFILE <<'EOF';
+=== global unexport
+global unexport.  Explicit export takes precedence.
+--- options:                   UNEXPORT_ALL=1
+--- source quote eval:         $::makefile
+--- stdout
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
+FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
+--- stderr
+--- error_code
+0
+
+
+
+=== both
+both: in the above makefile the unexport comes last so that rules.
+--- options:                   EXPORT_ALL=1 UNEXPORT_ALL=1
+--- source quote eval:         $::makefile
+--- stdout
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
+FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
+--- stderr
+--- error_code
+0
+
+
+
+=== pseudo target
+test the pseudo target.
+--- options:                   EXPORT_ALL_PSEUDO=1
+--- source quote eval:         $::makefile
+--- stdout
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=
+--- stderr
+--- error_code
+0
+
+
+
+=== expansion inside export
+Test the expansion of variables inside export
+--- source
 
 foo = f-ok
 bar = b-ok
@@ -136,22 +149,18 @@ all:
 	@echo foo=$(foo) bar=$(bar)
 	@echo foo=$$foo bar=$$bar
 
-EOF
+--- stdout
+foo=f-ok bar=b-ok
+foo=f-ok bar=b-ok
+--- stderr
+--- error_code
+0
 
-close(MAKEFILE);
-
-&run_make_with_options($makefile2,"",&get_logfile,0);
-$answer = "foo=f-ok bar=b-ok\nfoo=f-ok bar=b-ok\n";
-&compare_output($answer,&get_logfile(1));
 
 
-# TEST 7: Test the expansion of variables inside unexport
-
-$makefile3 = &get_tmpfile;
-
-open(MAKEFILE, "> $makefile3");
-
-print MAKEFILE <<'EOF';
+=== expansion inside unexport
+Test the expansion of variables inside unexport
+--- source
 
 foo = f-ok
 bar = b-ok
@@ -171,22 +180,18 @@ all:
 	@echo foo=$(foo) bar=$(bar)
 	@echo foo=$$foo bar=$$bar
 
-EOF
+--- stdout
+foo=f-ok bar=b-ok
+foo= bar=
+--- stderr
+--- error_code
+0
 
-close(MAKEFILE);
-
-&run_make_with_options($makefile3,"",&get_logfile,0);
-$answer = "foo=f-ok bar=b-ok\nfoo= bar=\n";
-&compare_output($answer,&get_logfile(1));
 
 
-# TEST 7: Test exporting multiple variables on the same line
-
-$makefile4 = &get_tmpfile;
-
-open(MAKEFILE, "> $makefile4");
-
-print MAKEFILE <<'EOF';
+=== export multiple in one line
+Test exporting multiple variables on the same line
+--- source
 
 A = a
 B = b
@@ -206,22 +211,25 @@ export F G H I J
 export D E $(SOME)
 
 all: ; @echo A=$$A B=$$B C=$$C D=$$D E=$$E F=$$F G=$$G H=$$H I=$$I J=$$J
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options($makefile4,"",&get_logfile,0);
-$answer = "A=a B=b C=c D=d E=e F=f G=g H=h I=i J=j\n";
-&compare_output($answer,&get_logfile(1));
+--- stdout
+A=a B=b C=c D=d E=e F=f G=g H=h I=i J=j
+--- stderr
+--- error_code
+0
 
 
-# TEST 8: Test unexporting multiple variables on the same line
 
-$makefile5 = &get_tmpfile;
+=== unexport multiple in one line
+Test unexporting multiple variables on the same line
+--- pre
 
-open(MAKEFILE, "> $makefile5");
+@ENV{qw(A B C D E F G H I J)} = qw(1 2 3 4 5 6 7 8 9 10);
 
-print MAKEFILE <<'EOF';
+--- post
+
+delete @ENV{qw(A B C D E F G H I J)};
+
+--- source
 
 A = a
 B = b
@@ -241,18 +249,8 @@ unexport F G H I J
 unexport D E $(SOME)
 
 all: ; @echo A=$$A B=$$B C=$$C D=$$D E=$$E F=$$F G=$$G H=$$H I=$$I J=$$J
-EOF
-
-close(MAKEFILE);
-
-@ENV{qw(A B C D E F G H I J)} = qw(1 2 3 4 5 6 7 8 9 10);
-
-&run_make_with_options($makefile5,"",&get_logfile,0);
-$answer = "A= B= C= D= E= F= G= H= I= J=\n";
-&compare_output($answer,&get_logfile(1));
-
-delete @ENV{qw(A B C D E F G H I J)};
-
-
-# This tells the test driver that the perl test script executed properly.
-1;
+--- stdout
+A= B= C= D= E= F= G= H= I= J=
+--- stderr
+--- error_code
+0

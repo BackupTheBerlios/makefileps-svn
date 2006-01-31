@@ -189,6 +189,7 @@ sub run_make($$) {
     my $options  = $block->options || '';
     my $goals    = $block->goals || '';
 
+    #warn Dumper($filename);
     if ($filename) {
         $options = "-f '$filename' $options";
     }
@@ -204,11 +205,11 @@ sub split_args ($) {
     my $text = shift;
     my @flds = extract_multiple(
         $text,
-        [ sub { extract_delimited($_[0], q{"'}) }, qr/\S+/ ],
+        [ qr/[^"']\S+/, sub { extract_delimited($_[0], q{"'}) } ],
         undef,
         0,
     );
-    #warn Dumper(@flds);
+    #warn Dumper($text, @flds);
     my @res = grep { 
         s/^\s+|\s+$//g;
         s/^'(.*)'$/$1/g;
