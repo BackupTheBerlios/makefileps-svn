@@ -11,7 +11,7 @@ our @EXPORT_OK = qw(
 
 use Text::Balanced qw( extract_delimited extract_multiple );
 
-sub split_args ($) {
+sub split_args {
     my $text = shift;
     my @flds = extract_multiple(
         $text,

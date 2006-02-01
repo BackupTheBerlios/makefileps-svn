@@ -11,7 +11,7 @@
 #:   Then we do the same thing for parallel builds: double-colon
 #:   targets should always be built serially.
 #:
-#: 2006-01-30 2006-01-31
+#: 2006-01-30 2006-02-01
 
 use t::Parser::Gnu;
 
@@ -88,7 +88,7 @@ bbb
 --- stderr
 --- error_code
 0
---- ONLY
+
 
 
 === TEST 3

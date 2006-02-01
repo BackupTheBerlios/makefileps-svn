@@ -1,10 +1,24 @@
+README
+======
+
 To run the GNU test suit provided by Makefile::Parser,
 the following steps should be followed:
 
-  * Set the MAKE_PATH environment to the gnu make 
-    utility you want to test. If MAKE_PATH is not 
+  * Set the GNU_MAKE_PATH environment to the gnu make 
+    utility you want to test. If GNU_MAKE_PATH is not 
     set, then 'make' will be used.
   * Ensure the current directory is the foler where
     this README file is in.
   * Enter the following command to start the tester:
       prove -I../.. -r
+
+By default, this GNU `make' test suit will run on a `sh'
+simulator witten in pure perl, say, the script
+`../../script/sh'. To use a differen shell, set the
+GNU_SHELL_PATH to the path of that shell. For instance,
+
+   GNU_SHELL_PATH = /bin/sh
+
+will use the local `sh' to speed up the testing process.
+However, using local `sh' may cause part of the test suit
+to fail.

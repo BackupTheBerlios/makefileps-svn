@@ -1,16 +1,18 @@
-#: t/Parser.pm
+#: t/Parser/Base.pm
 #: Tester based on Test::Base
 #: 2006-01-29 2006-02-01
 
-package t::Parser;
+package t::Parser::Base;
 use Test::Base -Base;
 
 use t::Parser::Util qw( split_args );
 
 our @EXPORT = qw(
-    run_test_make util_path set_make
-    $RM_F $ECHO_ENV $MAKE
+    run_test_make
+    $MAKE $PERL $SHELL
 );
+
+our @EXPORT_BASE = qw(set_make set_shell);
 
 use File::Temp qw( tempdir tempfile );
 use Cwd ();
@@ -19,14 +21,7 @@ use IPC::Cmd;
 use FindBin;
 #use Data::Dumper::Simple;
 
-our $UTIL_PATH;
-our $PERL;
-our $SHELL;
-
-sub util_path ($) {
-    $UTIL_PATH = File::Spec->catdir($FindBin::Bin, $_[0]);
-    $SHELL     = File::Spec->catfile($UTIL_PATH, 'sh');
-}
+our ($SHELL, $PERL);
 
 # the current implementation of clean_env is buggy. haven't found a better approach
 sub clean_env () {
@@ -44,7 +39,7 @@ sub clean_env () {
            # DJGPP-specific stuff
            'DJDIR', 'DJGPP', 'SHELL', 'COMSPEC', 'HOSTNAME', 'LFN',
            'FNCASE', '387', 'EMU387', 'GROUP',
-           'GNU_MAKE_PATH', 'MAKE_PATH', 'INC',
+           'GNU_MAKE_PATH', 'GNU_SHELL_PATH', 'INC',
           ) {
     $makeENV{$_} = $ENV{$_} if defined $ENV{$_};
   }
@@ -56,12 +51,17 @@ our ($MAKE, $MAKE_PATH);
 
 sub set_make ($$) {
     my ($env_name, $default) = @_;
-    $MAKE_PATH = $ENV{$env_name} || $MAKE_PATH || $default;
+    $MAKE_PATH = $ENV{$env_name} || $default;
     if ($MAKE_PATH =~ /\w*make\w*/i) {
         $MAKE = $&;
     } else {
         $MAKE = 'make';
     }
+}
+
+sub set_shell ($$) {
+    my ($env_name, $default) = @_;
+    $SHELL = $ENV{$env_name} || $default;
 }
 
 BEGIN {
@@ -71,8 +71,6 @@ BEGIN {
         $PERL = $^X;
     }
     #warn $PERL;
-
-    set_make('MAKE_PATH', 'make');
 
     # Get a clean environment
     clean_env();
@@ -119,8 +117,8 @@ sub subs_var ($$$) {
     $_[0] =~ s/\$ [ { \( ] $_[1] [ \) } ]/$_[2]/gsx;
 }
 
-sub create_file ($$@) {
-    my ($filename, $content, $native_shell) = @_;
+sub create_file ($$) {
+    my ($filename, $content) = @_;
     my $fh;
     if (not $filename) {
         ($fh, $filename) = tempfile( "create_file_XXXXX", DIR => '.', UNLINK => 1 );
@@ -129,8 +127,8 @@ sub create_file ($$@) {
             confess("can't open $filename for writing: $!");
         mark_temp($filename);
     }
+    $content .= "\n\nSHELL=$SHELL" if $SHELL;
     print $fh $content;
-    print $fh "\n\nSHELL=$PERL $SHELL" if not $native_shell;
     close $fh;
     return $filename;
 }
@@ -261,7 +259,7 @@ END {
     clean();
 }
 
-package t::Parser::Filter;
+package t::Parser::Base::Filter;
 use Test::Base::Filter -Base;
 
 sub quote {

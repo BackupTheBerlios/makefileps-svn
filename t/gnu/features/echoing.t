@@ -28,7 +28,7 @@
 #:   the -s option and check that make did not echo the echo
 #:   command before printing the message.
 #:
-#: 2006-01-30 2006-01-31
+#: 2006-01-30 2006-02-01
 
 use t::Parser::Gnu;
 
