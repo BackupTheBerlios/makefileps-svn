@@ -15,23 +15,24 @@
 #:   command is given with the -i option instead of the '-' in
 #:   front of the command.  They should run the same.
 #:
-#: 2006-01-30 2006-01-31
+#: 2006-01-30 2006-02-01
 
 use t::Parser::Gnu;
 use File::Spec;
 
 plan tests => 4 * blocks;
 
-our $cleanit_error     = "unable to remove `cleanit'";
+our $cleanit_error =
+    "rm: cannot lstat `cleanit': No such file or directory";
 our $delete_error_code = 1;
 
 our $source = <<'_EOC_';
 clean:
-	-$(RM_F) cleanit
-	$(RM_F) foo
+	-rm cleanit
+	rm foo
 clean2: 
-	$(RM_F) cleanit
-	$(RM_F) foo
+	rm cleanit
+	rm foo
 _EOC_
 
 run { run_test_make $_[0]; }
@@ -45,8 +46,8 @@ This file, therefore, should not exist if the test PASSES.
 --- source quote eval:    $::source
 --- touch:                foo
 --- stdout quote eval
-$::RM_F cleanit
-$::RM_F foo
+rm cleanit
+rm foo
 --- stderr quote eval
 $::cleanit_error
 $::MAKE: [clean] Error $::delete_error_code (ignored)
@@ -61,8 +62,8 @@ $::MAKE: [clean] Error $::delete_error_code (ignored)
 --- source quote eval:    $::source
 --- touch:                foo
 --- stdout quote eval
-$::RM_F cleanit
-$::RM_F foo
+rm cleanit
+rm foo
 --- stderr quote eval
 $::cleanit_error
 $::MAKE: [clean2] Error $::delete_error_code (ignored)

@@ -22,7 +22,16 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  Test::More (for testing purpose only)
+  Test::Simple
+  Test::Base
+  IPC::Cmd
+  File::Temp
+  File::Spec
+  ExtUtils::Command
+  Cwd
+  Text::Balanced
+  FindBin
+  Time::HiRes
 
 Test::More is usually included in Perl's standard installation.
 

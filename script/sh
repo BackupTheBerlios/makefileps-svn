@@ -1,0 +1,140 @@
+#!perl
+
+use strict;
+use warnings;
+
+use Getopt::Std;
+use Text::Balanced qw( extract_delimited extract_multiple );
+use Data::Dumper::Simple;
+use Time::HiRes qw( sleep );
+
+{
+    my %opts;
+    getopts('c', \%opts);
+
+    my $cmd = join(' ', @ARGV);
+    #warn Dumper($cmd);
+
+    $cmd =~ s/\n+/ /gs;
+    my @raw_args = split_args($cmd);
+    exit(0) if ! @raw_args;
+
+    my @args = process_args(0, @raw_args);
+    exit eval_cmd(@args);
+}
+
+sub split_args {
+    my $text = shift;
+    return () if not defined $text;
+    my @flds = extract_multiple(
+        $text,
+        [ sub { extract_delimited($_[0], q{"'}) }, qr/\s*\S+/ ],
+        undef,
+        1,
+    );
+    @flds = grep { s/^\s+|\s+$//g; defined($_) and ($_ ne '') } @flds;
+    #warn "======================\n";
+    #warn Dumper($text, @flds);
+    #warn "======================";
+    return @flds;
+}
+
+sub process_args {
+    #warn "!!!!!!!!!!!!!!!!!!!!!!";
+    my $level = shift;
+    my @raw_args = @_;
+    my @args;
+    foreach (@raw_args) {
+        #warn "----------\n";
+        #warn Dumper(@args, $_, @raw_args);
+        #warn "----------\n";
+        if (/^"(.*)"$/) {
+            #warn "---------";
+            #warn qq{Pusing "$1" into args\n};
+            my $s = $1;
+            process_escape( $s, q{ " \\ @ $ # } );
+            subs_env($s);
+            push @args, $s;
+        } elsif (/^'(.*)'$/) {
+            #warn "  Pusing '$1' into args\n";
+            push @args, $1;
+        } else {
+            #warn "  Remaining: $_\n";
+            my $s = $_;
+            if ($level == 0 and $s =~ /^\#/) {
+                return @args;
+            }
+            process_unquoted($s, $level, \@args);
+            #warn "~~~~~~~~~~~~~~\n";
+            #warn Dumper(@args, $_, @raw_args);
+            #warn "~~~~~~~~~~~~~~\n";
+        }
+    }
+    return @args;
+}
+
+sub process_unquoted {
+    my ($s, $level, $rargs) = @_;
+    return if $s eq '';
+    my $other;
+    if ($level == 0 and $s =~ /(.*);(.*)/) {
+        $s = $1;
+        $other = $2;
+    }
+    process_escape( $s, q{ ' " # \\ \ } );
+    subs_env($s);
+    my @subargs = split_args($s) if $s =~ / /;
+    #warn Dumper(@subargs);
+    if (@subargs > 1) {
+        push @$rargs, process_args ($level+1, @subargs);
+    } else {
+        my @files = glob $s;
+        if (@files > 1) {
+            push @$rargs, @files;
+        } else {
+            push @$rargs, $s;
+        }
+    }
+    if (defined $other) {
+        #warn "^^^^^^^^^^^^^\n";
+        #warn Dumper($rargs, $other);
+        #warn "^^^^^^^^^^^^^\n";
+        eval_cmd(@$rargs);
+        @$rargs = ();
+        #process_unquoted($other, $level, $rargs);
+    }
+}
+
+sub process_escape {
+    my $list = quotemeta pop @_;
+    $_[0] =~ s/ \\ ([ $list ]) /$1/gx;
+}
+
+sub subs_env {
+    $_[0] =~ s/\$(\w+)/defined $ENV{$1} ? $ENV{$1} : ''/ge;
+}
+
+sub eval_cmd {
+    my @args = @_;
+    my $exec = shift @args;
+    #warn Dumper($exec, @args);
+    if ($exec eq 'echo') {
+        print "@args\n";
+        return 0;
+    } elsif ($exec eq 'rm') {
+        foreach my $file (@args) {
+            $file =~ s/\s+$//;
+            if (! -e $file) {
+                warn "rm: cannot lstat `$file': No such file or directory\n";
+                return 1;
+            }
+            unlink $file;
+        }
+        return 0;
+    } elsif ($exec eq 'sleep') {
+        sleep ($args[0]);
+    } else {
+        warn "sh: unknown shell command: $exec";
+        return 254;
+    }
+}

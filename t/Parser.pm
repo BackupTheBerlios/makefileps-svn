@@ -1,34 +1,34 @@
 #: t/Parser.pm
 #: Tester based on Test::Base
-#: 2006-01-29 2006-01-31
+#: 2006-01-29 2006-02-01
 
 package t::Parser;
 use Test::Base -Base;
+
+use t::Parser::Util qw( split_args );
 
 our @EXPORT = qw(
     run_test_make util_path set_make
     $RM_F $ECHO_ENV $MAKE
 );
 
-use File::Temp qw[ tempdir tempfile ];
+use File::Temp qw( tempdir tempfile );
 use Cwd ();
 use File::Spec ();
 use IPC::Cmd;
-use Text::Balanced qw[ extract_delimited extract_multiple ];
 use FindBin;
 #use Data::Dumper::Simple;
 
 our $UTIL_PATH;
-our $ECHO_ENV;
-our $RM_F;
 our $PERL;
+our $SHELL;
 
 sub util_path ($) {
     $UTIL_PATH = File::Spec->catdir($FindBin::Bin, $_[0]);
-    $ECHO_ENV = "$PERL " . File::Spec->catfile($UTIL_PATH, 'echo_env.pl');
-    $RM_F     = "$PERL " . File::Spec->catfile($UTIL_PATH, 'rm_f.pl');
+    $SHELL     = File::Spec->catfile($UTIL_PATH, 'sh');
 }
 
+# the current implementation of clean_env is buggy. haven't found a better approach
 sub clean_env () {
   # Get a clean environment
 
@@ -40,13 +40,13 @@ sub clean_env () {
            # Purify things
            'PURIFYOPTIONS',
            # Windows NT-specific stuff
-           'Path', 'SystemRoot',
+           'Path', 'SystemRoot', 'TMP', 'SystemDrive', 'TEMP', 'OS', 'HOMEPATH',
            # DJGPP-specific stuff
            'DJDIR', 'DJGPP', 'SHELL', 'COMSPEC', 'HOSTNAME', 'LFN',
            'FNCASE', '387', 'EMU387', 'GROUP',
-           'GNU_MAKE_PATH', 'MAKE_PATH',
+           'GNU_MAKE_PATH', 'MAKE_PATH', 'INC',
           ) {
-    $makeENV{$_} = $ENV{$_} if $ENV{$_};
+    $makeENV{$_} = $ENV{$_} if defined $ENV{$_};
   }
   %ENV = ();
   %ENV = %makeENV;
@@ -112,8 +112,6 @@ sub run_test_make ($) {
 
 sub preprocess ($) {
     return if not defined $_[0];
-    subs_var($_[0], 'ECHO_ENV', $ECHO_ENV);
-    subs_var($_[0], 'RM_F',     $RM_F    );
     subs_var($_[0], 'PERL',     $PERL    );
 }
 
@@ -121,8 +119,8 @@ sub subs_var ($$$) {
     $_[0] =~ s/\$ [ { \( ] $_[1] [ \) } ]/$_[2]/gsx;
 }
 
-sub create_file ($$) {
-    my ($filename, $content) = @_;
+sub create_file ($$@) {
+    my ($filename, $content, $native_shell) = @_;
     my $fh;
     if (not $filename) {
         ($fh, $filename) = tempfile( "create_file_XXXXX", DIR => '.', UNLINK => 1 );
@@ -132,6 +130,7 @@ sub create_file ($$) {
         mark_temp($filename);
     }
     print $fh $content;
+    print $fh "\n\nSHELL=$PERL $SHELL" if not $native_shell;
     close $fh;
     return $filename;
 }
@@ -175,7 +174,6 @@ sub process_utouch ($) {
 # Touch with a time offset.  To DTRT, call touch() then use stat() to get the
 # access/mod time for each file and apply the offset.
 
-
 sub utouch ($@)
 {
   my $offset = shift;
@@ -199,25 +197,6 @@ sub run_make($$) {
             IPC::Cmd::run( command => $cmd, verbose => 0 );
     local $" = '';
     return ($errcode, "@$routput", "@$rstdout", "@$rstderr");
-}
-
-sub split_args ($) {
-    my $text = shift;
-    my @flds = extract_multiple(
-        $text,
-        [ qr/[^"']\S+/, sub { extract_delimited($_[0], q{"'}) } ],
-        undef,
-        0,
-    );
-    #warn Dumper($text, @flds);
-    my @res = grep { 
-        s/^\s+|\s+$//g;
-        s/^'(.*)'$/$1/g;
-        s/^"(.*)"$/$1/g;
-        $_;
-    } @flds;
-    #warn Dumper(@res);
-    return @res;
 }
 
 sub process_output ($$$$) {

@@ -9,9 +9,10 @@ author          ('Agent Zhang <agent2002@126.com>');
 license         ('perl');
 
 install_script  ($plmake);
-#requires        ('Data::Dumper');
 
-build_requires  ('Test::More');
+#requires        ('Data::Dumper::Simple');
+
+build_requires  ('Test::Simple');
 build_requires  ('Test::Base');
 build_requires  ('IPC::Cmd');
 build_requires  ('File::Temp');
@@ -20,6 +21,7 @@ build_requires  ('ExtUtils::Command');
 build_requires  ('Cwd');
 build_requires  ('Text::Balanced');
 build_requiers  ('FindBin');
+build_requires  ('Time::HiRes');
 
 makemaker_args  (
     test => { TESTS => "t/*.t t/*/*/*.t" },

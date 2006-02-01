@@ -1,17 +1,15 @@
 #: export.t
-#:
+#
 #: Description:
 #:   Check GNU make export/unexport commands.
 #: Details:
 #:
-#: 2006-01-31 2006-01-31
+#: 2006-01-31 2006-02-01
 
 # t::Parser cleans out our environment for us during startup 
 # so we don't have to worry about that here.
 
 use t::Parser::Gnu;
-
-no_diff();
 
 plan tests => 3 * blocks;
 
@@ -43,8 +41,8 @@ ifdef EXPORT_ALL_PSEUDO
 endif
 
 all:
-	@echo FOO=$(FOO) BAR=$(BAR) BAZ=$(BAZ) BOZ=$(BOZ) BITZ=$(BITZ) BOTZ=$(BOTZ)
-	@$(ECHO_ENV) FOO BAR BAZ BOZ BITZ BOTZ
+	@echo "FOO=$(FOO) BAR=$(BAR) BAZ=$(BAZ) BOZ=$(BOZ) BITZ=$(BITZ) BOTZ=$(BOTZ)"
+	@echo "FOO=$$FOO BAR=$$BAR BAZ=$$BAZ BOZ=$$BOZ BITZ=$$BITZ BOTZ=$$BOTZ"
 
 _EOC_
 

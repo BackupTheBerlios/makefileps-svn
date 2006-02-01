@@ -35,13 +35,12 @@ use t::Parser::Gnu;
 plan tests => 4 * blocks;
 
 our $example        = "EXAMPLE_FILE";
-our $delete_command = "$^X -MExtUtils::Command -e rm_f";
 
 our $source = <<_EOC_;
 all: 
-\techo This makefile did not clean the dir... good
+	echo This makefile did not clean the dir... good
 clean: 
-\t\@$::RM_F $example
+	\@rm $example
 _EOC_
 
 filters {
@@ -86,7 +85,7 @@ This makefile did not clean the dir... good
 --- options:            -n
 --- goals:              clean
 --- stdout quote eval
-$::RM_F $::example
+rm $::example
 --- stderr
 --- error_code
 0
