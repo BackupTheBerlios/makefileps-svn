@@ -62,7 +62,6 @@ sub process_args {
             #warn qq{Pusing "$1" into args\n};
             my $s = $1;
             process_escape( $s, q{ " \\ @ $ # } );
-            subs_env($s);
             push @args, $s if $s ne '';
         } elsif (/^'(.*)'$/) {
             #warn "  Pusing '$1' into args\n";
@@ -93,7 +92,6 @@ sub process_unquoted {
         $other = $2;
     }
     process_escape( $s, q{ ' " # \\ \ } );
-    subs_env($s);
     my @subargs = split_arg($s) if $s =~ / /;
     #warn Dumper(@subargs);
     if (@subargs > 1) {
@@ -127,11 +125,12 @@ sub gen_escape_pat {
 }
 
 sub subs_env {
-    $_[0] =~ s/\$(\w+)/defined $ENV{$1} ? $ENV{$1} : ''/ge;
+    $_[0] =~ s/\$(\w+)/defined $ENV{$1} ? "$ENV{$1}" : ''/ge;
 }
 
 sub eval_cmd {
     my @args = @_;
+    map { subs_env($_) } @args;
     my $exec = shift @args;
     #warn Dumper($exec, @args);
     if ($exec eq 'echo') {

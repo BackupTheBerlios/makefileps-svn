@@ -3,51 +3,23 @@
 #: 2006-01-29 2006-02-01
 
 package t::Backend::Base;
-use Test::Base -Base;
 
+use Test::Base -Base;
 use t::Backend::Util;
+use File::Temp qw( tempdir tempfile );
+use Cwd ();
+use File::Spec ();
+use FindBin;
+#use Data::Dumper::Simple;
 
 our @EXPORT = qw(
-    run_test_make
+    run_test_make create_file
     $MAKE $PERL $SHELL
 );
 
 our @EXPORT_BASE = qw(set_make set_shell);
 
-use File::Temp qw( tempdir tempfile );
-use Cwd ();
-use File::Spec ();
-use IPC::Cmd;
-use FindBin;
-#use Data::Dumper::Simple;
-
-our ($SHELL, $PERL);
-
-# the current implementation of clean_env is buggy. haven't found a better approach
-sub clean_env () {
-  # Get a clean environment
-
-  my %makeENV = ();
-  # Pull in benign variables from the user's environment
-  #
-  foreach (# UNIX-specific things
-           'TZ', 'LANG', 'TMPDIR', 'HOME', 'USER', 'LOGNAME', 'PATH',
-           # Purify things
-           'PURIFYOPTIONS',
-           # Windows NT-specific stuff
-           'Path', 'SystemRoot', 'TMP', 'SystemDrive', 'TEMP', 'OS', 'HOMEPATH',
-           # DJGPP-specific stuff
-           'DJDIR', 'DJGPP', 'SHELL', 'COMSPEC', 'HOSTNAME', 'LFN',
-           'FNCASE', '387', 'EMU387', 'GROUP',
-           'GNU_MAKE_PATH', 'GNU_SHELL_PATH', 'INC',
-          ) {
-    $makeENV{$_} = $ENV{$_} if defined $ENV{$_};
-  }
-  %ENV = ();
-  %ENV = %makeENV;
-}
-
-our ($MAKE, $MAKE_PATH);
+our ($SHELL, $PERL, $MAKE, $MAKE_PATH);
 
 sub set_make ($$) {
     my ($env_name, $default) = @_;
@@ -76,8 +48,6 @@ BEGIN {
     clean_env();
 }
 
-our @TempFiles;
-
 sub run_test_make ($) {
     my $block = shift;
 
@@ -94,14 +64,14 @@ sub run_test_make ($) {
     process_touch($block);
     process_utouch($block);
 
-    my ($errcode, $full_output, $stdout, $stderr) =
+    my ($errcode, $stdout, $stderr) =
         run_make($block, $filename);
 
     process_post($block);
     process_found($block);
     process_not_found($block);
 
-    clean();
+    clean_env();
     chdir $saved_cwd;
     #warn "\nstderr: $stderr\nstdout: $stdout\n";
 
@@ -133,33 +103,11 @@ sub create_file ($$) {
     return $filename;
 }
 
-sub process_pre ($) {
-    my $block = shift;
-    my $code = $block->pre;
-    return if not $code;
-    eval $code;
-    confess "error in `pre' section: $@" if $@;
-}
-
 sub process_touch ($) {
     my $block = shift;
     my $buf = $block->touch;
     return if not $buf;
     touch(split /\s+/, $buf);
-}
-
-sub touch (@)
-{
-  for my $name (@_) {
-      my $fh;
-      open $fh, ">> $name" and print $fh "\n" and close $fh
-	      or confess("couldn't touch $name: $!");
-      mark_temp($name);
-  }
-}
-
-sub mark_temp {
-    push @TempFiles, @_;
 }
 
 sub process_utouch ($) {
@@ -169,17 +117,7 @@ sub process_utouch ($) {
     utouch(split /\s+/, $buf);
 }
 
-# Touch with a time offset.  To DTRT, call touch() then use stat() to get the
-# access/mod time for each file and apply the offset.
-
-sub utouch ($@)
-{
-  my $offset = shift;
-  touch(@_);
-  my @s = stat $_[0];
-  utime($s[8]+$offset, $s[9]+$offset, @_);
-}
-
+# returns ($errcode, $stdout, $stderr) or $errcode
 sub run_make($$) {
     my ($block, $filename) = @_;
     my $options  = $block->options || '';
@@ -191,10 +129,8 @@ sub run_make($$) {
     }
     my $cmd = [ split_arg($MAKE_PATH), split_arg($options), split_arg($goals) ];
     #warn Dumper($cmd);
-    my( $success, $errcode, $routput, $rstdout, $rstderr ) =
-            IPC::Cmd::run( command => $cmd, verbose => 0 );
-    local $" = '';
-    return ($errcode, "@$routput", "@$rstdout", "@$rstderr");
+    my @res = run_shell($cmd);
+    return @res;
 }
 
 sub process_output ($$$$) {
@@ -218,45 +154,6 @@ sub process_output ($$$$) {
     is $errcode, $errcode2, "Error Code - $name" if defined $errcode2;
     is $stdout, $stdout2, "stdout - $name" if defined $stdout2;
     is $stderr, $stderr2, "stderr - $name" if defined $stderr2;
-}
-
-sub process_post ($) {
-    my $block = shift;
-    my $code = $block->post;
-    return if not $code;
-    eval $code;
-    confess "error in `post' section: $@" if $@;
-}
-
-sub process_found ($) {
-    my $block = shift;
-    my $buf = $block->found;
-    return if not $buf;
-    my @files = split /\s+/s, $buf;
-    for my $file (@files) {
-        ok -f $file, "File $file should be found - " . $block->name();
-    }
-}
-
-sub process_not_found ($) {
-    my $block = shift;
-    my $buf = $block->not_found;
-    return if not $buf;
-    my @files = split /\s+/s, $buf;
-    for my $file (@files) {
-        ok ! -f $file, "File $file should NOT be found - " . $block->name();
-    }
-}
-
-sub clean () {
-    for my $tmpfile (@TempFiles) {
-        unlink $tmpfile;
-    }
-    @TempFiles = ();
-}
-
-END {
-    clean();
 }
 
 package t::Backend::Base::Filter;

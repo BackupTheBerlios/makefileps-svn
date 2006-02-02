@@ -5,11 +5,17 @@
 package t::Util;
 
 use Spiffy -Base;
+use Carp qw( confess );
+use Test::More;
 use IPC::Cmd;
 use Text::Balanced qw( extract_delimited extract_multiple );
 use Data::Dumper::Simple;
 
-our @EXPORT = qw( run_shell split_arg join_list );
+our @EXPORT = qw(
+    run_shell split_arg join_list
+    process_pre process_post
+    process_found process_not_found
+);
 
 sub join_list (@) {
     my @args = @_;
@@ -48,6 +54,48 @@ sub split_arg ($) {
     } @flds;
     #warn Dumper(@res);
     return @res;
+}
+
+sub process_pre ($) {
+    my $block = shift;
+    my $code = $block->pre;
+    return if not $code;
+    {
+        package main;
+        eval $code;
+    }
+    confess "error in `pre' section: $@" if $@;
+}
+
+sub process_post ($) {
+    my $block = shift;
+    my $code = $block->post;
+    return if not $code;
+    {
+        package main;
+        eval $code;
+    }
+    confess "error in `post' section: $@" if $@;
+}
+
+sub process_found ($) {
+    my $block = shift;
+    my $buf = $block->found;
+    return if not $buf;
+    my @files = split /\s+/s, $buf;
+    for my $file (@files) {
+        ok -f $file, "File $file should be found - " . $block->name();
+    }
+}
+
+sub process_not_found ($) {
+    my $block = shift;
+    my $buf = $block->not_found;
+    return if not $buf;
+    my @files = split /\s+/s, $buf;
+    for my $file (@files) {
+        ok ! -f $file, "File $file should NOT be found - " . $block->name();
+    }
 }
 
 1;

@@ -1,4 +1,5 @@
 #: quotes.t
+#: test the various quotes in `sh' syntax
 #: 2006-02-02 2006-02-02
 
 use t::Shell;
@@ -59,6 +60,7 @@ echo '\\'
 --- stderr
 --- error_code
 0
+
 
 
 === Test 6: malformed single-colon
