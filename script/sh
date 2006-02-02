@@ -16,14 +16,14 @@ use Time::HiRes qw( sleep );
     #warn Dumper($cmd);
 
     $cmd =~ s/\n+/ /gs;
-    my @raw_args = split_args($cmd);
+    my @raw_args = split_arg($cmd);
     exit(0) if ! @raw_args;
 
     my @args = process_args(0, @raw_args);
     exit eval_cmd(@args);
 }
 
-sub split_args {
+sub split_arg {
     my $text = shift;
     return () if not defined $text;
     my @flds = extract_multiple(
@@ -83,7 +83,7 @@ sub process_unquoted {
     }
     process_escape( $s, q{ ' " # \\ \ } );
     subs_env($s);
-    my @subargs = split_args($s) if $s =~ / /;
+    my @subargs = split_arg($s) if $s =~ / /;
     #warn Dumper(@subargs);
     if (@subargs > 1) {
         push @$rargs, process_args ($level+1, @subargs);
