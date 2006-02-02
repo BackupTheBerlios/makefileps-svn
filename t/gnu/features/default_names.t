@@ -6,10 +6,9 @@
 #:   This script tests to make sure that Make looks for
 #:   default makefiles in the correct order (GNUmakefile, makefile, Makefile)
 #:
-#: 2006-01-29 2006-01-31
+#: 2006-01-29 2006-02-02
 
 use t::Parser::Gnu;
-use File::Temp;
 
 plan tests => 3 * blocks;
 

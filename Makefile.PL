@@ -24,7 +24,7 @@ build_requiers  ('FindBin');
 build_requires  ('Time::HiRes');
 
 makemaker_args  (
-    test => { TESTS => "t/*.t t/*/*/*.t" },
+    test => { TESTS => "t/*.t t/*/*.t t/*/*/*.t" },
 );
 
 &WriteAll;

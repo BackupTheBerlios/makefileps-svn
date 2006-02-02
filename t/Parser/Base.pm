@@ -5,7 +5,7 @@
 package t::Parser::Base;
 use Test::Base -Base;
 
-use t::Parser::Util qw( split_args );
+use t::Parser::Util;
 
 our @EXPORT = qw(
     run_test_make
@@ -189,7 +189,7 @@ sub run_make($$) {
     if ($filename) {
         $options = "-f '$filename' $options";
     }
-    my $cmd = [ split_args($MAKE_PATH), split_args($options), split_args($goals) ];
+    my $cmd = [ split_arg($MAKE_PATH), split_arg($options), split_arg($goals) ];
     #warn Dumper($cmd);
     my( $success, $errcode, $routput, $rstdout, $rstderr ) =
             IPC::Cmd::run( command => $cmd, verbose => 0 );
