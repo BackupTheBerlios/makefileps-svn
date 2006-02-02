@@ -4,7 +4,7 @@
 #:   Check GNU make export/unexport commands.
 #: Details:
 #:
-#: 2006-01-31 2006-02-01
+#: 2006-01-31 2006-02-02
 
 # t::Backend cleans out our environment for us during startup 
 # so we don't have to worry about that here.
@@ -50,7 +50,7 @@ run { run_test_make $_[0]; }
 
 __DATA__
 
-=== basics
+=== TEST 0: basics
 --- source quote eval:         $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
@@ -59,24 +59,10 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 --- error_code
 0
 
+### `Test 1' has been moved to the end of file. It will cause problem
+### on Cygwin if I put it here. explanation?  -- agent
 
-
-=== vars from the outer-most environment are exported
-make sure vars inherited from the parent are exported
---- pre:                       $ENV{FOO} = 1;
---- post:                      delete $ENV{FOO};
---- source quote eval:         $::makefile
---- stdout
-FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
-FOO=foo BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
---- stderr
---- error_code
-0
-
-
-
-=== global export
-global export.  Explicit unexport takes precedence.
+=== TEST 2: global export.  Explicit unexport takes precedence.
 --- options:                   EXPORT_ALL=1
 --- source quote eval:         $::makefile
 --- stdout
@@ -88,8 +74,7 @@ FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 
 
-=== global unexport
-global unexport.  Explicit export takes precedence.
+=== TEST 3: global unexport.  Explicit export takes precedence.
 --- options:                   UNEXPORT_ALL=1
 --- source quote eval:         $::makefile
 --- stdout
@@ -101,8 +86,7 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 
 
-=== both
-both: in the above makefile the unexport comes last so that rules.
+=== TEST 4: both: in the above makefile the unexport comes last so that rules.
 --- options:                   EXPORT_ALL=1 UNEXPORT_ALL=1
 --- source quote eval:         $::makefile
 --- stdout
@@ -114,8 +98,7 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 
 
-=== pseudo target
-test the pseudo target.
+=== TEST 5: test the pseudo target.
 --- options:                   EXPORT_ALL_PSEUDO=1
 --- source quote eval:         $::makefile
 --- stdout
@@ -127,8 +110,7 @@ FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 
 
-=== expansion inside export
-Test the expansion of variables inside export
+=== TEST 6: Test the expansion of variables inside export
 --- source
 
 foo = f-ok
@@ -156,8 +138,7 @@ foo=f-ok bar=b-ok
 
 
 
-=== expansion inside unexport
-Test the expansion of variables inside unexport
+=== TEST 7: Test the expansion of variables inside unexport
 --- source
 
 foo = f-ok
@@ -187,8 +168,7 @@ foo= bar=
 
 
 
-=== export multiple in one line
-Test exporting multiple variables on the same line
+=== TEST 7: Test exporting multiple variables on the same line
 --- source
 
 A = a
@@ -217,8 +197,7 @@ A=a B=b C=c D=d E=e F=f G=g H=h I=i J=j
 
 
 
-=== unexport multiple in one line
-Test unexporting multiple variables on the same line
+=== TEST 8: Test unexporting multiple variables on the same line
 --- pre
 
 @ENV{qw(A B C D E F G H I J)} = qw(1 2 3 4 5 6 7 8 9 10);
@@ -249,6 +228,21 @@ unexport D E $(SOME)
 all: ; @echo A=$$A B=$$B C=$$C D=$$D E=$$E F=$$F G=$$G H=$$H I=$$I J=$$J
 --- stdout
 A= B= C= D= E= F= G= H= I= J=
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 1: make sure vars inherited from the parent are exported
+This test must be performed after TEST 3 and TEST 4, or the latters
+will fail on Cygwin.  -- agent
+--- pre:                       $ENV{FOO} = 1;
+--- post:                      delete $ENV{FOO};
+--- source quote eval:         $::makefile
+--- stdout
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
+FOO=foo BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 --- stderr
 --- error_code
 0

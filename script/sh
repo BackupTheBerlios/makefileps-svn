@@ -29,16 +29,22 @@ use Time::HiRes qw( sleep );
 sub split_arg {
     my $text = shift;
     return () if not defined $text;
+    my $escape_pat = gen_escape_pat( q{ ' " # \\ \ } );
     my @flds = extract_multiple(
         $text,
-        [ sub { extract_delimited($_[0], q{"'}) }, qr/\s*\S+/ ],
+        [
+            qr/\G\s*$escape_pat+/,
+            sub { extract_delimited($_[0], q{"}) },
+            qr/\G\s*'[^']*'/,
+            qr/\G\s*\S[^'"\s]*/,
+        ],
         undef,
         1,
     );
-    @flds = grep { s/^\s+|\s+$//g; defined($_) and ($_ ne '') } @flds;
-    #warn "======================\n";
+    @flds = grep { s/^\s+|\s+$//g; defined($_) && $_ ne '' } @flds;
+    #warn "\n======================\n";
     #warn Dumper($text, @flds);
-    #warn "======================";
+    #warn "======================\n";
     return @flds;
 }
 
@@ -57,10 +63,12 @@ sub process_args {
             my $s = $1;
             process_escape( $s, q{ " \\ @ $ # } );
             subs_env($s);
-            push @args, $s;
+            push @args, $s if $s ne '';
         } elsif (/^'(.*)'$/) {
             #warn "  Pusing '$1' into args\n";
-            push @args, $1;
+            push @args, $1 if $1 ne '';
+        } elsif (/^['"]/) {
+            die "sh: unexpected EOF while looking for matching `$&'\n";
         } else {
             #warn "  Remaining: $_\n";
             my $s = $_;
@@ -95,7 +103,7 @@ sub process_unquoted {
         if (@files > 1) {
             push @$rargs, @files;
         } else {
-            push @$rargs, $s;
+            push @$rargs, $s if $s ne '';
         }
     }
     if (defined $other) {
@@ -109,8 +117,13 @@ sub process_unquoted {
 }
 
 sub process_escape {
-    my $list = quotemeta pop @_;
-    $_[0] =~ s/ \\ ([ $list ]) /$1/gx;
+    my $pat = gen_escape_pat($_[1]);
+    $_[0] =~ s/$pat/substr($&,1,1)/eg;
+}
+
+sub gen_escape_pat {
+    my $list = quotemeta $_[0];
+    return qr/ \\ [ $list ] /x;
 }
 
 sub subs_env {

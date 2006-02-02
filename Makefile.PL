@@ -14,10 +14,10 @@ install_script  ($plmake);
 
 build_requires  ('Test::Simple');
 build_requires  ('Test::Base');
+build_requires  ('IPC::Run');
 build_requires  ('IPC::Cmd');
 build_requires  ('File::Temp');
 build_requires  ('File::Spec');
-build_requires  ('ExtUtils::Command');
 build_requires  ('Cwd');
 build_requires  ('Text::Balanced');
 build_requiers  ('FindBin');

@@ -22,9 +22,12 @@ sub run_test ($) {
     #warn Dumper($SHELL);
     my @res = split_arg($SHELL);
     #warn Dumper(@res);
+    #warn Dumper($block->cmd);
     my ($error_code, $stdout, $stderr) = run_shell( [@res, '-c', $block->cmd] );
-    my ($stdout2, $stderr2, $error_code2) =
-        ($block->stdout, $block->stderr, $block->error_code);
+    #warn Dumper($stdout);
+    my $stdout2     = $block->stdout;
+    my $stderr2     = $block->stderr;
+    my $error_code2 = $block->error_code;
 
     my $name = $block->name;
     is ($stdout, $stdout2, "stdout - $name") if defined $stdout2;

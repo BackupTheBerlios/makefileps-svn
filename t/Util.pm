@@ -9,7 +9,7 @@ use IPC::Cmd;
 use Text::Balanced qw( extract_delimited extract_multiple );
 use Data::Dumper::Simple;
 
-our @EXPORT = qw( run_shell split_arg );
+our @EXPORT = qw( run_shell split_arg join_list );
 
 sub join_list (@) {
     my @args = @_;
@@ -18,14 +18,16 @@ sub join_list (@) {
             $_ = join('', @$_);
         }
     }
-    return @args;
+    return wantarray ? @args : $args[0];
 }
 
 # returns ($error_code, $stdout, $stderr)
-sub run_shell ($) {
-    my $cmd = shift;
-    my @res = IPC::Cmd::run( command => $cmd, verbose => 0 );
-    return join_list @res[1, 3, 4];
+sub run_shell ($@) {
+    my ($cmd, $verbose) = @_;
+    $IPC::Cmd::USE_IPC_RUN = 1;
+    my @res = IPC::Cmd::run( command => $cmd, verbose => $verbose );
+    #warn "^^^ Output: $res[2][0]";
+    return (join_list @res[1, 3, 4]);
 }
 
 sub split_arg ($) {

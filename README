@@ -24,10 +24,10 @@ This module requires these other modules and libraries:
 
   Test::Simple
   Test::Base
+  IPC::Run
   IPC::Cmd
   File::Temp
   File::Spec
-  ExtUtils::Command
   Cwd
   Text::Balanced
   FindBin

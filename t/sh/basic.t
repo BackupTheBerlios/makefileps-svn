@@ -18,6 +18,8 @@ hello, world
 --- error_code
 0
 
+
+
 === Test 2: whitespace
 --- cmd
 echo hello,    world
@@ -26,6 +28,8 @@ hello, world
 --- stderr
 --- error_code
 0
+
+
 
 === Test 3: multiple argument
 --- cmd
@@ -36,6 +40,8 @@ a b c
 --- error_code
 0
 
+
+
 === Test 4: no argument
 --- cmd
 echo
@@ -44,3 +50,13 @@ echo
 --- error_code
 0
 
+
+
+=== Test 5: 0 as the argument
+--- cmd
+echo 0 "0" '0' ' '
+--- stdout eval
+"0 0 0  \n"
+--- stderr
+--- error_code
+0
