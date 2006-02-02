@@ -1,4 +1,7 @@
 #!perl
+#: sh
+#: Perl simulator for /bin/sh (Bourne Shell)
+#: 2006-02-01 2006-02-02
 
 use strict;
 use warnings;

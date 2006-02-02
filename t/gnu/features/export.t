@@ -6,10 +6,10 @@
 #:
 #: 2006-01-31 2006-02-01
 
-# t::Parser cleans out our environment for us during startup 
+# t::Backend cleans out our environment for us during startup 
 # so we don't have to worry about that here.
 
-use t::Parser::Gnu;
+use t::Backend::Gnu;
 
 plan tests => 3 * blocks;
 

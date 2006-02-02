@@ -1,11 +1,11 @@
-#: t/Parser/Base.pm
+#: t/Backend/Base.pm
 #: Tester based on Test::Base
 #: 2006-01-29 2006-02-01
 
-package t::Parser::Base;
+package t::Backend::Base;
 use Test::Base -Base;
 
-use t::Parser::Util;
+use t::Backend::Util;
 
 our @EXPORT = qw(
     run_test_make
@@ -259,7 +259,7 @@ END {
     clean();
 }
 
-package t::Parser::Base::Filter;
+package t::Backend::Base::Filter;
 use Test::Base::Filter -Base;
 
 sub quote {

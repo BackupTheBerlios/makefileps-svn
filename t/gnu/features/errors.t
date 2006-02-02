@@ -17,7 +17,7 @@
 #:
 #: 2006-01-30 2006-02-01
 
-use t::Parser::Gnu;
+use t::Backend::Gnu;
 use File::Spec;
 
 plan tests => 4 * blocks;

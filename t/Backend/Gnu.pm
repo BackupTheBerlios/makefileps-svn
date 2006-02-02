@@ -1,6 +1,9 @@
-package t::Parser::Gnu;
+#: t/Backend/Gnu.pm
+#: 2006-02-01 2006-02-02
 
-use t::Parser::Base -Base;
+package t::Backend::Gnu;
+
+use t::Backend::Base -Base;
 use FindBin;
 
 my $UTIL_PATH = File::Spec->catdir($FindBin::Bin, '../../../script');
