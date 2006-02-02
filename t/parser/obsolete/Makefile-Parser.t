@@ -2,12 +2,14 @@
 #: Test script for Makefile/Parser.pm
 #: v0.12
 #: Copyright (c) 2005 Agent Zhang
-#: 2005-09-24 2005-10-28
+#: 2005-09-24 2006-02-02
 
 use strict;
 use warnings;
+use Cwd;
+use FindBin;
 
-my $dir = -d 't' ? 't' : '.';
+my $dir = $FindBin::Bin;
 
 use Test::More tests => 157;
 use Makefile::Parser;
@@ -147,7 +149,8 @@ ok !$mk->parse_file('Makefile.bar.bar');
 ok defined $mk, 'object defined';
 like(Makefile::Parser->error, qr/Cannot open Makefile.bar.bar for reading:.*/);
 
-chdir('./t');
+my $saved_dir = Cwd::cwd;
+chdir($dir);
 $mk = $pack->new;
 $mk->parse_file;
 $tar = $mk->target('test');
@@ -198,7 +201,7 @@ my $mk2 = $mk->new;
 $mk2->parse_file;
 isa_ok $mk, 'Makefile::Parser';
 
-chdir('..');
+chdir $saved_dir;
 
 #####
 # Makefile2
@@ -206,7 +209,7 @@ chdir('..');
 
 #warn "!!! Makefile2 !!!\n";
 my $ps = Makefile::Parser->new;
-$ps->parse_file('t/Makefile2');
+$ps->parse_file("$dir/Makefile2");
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'all clean';
@@ -242,7 +245,7 @@ is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2
 ####
 
 #warn "!!! Makefile3 !!!\n";
-ok $ps->parse_file('t/Makefile3');
+ok $ps->parse_file("$dir/Makefile3");
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'all clean';
@@ -277,7 +280,7 @@ is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2
 
 #warn "!!! Mafefile4 !!!\n";
 
-$ps->parse_file('t/Makefile4');
+$ps->parse_file("$dir/Makefile4");
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'all clean';
@@ -307,7 +310,7 @@ is join(' ', @prereqs), 'ast++.sum.c';
 is join(' ', sort @tars), 'all ast++.sum.o clean sum1.exe sum1.obj sum2.exe sum2.obj';
 
 #warn "!!! Makefile5 !!!\n";
-ok $ps->parse_file('t/Makefile5');
+ok $ps->parse_file("$dir/Makefile5");
 
 @roots = $ps->roots;
 is join(' ', sort @roots), 'abc';

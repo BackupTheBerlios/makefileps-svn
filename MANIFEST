@@ -3,7 +3,6 @@ Makefile.PL
 MANIFEST
 README
 READTHEM
-t/Makefile-Parser.t
 t/pod-coverage.t
 t/pod.t
 lib/Makefile/Parser.pm
