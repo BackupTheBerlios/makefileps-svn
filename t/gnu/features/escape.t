@@ -7,7 +7,7 @@
 #:   Make sure escaping of whitespace works in target names.
 #:   Make sure that escaping of '#' works.
 #:
-#: 2006-01-31 2006-02-01
+#: 2006-01-31 2006-02-02
 
 use t::Backend::Gnu;
 
@@ -17,8 +17,9 @@ filters {
     source     => [qw< quote eval >],
 };
 
+# renamed $(path) to $(path2) since `path' is an essential env on Win32
 our $source = <<'_EOC_';
-$(path)foo : ; @echo cp $^ $@
+$(path2)foo : ; @echo cp $^ $@
 
 foo\ bar: ; @echo 'touch "$@"'
 
@@ -30,7 +31,8 @@ run { run_test_make $_[0]; }
 
 __DATA__
 
-=== empty `$^' trimmied
+=== TEST 1
+empty `$^' trimmied
 --- source:               $::source
 --- stdout
 cp foo
@@ -40,10 +42,9 @@ cp foo
 
 
 
-=== unquoted `:' in target name
-This one should fail, since the ":" is unquoted.
+=== TEST 2: This one should fail, since the ":" is unquoted.
 --- source:               $::source
---- options:              path=p:
+--- options:              path2=p:
 --- filename:             Makefile
 --- stdout
 --- stderr
@@ -53,10 +54,9 @@ Makefile:1: *** target pattern contains no `%'.  Stop.
 
 
 
-=== escaped `:' in target name
-This one should work, since we escape the ":".
+=== TEST 3: This one should work, since we escape the ":".
 --- source:               $::source
---- options:              'path=p\:'
+--- options:              'path2=p\:'
 --- filename:             Makefile
 --- stdout
 cp p:foo
@@ -66,10 +66,9 @@ cp p:foo
 
 
 
-=== escape char for `:' gets escaped
-TEST 4: This one should fail, since the escape char is escaped.
+=== TEST 4: This one should fail, since the escape char is escaped.
 --- source:               $::source
---- options:              "path=p\\:"
+--- options:              'path2=p\\:'
 --- filename:             Makefile
 --- stdout
 --- stderr
@@ -79,8 +78,7 @@ Makefile:1: *** target pattern contains no `%'.  Stop.
 
 
 
-=== escaped white space in target name
-TEST 5: This one should work
+=== TEST 5: This one should work
 --- source:               $::source
 --- goals:                'foo bar'
 --- stderr
@@ -91,8 +89,7 @@ touch "foo bar"
 
 
 
-=== escaped comments
-TEST 6: Test escaped comments
+=== TEST 6: Test escaped comments
 --- source:               $::source
 --- goals:                sharp
 --- stdout

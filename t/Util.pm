@@ -13,6 +13,7 @@ use Data::Dumper::Simple;
 
 our @EXPORT = qw(
     run_shell split_arg join_list
+    split_arg process_escape gen_escape_pat
     process_pre process_post
     process_found process_not_found
 );
@@ -38,22 +39,34 @@ sub run_shell ($@) {
 
 sub split_arg ($) {
     my $text = shift;
-    #warn Dumper($text);
+    return () if not defined $text;
     my @flds = extract_multiple(
         $text,
-        [ sub { extract_delimited($_[0], q{"'}) }, qr/\s*\S+/ ],
+        [
+            qr/\G\s*\\./,
+            qr/\G\s*'[^']*'/,
+            sub { extract_delimited($_[0], q{"}) },
+            qr/\G\s*\S[^'"\s]*/,
+        ],
         undef,
         1,
     );
+    @flds = grep { s/^\s+|\s+$//g; defined($_) && $_ ne '' } @flds;
+    #warn "\n======================\n";
     #warn Dumper($text, @flds);
-    my @res = grep {
-        s/^\s+|\s+$//g;
-        s/^'(.*)'$/$1/g;
-        s/^"(.*)"$/$1/g;
-        defined $_ and $_ ne '';
-    } @flds;
-    #warn Dumper(@res);
-    return @res;
+    #warn "======================\n";
+    return @flds;
+}
+
+sub process_escape ($$) {
+    return if $_[0] !~ /\\/;
+    my $pat = gen_escape_pat($_[1]);
+    $_[0] =~ s/$pat/substr($&,1,1)/eg;
+}
+
+sub gen_escape_pat ($) {
+    my $list = quotemeta $_[0];
+    return qr/ \\ [ $list ] /x;
 }
 
 sub process_pre ($) {

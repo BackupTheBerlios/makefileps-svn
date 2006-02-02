@@ -1,6 +1,6 @@
 #: t/Backend/Base.pm
 #: Tester based on Test::Base
-#: 2006-01-29 2006-02-01
+#: 2006-01-29 2006-02-02
 
 package t::Backend::Base;
 
@@ -20,6 +20,7 @@ our @EXPORT = qw(
 our @EXPORT_BASE = qw(set_make set_shell);
 
 our ($SHELL, $PERL, $MAKE, $MAKE_PATH);
+our @MakeExe;
 
 sub set_make ($$) {
     my ($env_name, $default) = @_;
@@ -71,7 +72,7 @@ sub run_test_make ($) {
     process_found($block);
     process_not_found($block);
 
-    clean_env();
+    clean_temp();
     chdir $saved_cwd;
     #warn "\nstderr: $stderr\nstdout: $stdout\n";
 
@@ -123,11 +124,13 @@ sub run_make($$) {
     my $options  = $block->options || '';
     my $goals    = $block->goals || '';
 
+    @MakeExe = split_arg($MAKE_PATH) if not @MakeExe;
+    my @args = @MakeExe;
     #warn Dumper($filename);
     if ($filename) {
-        $options = "-f '$filename' $options";
+        push @args, '-f', $filename;
     }
-    my $cmd = [ split_arg($MAKE_PATH), split_arg($options), split_arg($goals) ];
+    my $cmd = [ @args, process_args("$options $goals") ];
     #warn Dumper($cmd);
     my @res = run_shell($cmd);
     return @res;

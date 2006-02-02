@@ -5,6 +5,9 @@
 
 use strict;
 use warnings;
+use FindBin;
+use lib "$FindBin::Bin/..";
+use t::Util;
 
 use Getopt::Std;
 use Text::Balanced qw( extract_delimited extract_multiple );
@@ -26,28 +29,6 @@ use Time::HiRes qw( sleep );
     exit eval_cmd(@args);
 }
 
-sub split_arg {
-    my $text = shift;
-    return () if not defined $text;
-    my $escape_pat = gen_escape_pat( q{ ' " # \\ \ } );
-    my @flds = extract_multiple(
-        $text,
-        [
-            qr/\G\s*$escape_pat+/,
-            sub { extract_delimited($_[0], q{"}) },
-            qr/\G\s*'[^']*'/,
-            qr/\G\s*\S[^'"\s]*/,
-        ],
-        undef,
-        1,
-    );
-    @flds = grep { s/^\s+|\s+$//g; defined($_) && $_ ne '' } @flds;
-    #warn "\n======================\n";
-    #warn Dumper($text, @flds);
-    #warn "======================\n";
-    return @flds;
-}
-
 sub process_args {
     #warn "!!!!!!!!!!!!!!!!!!!!!!";
     my $level = shift;
@@ -62,18 +43,21 @@ sub process_args {
             #warn qq{Pusing "$1" into args\n};
             my $s = $1;
             process_escape( $s, q{ " \\ @ $ # } );
+            subs_env($s);
             push @args, $s if $s ne '';
         } elsif (/^'(.*)'$/) {
             #warn "  Pusing '$1' into args\n";
             push @args, $1 if $1 ne '';
         } elsif (/^['"]/) {
-            die "sh: unexpected EOF while looking for matching `$&'\n";
+            warn "sh: unexpected EOF while looking for matching `$&'\n";
+            exit(512);
         } else {
             #warn "  Remaining: $_\n";
             my $s = $_;
             if ($level == 0 and $s =~ /^\#/) {
                 return @args;
             }
+            $s =~ s/\\(.)/$1/gs;
             process_unquoted($s, $level, \@args);
             #warn "~~~~~~~~~~~~~~\n";
             #warn Dumper(@args, $_, @raw_args);
@@ -91,7 +75,7 @@ sub process_unquoted {
         $s = $1;
         $other = $2;
     }
-    process_escape( $s, q{ ' " # \\ \ } );
+    subs_env($s);
     my @subargs = split_arg($s) if $s =~ / /;
     #warn Dumper(@subargs);
     if (@subargs > 1) {
@@ -114,23 +98,12 @@ sub process_unquoted {
     }
 }
 
-sub process_escape {
-    my $pat = gen_escape_pat($_[1]);
-    $_[0] =~ s/$pat/substr($&,1,1)/eg;
-}
-
-sub gen_escape_pat {
-    my $list = quotemeta $_[0];
-    return qr/ \\ [ $list ] /x;
-}
-
 sub subs_env {
     $_[0] =~ s/\$(\w+)/defined $ENV{$1} ? "$ENV{$1}" : ''/ge;
 }
 
 sub eval_cmd {
     my @args = @_;
-    map { subs_env($_) } @args;
     my $exec = shift @args;
     #warn Dumper($exec, @args);
     if ($exec eq 'echo') {

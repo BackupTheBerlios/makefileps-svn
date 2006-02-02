@@ -4,7 +4,7 @@
 
 use t::Shell;
 
-plan tests => 3 * blocks() - 2;
+plan tests => 3 * blocks() - 4;
 
 run_tests;
 
@@ -35,9 +35,7 @@ hello,    world
 === Test 3: single-colon, escape '
 --- cmd
 echo '\''
---- stdout
---- error_code
-512
+--- stdout:
 
 
 
@@ -88,9 +86,7 @@ abcd
 === Test 8: ditto, yet another
 --- cmd
 echo ab'cd
---- stdout
---- error_code
-512
+--- stdout:
 
 
 

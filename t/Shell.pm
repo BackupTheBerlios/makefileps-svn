@@ -18,13 +18,12 @@ BEGIN {
 
 sub run_test ($) {
     my $block = shift;
-    #$SHELL = 'bash';
-    #warn Dumper($SHELL);
-    my @res = split_arg($SHELL);
-    #warn Dumper(@res);
     #warn Dumper($block->cmd);
-    my ($error_code, $stdout, $stderr) = run_shell( [@res, '-c', $block->cmd] );
+    process_pre($block);
+    my ($error_code, $stdout, $stderr) = 
+        run_shell( [ split_arg($SHELL), '-c', $block->cmd ] );
     #warn Dumper($stdout);
+    process_post($block);
     my $stdout2     = $block->stdout;
     my $stderr2     = $block->stderr;
     my $error_code2 = $block->error_code;
