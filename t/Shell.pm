@@ -6,7 +6,7 @@ package t::Shell;
 use Test::Base -Base;
 use t::Util;
 use FindBin;
-use Data::Dumper::Simple;
+#use Data::Dumper::Simple;
 
 our @EXPORT = qw( run_tests run_test );
 

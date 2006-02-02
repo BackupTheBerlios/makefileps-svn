@@ -10,8 +10,7 @@ use lib "$FindBin::Bin/..";
 use t::Util;
 
 use Getopt::Std;
-use Text::Balanced qw( extract_delimited extract_multiple );
-use Data::Dumper::Simple;
+#use Data::Dumper::Simple;
 use Time::HiRes qw( sleep );
 
 {

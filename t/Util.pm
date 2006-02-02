@@ -8,8 +8,8 @@ use Spiffy -Base;
 use Carp qw( confess );
 use Test::More;
 use IPC::Cmd;
-use Text::Balanced qw( extract_delimited extract_multiple );
-use Data::Dumper::Simple;
+use Text::Balanced qw( gen_delimited_pat );
+#use Data::Dumper::Simple;
 
 our @EXPORT = qw(
     run_shell split_arg join_list
@@ -17,6 +17,12 @@ our @EXPORT = qw(
     process_pre process_post
     process_found process_not_found
 );
+
+our $DelimPat;
+
+BEGIN {
+    $DelimPat = gen_delimited_pat(q{"});
+}
 
 sub join_list (@) {
     my @args = @_;
@@ -37,21 +43,42 @@ sub run_shell ($@) {
     return (join_list @res[1, 3, 4]);
 }
 
+sub extract_many (@) {
+    my $text = shift;
+    my @flds;
+    while (1) {
+        #warn '@flds = ', Dumper(@flds);
+        if ($text =~ /\G\s*(\\.)/gc) {
+            push @flds, $1;
+        } elsif ($text =~ /\G\s*('[^']*')/gc) {
+            push @flds, $1;
+        } elsif ($text =~ /\G\s*($DelimPat)/gc) {
+            push @flds, $1;
+        } elsif ($text =~ /\G\s*(\S[^'"\s]*)/gc) {
+            push @flds, $1;
+        } else {
+            last;
+        }
+    }
+    return @flds;
+}
+
 sub split_arg ($) {
     my $text = shift;
     return () if not defined $text;
-    my @flds = extract_multiple(
-        $text,
-        [
-            qr/\G\s*\\./,
-            qr/\G\s*'[^']*'/,
-            sub { extract_delimited($_[0], q{"}) },
-            qr/\G\s*\S[^'"\s]*/,
-        ],
-        undef,
-        1,
-    );
-    @flds = grep { s/^\s+|\s+$//g; defined($_) && $_ ne '' } @flds;
+    #my @flds = extract_multiple(
+    #    $text,
+    #    [
+    #        qr/\G\s*\\./,
+    #        qr/\G\s*'[^']*'/,
+    #        qr/\G\s*$DelimPat/,
+    #        qr/\G\s*\S[^'"\s]*/,
+    #    ],
+    #    undef,
+    #    1,
+    #);
+    my @flds = extract_many($text);
+    #@flds = grep { s/^\s+|\s+$//g; defined($_) && $_ ne '' } @flds;
     #warn "\n======================\n";
     #warn Dumper($text, @flds);
     #warn "======================\n";
