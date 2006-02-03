@@ -14,22 +14,52 @@ use Getopt::Std;
 #use Data::Dumper::Simple;
 use Time::HiRes qw( sleep );
 
-{
-    my %opts;
-    getopts('c', \%opts);
+my %opts;
+getopts('c', \%opts);
 
-    my $cmd = join(' ', @ARGV);
+my $ExitCode = 0;
+
+$| = 1;
+
+if ($opts{c}) {
+    eval {
+        process_shell(join ' ', @ARGV);
+    };
+    warn $@ if $@;
+    exit($ExitCode);
+} else {
+    print '$ ';
+    process_prompt();
+    exit(0);
+}
+
+sub process_prompt {
+    while (<STDIN>) {
+        chomp;
+        #warn "Got shell [$_]";
+        last if /^\s*exit\s*$/;
+        eval {
+            process_shell($_);
+        };
+        if ($@) {
+            warn "$@\n";
+            warn "[Error code $ExitCode returned.]\n";
+        }
+        print '$ ';
+    }
+}
+
+sub process_shell {
+    my $cmd = shift;
     #warn Dumper($cmd);
 
     $cmd =~ s/\n+/ /gs;
     my @raw_args = split_arg($cmd);
-    exit(0) if ! @raw_args;
-
     my @args = process_args(0, @raw_args);
-    exit eval_cmd(@args);
+    return eval_cmd(@args);
 }
 
-sub process_args {
+sub process_args ($$) {
     #warn "!!!!!!!!!!!!!!!!!!!!!!";
     my $level = shift;
     my @raw_args = @_;
@@ -49,8 +79,8 @@ sub process_args {
             #warn "  Pusing '$1' into args\n";
             push @args, $1 if $1 ne '';
         } elsif (/^['"]/) {
-            warn "sh: unexpected EOF while looking for matching `$&'\n";
-            exit(512);
+            $ExitCode = 512;
+            die "sh: unexpected EOF while looking for matching `$&'\n";
         } else {
             #warn "  Remaining: $_\n";
             my $s = $_;
@@ -104,6 +134,7 @@ sub subs_env {
 
 sub eval_cmd {
     my @args = @_;
+    return 0 if not @args;
     my $exec = shift @args;
     #warn Dumper($exec, @args);
     if ($exec eq 'echo') {
@@ -114,15 +145,22 @@ sub eval_cmd {
             $file =~ s/\s+$//;
             if (! -e $file) {
                 warn "rm: cannot lstat `$file': No such file or directory\n";
-                return 1;
+                $ExitCode = 1;
+                return;
             }
             unlink $file;
         }
         return 0;
     } elsif ($exec eq 'sleep') {
         sleep ($args[0]);
+    } elsif ($exec eq 'pwd') {
+        require 'Cwd.pm';
+        print Cwd::cwd(), "\n";
+    } elsif ($exec eq 'cd') {
+        chdir $args[0];
     } else {
         warn "sh: unknown shell command: $exec";
-        return 254;
+        $ExitCode = 254;
+        return;
     }
 }
