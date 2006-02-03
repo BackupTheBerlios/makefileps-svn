@@ -6,7 +6,7 @@
 #:   This script tests to make sure that Make looks for
 #:   default makefiles in the correct order (GNUmakefile, makefile, Makefile)
 #:
-#: 2006-01-29 2006-02-02
+#: 2006-01-29 2006-02-03
 
 use t::Backend::Gnu;
 
@@ -29,9 +29,7 @@ run { run_test_make $_[0]; }
 
 __DATA__
 
-=== `GNUmakefile', `makefile' and `Makefile'
-When `GNUmakefile', `makefile', and `Makefile' appeare at the same time,
-`GNUmakefile' should be used.
+=== TEST 0: When GNUmakefile, makefile, and Makefile all appeare, GNUmakefile takes precedence.
 --- pre
 # Create a makefile called "GNUmakefile"
 create_file("GNUmakefile", "FIRST: ; \@echo It chose GNUmakefile\n");
@@ -56,9 +54,7 @@ It chose GNUmakefile
 
 
 
-=== Only `makefile' and `Makefile'
-When only `makefile' and `Makefile' are present in the current directory,
-`makefile' is favored.
+=== TEST 1: When only makefile and Makefile present, makefile is favored.
 --- pre
 create_file("makefile", "SECOND: ; \@echo It chose makefile\n");
 
@@ -74,7 +70,7 @@ It chose makefile
 
 
 
-=== Single `Makefile'
+=== TEST 2: When only Makefile appear, it is used for sure.
 --- pre
 create_file("Makefile", "THIRD: ; \@echo It chose Makefile\n");
 --- stdout

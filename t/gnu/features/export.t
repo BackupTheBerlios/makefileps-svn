@@ -4,7 +4,7 @@
 #:   Check GNU make export/unexport commands.
 #: Details:
 #:
-#: 2006-01-31 2006-02-02
+#: 2006-01-31 2006-02-03
 
 # t::Backend cleans out our environment for us during startup 
 # so we don't have to worry about that here.
@@ -59,8 +59,12 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 --- error_code
 0
 
+
+
 ### `Test 1' has been moved to the end of file. It will cause problem
 ### on Cygwin if I put it here. explanation?  -- agent
+
+
 
 === TEST 2: global export.  Explicit unexport takes precedence.
 --- options:                   EXPORT_ALL=1

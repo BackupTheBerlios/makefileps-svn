@@ -11,7 +11,7 @@
 #:   Then we do the same thing for parallel builds: double-colon
 #:   targets should always be built serially.
 #:
-#: 2006-01-30 2006-02-01
+#: 2006-01-30 2006-02-03
 
 use t::Backend::Gnu;
 
@@ -50,8 +50,7 @@ run { run_test_make $_[0]; }
 
 __DATA__
 
-=== TEST 0
-TEST 0: A simple double-colon rule that isn't the goal target.
+=== TEST 0: A simple double-colon rule that isn't the goal target.
 --- source:            $::source
 --- goals:             all
 --- stdout
@@ -63,8 +62,7 @@ bbb
 
 
 
-=== TEST 1
-TEST 1: As above, in parallel
+=== TEST 1: As above, in parallel
 --- source:            $::source
 --- options:           -j10
 --- goals:             all
@@ -77,8 +75,7 @@ bbb
 
 
 
-=== TEST 2
-TEST 2: A simple double-colon rule that is the goal target
+=== TEST 2: A simple double-colon rule that is the goal target
 --- source:            $::source
 --- goals:             bar
 --- stdout
@@ -91,8 +88,7 @@ bbb
 
 
 
-=== TEST 3
-TEST 3: As above, in parallel
+=== TEST 3: As above, in parallel
 --- source:            $::source
 --- options:           -j10
 --- goals:             bar
@@ -106,8 +102,7 @@ bbb
 
 
 
-=== TEST 4
-TEST 4: Each double-colon rule is supposed to be run individually
+=== TEST 4: Each double-colon rule is supposed to be run individually
 --- source:            $::source
 --- utouch
 -5 f2.h
@@ -123,8 +118,7 @@ foo FIRST
 
 
 
-=== TEST 5
-TEST 5: Again, in parallel.
+=== TEST 5: Again, in parallel.
 --- source:            $::source
 --- options:           -j10
 --- utouch:            -5 f2.h
@@ -139,8 +133,7 @@ foo FIRST
 
 
 
-=== TEST 6
-TEST 6: Each double-colon rule is supposed to be run individually
+=== TEST 6: Each double-colon rule is supposed to be run individually
 --- source:            $::source
 --- utouch:            -5 f1.h
 --- touch:             foo
@@ -154,8 +147,7 @@ foo SECOND
 
 
 
-=== TEST 7
-TEST 7: Again, in parallel.
+=== TEST 7: Again, in parallel.
 --- source:            $::source
 --- options:           -j10
 --- utouch:            -5 f1.h
@@ -170,8 +162,7 @@ foo SECOND
 
 
 
-=== TEST 8
-TEST 8: Test circular dependency check; PR/1671
+=== TEST 8: Test circular dependency check; PR/1671
 --- source:            $::source
 --- goals:             d
 --- stdout
@@ -184,8 +175,7 @@ $::MAKE: Circular d <- d dependency dropped.
 
 
 
-=== Commented TEST 8
-TEST 8: I don't grok why this is different than the above, but it is...
+=== TEST 8: I don't grok why this is different than the above, but it is...
 Hmm... further testing indicates this might be timing-dependent?
 --- source:            $::source
 --- goals:             biz

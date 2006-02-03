@@ -28,7 +28,7 @@
 #:   the -s option and check that make did not echo the echo
 #:   command before printing the message.
 #:
-#: 2006-01-30 2006-02-01
+#: 2006-01-30 2006-02-03
 
 use t::Backend::Gnu;
 
@@ -54,7 +54,7 @@ run { run_test_make $_[0]; }
 
 __DATA__
 
-=== echo both the command and the string to be echoed
+=== TEST 1: echo both the command and the string to be echoed
 --- source:      $::source
 --- touch:       $::example
 --- stdout
@@ -67,7 +67,7 @@ This makefile did not clean the dir... good
 
 
 
-=== take action, no command echo
+=== TEST 2: take action, no command echo
 --- source:      $::source
 --- touch:       $::example
 --- goals:       clean
@@ -79,7 +79,7 @@ This makefile did not clean the dir... good
 
 
 
-=== no action taken, echo command only
+=== TEST 3: no action taken, echo command only
 --- source:      $::source
 --- touch:       $::example
 --- options:            -n
@@ -93,7 +93,7 @@ rm $::example
 
 
 
-=== quiet mode, only execute the echo command
+=== TEST 4: quiet mode, only execute the echo command
 --- source:      $::source
 --- touch:       $::example
 --- options:     -s

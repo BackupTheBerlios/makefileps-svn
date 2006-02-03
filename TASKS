@@ -4,9 +4,9 @@ TASKS
 - factor out `split_arg' and `process_escape' 
   from t::Util into t::Util::Tiny, so as to reduce
   the startup time of script/sh
-- re-add "TEST 0", "TEST 1", etc. back into
-  t/gnu/features/*.t to facilitate the debugging
-  process
 - factor out `process_out' from t::Backend::Base
   into t::Util, which will also supports `---stdout_like',
   `---stderr_like', and `---success' block sections
+- add interactive capability to script/sh
+- add shortcut `run_tests' for run {...} to t::Parser::Base
+- rename `run_make_test' to a more compact name, `run_test'.

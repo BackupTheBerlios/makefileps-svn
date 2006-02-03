@@ -15,7 +15,7 @@
 #:   command is given with the -i option instead of the '-' in
 #:   front of the command.  They should run the same.
 #:
-#: 2006-01-30 2006-02-01
+#: 2006-01-30 2006-02-03
 
 use t::Backend::Gnu;
 use File::Spec;
@@ -39,7 +39,7 @@ run { run_test_make $_[0]; }
 
 __DATA__
 
-=== ignore cmd error with `-'
+=== TEST 1: ignore cmd error with `-'
 If make acted as planned, it should ignore the error from the first
 command in the target and execute the second which deletes the file "foo".
 This file, therefore, should not exist if the test PASSES.
@@ -56,7 +56,7 @@ $::MAKE: [clean] Error $::delete_error_code (ignored)
 --- not_found:            foo
 
 
-=== ignore cmd error with `-i' option open
+=== TEST 2: ignore cmd error with `-i' option open
 --- options:              -i
 --- goals:                clean2
 --- source quote eval:    $::source

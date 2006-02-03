@@ -5,7 +5,7 @@
 #: Details:
 #:   Attempt various different flavors of GNU make conditionals.
 #:
-#: 2006-01-29 2006-01-30
+#: 2006-01-29 2006-02-03
 
 use t::Backend::Gnu;
 
@@ -15,8 +15,7 @@ run { run_test_make $_[0]; }
 
 __DATA__
 
-=== Check GNU make conditionals
-Attempt various different flavors of GNU make conditionals.
+=== TEST 0:
 --- source
 
 objects = foo.obj
@@ -68,8 +67,7 @@ arg4 is defined
 
 
 
-=== variable in ifdef
-Test expansion of variables inside ifdef
+=== TEST 1: Test expansion of variables inside ifdef
 --- source
 
 foo = 1
