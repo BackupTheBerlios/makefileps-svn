@@ -1,11 +1,9 @@
 #: t/Backend/Util.pm
 #: utilities used in t::Backend::Base
-#: 2006-02-01 2006-02-02
+#: 2006-02-01 2006-02-03
 
 package t::Backend::Util;
 
-use strict;
-use warnings;
 use t::Util -Base;
 #use Data::Dumper::Simple;
 

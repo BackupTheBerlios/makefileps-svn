@@ -1,9 +1,6 @@
 TASKS
 -----
 
-- factor out `split_arg' and `process_escape' 
-  from t::Util into t::Util::Tiny, so as to reduce
-  the startup time of script/sh
 - factor out `process_out' from t::Backend::Base
   into t::Util, which will also supports `---stdout_like',
   `---stderr_like', and `---success' block sections

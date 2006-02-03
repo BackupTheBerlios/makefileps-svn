@@ -1,13 +1,14 @@
 #!perl
 #: sh
 #: Perl simulator for /bin/sh (Bourne Shell)
-#: 2006-02-01 2006-02-02
+#: 2006-02-01 2006-02-03
 
 use strict;
 use warnings;
+
 use FindBin;
 use lib "$FindBin::Bin/..";
-use t::Util;
+use t::Util::Base;
 
 use Getopt::Std;
 #use Data::Dumper::Simple;
