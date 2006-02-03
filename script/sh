@@ -72,7 +72,8 @@ sub process_args ($$) {
             #warn "---------";
             #warn qq{Pusing "$1" into args\n};
             my $s = $1;
-            process_escape( $s, q{ " \\ @ $ # } );
+            process_escape( $s, q{\\@$\#} );
+            #warn "$s";
             subs_env($s);
             push @args, $s if $s ne '';
         } elsif (/^'(.*)'$/) {

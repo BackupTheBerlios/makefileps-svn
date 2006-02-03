@@ -10,7 +10,7 @@ run_tests;
 
 __DATA__
 
-=== Test 1: basic
+=== TEST 1: basic
 --- cmd
 echo hello, #world
 --- stdout
@@ -21,7 +21,7 @@ hello,
 
 
 
-=== Test 2: `#' at the very beginning
+=== TEST 2: `#' at the very beginning
 --- cmd
 #echo 'hello'
 --- stdout
@@ -31,7 +31,7 @@ hello,
 
 
 
-=== Test 3: `#' in the middle of word
+=== TEST 3: `#' in the middle of word
 --- cmd
 echo hello#world
 --- stdout
@@ -42,7 +42,7 @@ hello#world
 
 
 
-=== Test 4: `#' at the end of word
+=== TEST 4: `#' at the end of word
 --- cmd
 echo hello# world!
 --- stdout
@@ -53,7 +53,7 @@ hello# world!
 
 
 
-=== Test 5: `#' in single quotes
+=== TEST 5: `#' in single quotes
 --- cmd
 echo 'hi, #bill!'
 --- stdout
@@ -64,7 +64,7 @@ hi, #bill!
 
 
 
-=== Test 6: `#' in double quotes
+=== TEST 6: `#' in double quotes
 --- cmd
 echo "hi, #jim!"
 --- stdout
@@ -75,7 +75,7 @@ hi, #jim!
 
 
 
-=== Test 7: escaped `#'
+=== TEST 7: escaped `#'
 --- cmd
 echo hello, \#world
 --- stdout

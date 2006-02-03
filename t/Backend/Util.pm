@@ -27,7 +27,7 @@ sub process_args ($) {
             #warn "---------";
             #warn qq{Pusing "$1" into args\n};
             $_ = $1;
-            process_escape( $_, q{ " \\ } );
+            process_escape( $_, q{"\\$@\#} );
         } elsif (/^'(.*)'$/) {
             #warn "  Pusing '$1' into args\n";
             $_ = $1;

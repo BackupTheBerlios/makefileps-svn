@@ -1,6 +1,6 @@
 #: quotes.t
 #: test the various quotes in `sh' syntax
-#: 2006-02-02 2006-02-02
+#: 2006-02-02 2006-02-03
 
 use t::Shell;
 
@@ -10,7 +10,7 @@ run_tests;
 
 __DATA__
 
-=== Test 1: single-colon, basic
+=== TEST 1: single-colon, basic
 --- cmd
 echo 'hello, world'
 --- stdout
@@ -21,7 +21,7 @@ hello, world
 
 
 
-=== Test 2: single-colon, whitespace
+=== TEST 2: single-colon, whitespace
 --- cmd
 echo 'hello,    world'
 --- stdout
@@ -32,7 +32,7 @@ hello,    world
 
 
 
-=== Test 3: single-colon, escape '
+=== TEST 3: single-colon, escape '
 --- cmd
 echo '\''
 --- stdout:
@@ -41,7 +41,7 @@ echo '\''
 
 
 
-=== Test 4: single-colon, escape "
+=== TEST 4: single-colon, escape "
 --- cmd
 echo '\"'
 --- stdout
@@ -51,7 +51,7 @@ echo '\"'
 
 
 
-=== Test 5: single-colon, escape '\'
+=== TEST 5: single-colon, escape '\'
 --- cmd
 echo '\\'
 --- stdout
@@ -62,7 +62,7 @@ echo '\\'
 
 
 
-=== Test 6: malformed single-colon
+=== TEST 6: malformed single-colon
 --- cmd
 echo ab''
 --- stdout
@@ -73,7 +73,7 @@ ab
 
 
 
-=== Test 7: ditto, another example
+=== TEST 7: ditto, another example
 --- cmd
 echo abcd
 --- stdout
@@ -84,7 +84,7 @@ abcd
 
 
 
-=== Test 8: ditto, yet another
+=== TEST 8: ditto, yet another
 --- cmd
 echo ab'cd
 --- stdout
@@ -93,7 +93,7 @@ echo ab'cd
 
 
 
-=== Test 9: double quotes in single quotes
+=== TEST 9: double quotes in single quotes
 --- cmd
 echo '""'
 --- stdout
@@ -104,7 +104,7 @@ echo '""'
 
 
 
-=== Test 10: escaped single quote
+=== TEST 10: escaped single quote
 --- cmd
 echo \'
 --- stdout

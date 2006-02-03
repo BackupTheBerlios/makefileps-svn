@@ -8,7 +8,7 @@ use Spiffy -Base;
 use Text::Balanced qw( gen_delimited_pat );
 
 our @EXPORT = qw(
-    split_arg process_escape gen_escape_pat
+    split_arg process_escape
 );
 
 our $DelimPat;
@@ -22,13 +22,13 @@ sub extract_many (@) {
     my @flds;
     while (1) {
         #warn '@flds = ', Dumper(@flds);
-        if ($text =~ /\G\s*(\\.[^'"\s]*)/gco) {
+        if ($text =~ /\G\s* ( (?:\\.)+ [^'"\s]* )/gcox) {
             push @flds, $1;
         } elsif ($text =~ /\G\s*('[^']*')/gco) {
             push @flds, $1;
         } elsif ($text =~ /\G\s*($DelimPat)/gco) {
             push @flds, $1;
-        } elsif ($text =~ /\G\s*(\S[^'"\s]*)/gco) {
+        } elsif ($text =~ /\G\s*( \S (?:[^'"\s\\]|\\.)* )/gcox) {
             push @flds, $1;
         } else {
             last;
@@ -59,15 +59,10 @@ sub split_arg ($) {
     return @flds;
 }
 
-sub process_escape ($$) {
+sub process_escape (@) {
     return if $_[0] !~ /\\/;
-    my $pat = gen_escape_pat($_[1]);
-    $_[0] =~ s/$pat/substr($&,1,1)/eg;
-}
-
-sub gen_escape_pat ($) {
-    my $list = quotemeta $_[0];
-    return qr/ \\ [ $list ] /x;
+    my $list = quotemeta $_[1];
+    $_[0] =~ s/\\[$list]/substr($&,1,1)/eg;
 }
 
 1;

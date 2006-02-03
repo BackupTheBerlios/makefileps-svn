@@ -10,7 +10,7 @@ run_tests;
 
 __DATA__
 
-=== Test 1: simple
+=== TEST 1: simple
 --- pre:      $ENV{A} = 3;
 --- cmd
 echo $A
@@ -22,7 +22,7 @@ echo $A
 
 
 
-=== Test 2: simple, and multiple
+=== TEST 2: simple, and multiple
 --- pre:      $ENV{A} = 5; $ENV{B} = 'abc';
 --- cmd
 echo $B $A
@@ -34,7 +34,7 @@ abc 5
 
 
 
-=== Test 3: interpolate
+=== TEST 3: interpolate
 --- pre:      $ENV{ABC} = 2;
 --- cmd
 echo "$ABC"
@@ -46,7 +46,7 @@ echo "$ABC"
 
 
 
-=== Test 4: interpolate, multiple
+=== TEST 4: interpolate, multiple
 --- pre:     $ENV{foo} = 'FOO'; $ENV{bar} = 'BAR';
 --- cmd
 echo "FOO == $foo and BAR == $bar"
@@ -58,7 +58,7 @@ FOO == FOO and BAR == BAR
 
 
 
-=== Test 5: no interpolation in single quotes:
+=== TEST 5: no interpolation in single quotes:
 --- pre:     $ENV{A} = '123';
 --- cmd
 echo '$A' ' = ' "$A"

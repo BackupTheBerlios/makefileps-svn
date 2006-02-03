@@ -1,6 +1,6 @@
 #: basic.t
 #: test the very basic syntax of `sh'
-#: 2006-02-02 2006-02-02
+#: 2006-02-02 2006-02-03
 
 use t::Shell;
 
@@ -10,7 +10,7 @@ run_tests;
 
 __DATA__
 
-=== Test 1: normal
+=== TEST 1: normal
 --- cmd
 echo hello, world
 --- stdout
@@ -21,7 +21,7 @@ hello, world
 
 
 
-=== Test 2: whitespace
+=== TEST 2: whitespace
 --- cmd
 echo hello,    world
 --- stdout
@@ -32,7 +32,7 @@ hello, world
 
 
 
-=== Test 3: multiple argument
+=== TEST 3: multiple argument
 --- cmd
 echo a b c
 --- stdout
@@ -43,7 +43,7 @@ a b c
 
 
 
-=== Test 4: no argument
+=== TEST 4: no argument
 --- cmd
 echo
 --- stdout unchomp
@@ -53,7 +53,7 @@ echo
 
 
 
-=== Test 5: 0 as the argument
+=== TEST 5: 0 as the argument
 --- cmd
 echo 0 "0" '0' ' '
 --- stdout eval

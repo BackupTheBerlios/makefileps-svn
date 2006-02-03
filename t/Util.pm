@@ -122,6 +122,11 @@ sub test_shell_command ($$@) {
         $success2,
         "success - $name",
     );
+    if (not defined $block->stderr() and
+            not defined $block->stderr_like() and
+            $stderr) {
+        warn $stderr;
+    }
 }
 
 # returns ($error_code, $stdout, $stderr)
