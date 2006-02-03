@@ -6,34 +6,15 @@ package t::Util;
 
 use t::Util::Base -Base;
 use Carp qw( confess );
-use Test::More;
 use IPC::Cmd;
 #use Data::Dumper::Simple;
 
 our @EXPORT = qw(
-    run_shell split_arg join_list
+    test_shell_command run_shell
+    split_arg join_list
     process_pre process_post
     process_found process_not_found
 );
-
-sub join_list (@) {
-    my @args = @_;
-    for (@args) {
-        if (ref $_ eq 'ARRAY') {
-            $_ = join('', @$_);
-        }
-    }
-    return wantarray ? @args : $args[0];
-}
-
-# returns ($error_code, $stdout, $stderr)
-sub run_shell ($@) {
-    my ($cmd, $verbose) = @_;
-    $IPC::Cmd::USE_IPC_RUN = 1;
-    my @res = IPC::Cmd::run( command => $cmd, verbose => $verbose );
-    #warn "^^^ Output: $res[2][0]";
-    return (join_list @res[1, 3, 4]);
-}
 
 sub process_pre ($) {
     my $block = shift;
@@ -63,7 +44,10 @@ sub process_found ($) {
     return if not $buf;
     my @files = split /\s+/s, $buf;
     for my $file (@files) {
-        ok -f $file, "File $file should be found - " . $block->name();
+        Test::More::ok(
+            -f $file, 
+            "File $file should be found - ".$block->name
+        );
     }
 }
 
@@ -73,8 +57,79 @@ sub process_not_found ($) {
     return if not $buf;
     my @files = split /\s+/s, $buf;
     for my $file (@files) {
-        ok ! -f $file, "File $file should NOT be found - " . $block->name();
+        Test::More::ok(
+            ! -f $file,
+            "File $file should NOT be found - ".$block->name
+        );
     }
+}
+
+sub compare ($$$) {
+    my ($got, $expected, $desc) = @_;
+    return if not defined $expected;
+    if (ref $expected and ref $expected eq 'Regexp') {
+        Test::More::like($got, $expected, $desc);
+    } else {
+        Test::More::is($got, $expected, $desc);
+    }
+}
+
+sub join_list (@) {
+    my @args = @_;
+    for (@args) {
+        if (ref $_ eq 'ARRAY') {
+            $_ = join('', @$_);
+        }
+    }
+    return wantarray ? @args : $args[0];
+}
+
+sub test_shell_command ($$@) {
+    my $block    = shift;
+    my $cmd      = shift;
+    my %filters  = @_;
+    return if not defined $cmd;
+
+    my ($success, $errcode, $full, $stdout, $stderr)
+        = join_list IPC::Cmd::run( command => $cmd );
+
+    my $errcode2 = $block->error_code;
+    if ($errcode2 and $errcode2 =~ /\d+/s) {
+        $errcode2 = $&;
+    }
+
+    my $success2 = $block->success;
+    if ($success2 and $success2 =~ /\d+/s) {
+        $success2 = $&;
+    }
+
+    my $name = $block->name;
+
+    while (my ($key, $val) = each %filters) {
+        if ($key =~ /stdout|stderr/) {
+            no strict 'refs';
+            $val->(${"$key"}) if ref $val eq 'CODE';
+        }
+    }
+
+    compare $stdout, $block->stdout, "stdout - $name";
+    compare $stdout, $block->stdout_like, "stdout_like - $name";
+    compare $stderr, $block->stderr, "stderr - $name";
+    compare $stderr, $block->stderr_like, "stderr_like - $name";
+    compare $errcode, $errcode2, "error_code - $name";
+    compare $success, $success2, "success - $name";
+}
+
+# returns ($error_code, $stdout, $stderr)
+sub run_shell (@) {
+    my ($cmd, $verbose) = @_;
+    #$IPC::Cmd::USE_IPC_RUN = 1;
+   
+    #confess Dumper($cmd);
+    my @res = IPC::Cmd::run( command => $cmd, verbose => $verbose );
+    #warn "HERE!";
+    #warn "^^^ Output: $res[2][0]";
+    return (join_list @res[1, 3, 4]);
 }
 
 1;

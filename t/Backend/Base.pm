@@ -65,8 +65,7 @@ sub run_test ($) {
     process_touch($block);
     process_utouch($block);
 
-    my ($errcode, $stdout, $stderr) =
-        run_make($block, $filename);
+    run_make($block, $filename);
 
     process_post($block);
     process_found($block);
@@ -75,8 +74,6 @@ sub run_test ($) {
     clean_temp();
     chdir $saved_cwd;
     #warn "\nstderr: $stderr\nstdout: $stdout\n";
-
-    process_output($block, $errcode, $stdout, $stderr);
 }
 
 sub run_tests () {
@@ -98,7 +95,8 @@ sub create_file ($$) {
     my ($filename, $content) = @_;
     my $fh;
     if (not $filename) {
-        ($fh, $filename) = tempfile( "create_file_XXXXX", DIR => '.', UNLINK => 1 );
+        ($fh, $filename) = 
+            tempfile( "create_file_XXXXX", DIR => '.', UNLINK => 1 );
     } else {
         open $fh, "> $filename" or
             confess("can't open $filename for writing: $!");
@@ -138,31 +136,22 @@ sub run_make($$) {
     }
     my $cmd = [ @args, process_args("$options $goals") ];
     #warn Dumper($cmd);
-    my @res = run_shell($cmd);
-    return @res;
-}
 
-sub process_output ($$$$) {
-    my ($block, $errcode, $stdout, $stderr) = @_;
-
-    my $stdout2  = $block->stdout;
-    my $stderr2  = $block->stderr;
-    my $errcode2 = $block->error_code;
-
-    if ($errcode2 and $errcode2 =~ /\d+/s) {
-        $errcode2 = $&;
-    }
-
-    my $name = $block->name;
-
-    # fixed the problem due to recursive invoking of `make':
-    $stdout =~ s/^$MAKE\[\d+\]: (?:Leaving|Entering) directory [^\n]+\n//gsm;
-    $stdout =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
-    $stderr =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
-
-    is $errcode, $errcode2, "Error Code - $name" if defined $errcode2;
-    is $stdout, $stdout2, "stdout - $name" if defined $stdout2;
-    is $stderr, $stderr2, "stderr - $name" if defined $stderr2;
+    # fixed the problem due to recursive invoking of `make' via filters:
+    test_shell_command(
+        $block, $cmd,
+        stdout => sub {
+            return unless $_[0];
+            $_[0] =~ s/^ $MAKE \[ \d+ \] :
+                \s* (?: Leaving | Entering ) \s*
+                directory [^\n]+ \n//gsmix;
+            $_[0] =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
+        },
+        stderr => sub {
+            return unless $_[0];
+            $_[0] =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
+        },
+    );
 }
 
 package t::Backend::Base::Filter;

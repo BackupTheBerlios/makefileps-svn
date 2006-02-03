@@ -1,8 +1,5 @@
 TASKS
 -----
 
-- factor out `process_out' from t::Backend::Base
-  into t::Util, which will also supports `---stdout_like',
-  `---stderr_like', and `---success' block sections
-- update t/sh/*.t and t/gnu/features/*.t to make use of new section types `stderr_like', and `success'
-- add t/sh/comments.t and t/sh/semi_colon.t to test extra features `script/sh' already supports
+- add t/sh/escape.t and t/sh/semi_colon.t to test extra features `script/sh' already supports
+- report the IPC::Cmd bug on Win32 (\") to rt.cpan.org

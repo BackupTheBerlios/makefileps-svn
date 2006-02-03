@@ -22,13 +22,13 @@ sub extract_many (@) {
     my @flds;
     while (1) {
         #warn '@flds = ', Dumper(@flds);
-        if ($text =~ /\G\s*(\\.)/gc) {
+        if ($text =~ /\G\s*(\\.[^'"\s]*)/gco) {
             push @flds, $1;
-        } elsif ($text =~ /\G\s*('[^']*')/gc) {
+        } elsif ($text =~ /\G\s*('[^']*')/gco) {
             push @flds, $1;
-        } elsif ($text =~ /\G\s*($DelimPat)/gc) {
+        } elsif ($text =~ /\G\s*($DelimPat)/gco) {
             push @flds, $1;
-        } elsif ($text =~ /\G\s*(\S[^'"\s]*)/gc) {
+        } elsif ($text =~ /\G\s*(\S[^'"\s]*)/gco) {
             push @flds, $1;
         } else {
             last;

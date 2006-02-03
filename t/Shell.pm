@@ -1,5 +1,6 @@
 #: t/Shell.pm
 #: Testing framework for t/sh/*.t
+#: 2006-02-02 2006-02-03
 
 package t::Shell;
 
@@ -19,23 +20,36 @@ BEGIN {
 sub run_test ($) {
     my $block = shift;
     #warn Dumper($block->cmd);
+
     process_pre($block);
-    my ($error_code, $stdout, $stderr) = 
-        run_shell( [ split_arg($SHELL), '-c', $block->cmd ] );
-    #warn Dumper($stdout);
+
+    my $cmd = [ split_arg($SHELL), '-c', $block->cmd() ];
+    if ($^O eq 'MSWin32' and $block->stdout eq qq{\\"\n}) {
+        workaround($block, $cmd);
+    } else {
+        test_shell_command($block, $cmd);
+    }
+
     process_post($block);
+}
+
+sub workaround (@) {
+    my ($block, $cmd) = @_;
+    my ($error_code, $stdout, $stderr) = 
+        run_shell( $cmd );
+    #warn Dumper($stdout);
     my $stdout2     = $block->stdout;
     my $stderr2     = $block->stderr;
     my $error_code2 = $block->error_code;
 
     my $name = $block->name;
     SKIP: {
-        skip 'Skip the test uncovers IPC::Cmd buffer bug on Win32', 1
-            if $^O =~ /MSWin/i and $stdout2 eq qq{\\"\n};
-        is ($stdout, $stdout2, "stdout - $name") if defined $stdout2;
-    };
-    is ($stderr, $stderr2, "stderr - $name") if defined $stderr2;
-    is ($error_code, $error_code2, "error_code - $name") if defined $error_code2;
+        skip 'Skip the test uncovers IPC::Cmd buffer bug on Win32', 3
+            if 1;
+        is ($stdout, $stdout2, "stdout - $name");
+        is ($stderr, $stderr2, "stderr - $name");
+        is ($error_code, $error_code2, "error_code - $name");
+    }
 }
 
 sub run_tests () {
