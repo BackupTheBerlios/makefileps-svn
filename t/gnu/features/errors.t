@@ -22,9 +22,9 @@ use File::Spec;
 
 plan tests => 4 * blocks;
 
-our $cleanit_error =
-    "rm: cannot lstat `cleanit': No such file or directory";
-our $delete_error_code = 1;
+filters {
+    source => [qw< quote eval >],
+};
 
 our $source = <<'_EOC_';
 clean:
@@ -43,30 +43,28 @@ __DATA__
 If make acted as planned, it should ignore the error from the first
 command in the target and execute the second which deletes the file "foo".
 This file, therefore, should not exist if the test PASSES.
---- source quote eval:    $::source
+--- source:               $::source
 --- touch:                foo
---- stdout quote eval
+--- stdout
 rm cleanit
 rm foo
---- stderr quote eval
-$::cleanit_error
-$::MAKE: [clean] Error $::delete_error_code (ignored)
---- error_code
-0
+--- stderr_like
+.*\w+.*
+\w+: \[clean\] Error [1-9]\d* \(ignored\)
+--- success:              true
 --- not_found:            foo
 
 
 === TEST 2: ignore cmd error with `-i' option open
 --- options:              -i
 --- goals:                clean2
---- source quote eval:    $::source
+--- source:               $::source
 --- touch:                foo
---- stdout quote eval
+--- stdout
 rm cleanit
 rm foo
---- stderr quote eval
-$::cleanit_error
-$::MAKE: [clean2] Error $::delete_error_code (ignored)
---- error_code
-0
+--- stderr_like
+.*\w+.*
+\w+: \[clean2\] Error [1-9]\d* \(ignored\)
+--- success:               true
 --- not_found:             foo

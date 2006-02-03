@@ -28,3 +28,8 @@ makemaker_args  (
 );
 
 &WriteAll;
+
+print "--" x 30, "\n";
+do 'script/checkenv';
+print "--" x 30, "\n";
+

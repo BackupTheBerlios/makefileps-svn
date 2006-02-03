@@ -49,8 +49,8 @@ cp foo
 --- stdout
 --- stderr
 Makefile:1: *** target pattern contains no `%'.  Stop.
---- error_code
-512
+--- success
+false
 
 
 
@@ -73,8 +73,8 @@ cp p:foo
 --- stdout
 --- stderr
 Makefile:1: *** target pattern contains no `%'.  Stop.
---- error_code
-512
+--- success
+false
 
 
 

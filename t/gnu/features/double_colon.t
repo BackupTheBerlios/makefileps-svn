@@ -18,7 +18,7 @@ use t::Backend::Gnu;
 plan tests => 3 * blocks;
 
 filters {
-    source     => [qw< quote eval >],
+    source => [qw< quote eval >],
 };
 
 our $source = <<'_EOC_';

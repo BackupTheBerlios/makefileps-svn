@@ -79,7 +79,7 @@ sub process_args ($$) {
             #warn "  Pusing '$1' into args\n";
             push @args, $1 if $1 ne '';
         } elsif (/^['"]/) {
-            $ExitCode = 512;
+            $ExitCode = 1;
             die "sh: unexpected EOF while looking for matching `$&'\n";
         } else {
             #warn "  Remaining: $_\n";
@@ -160,7 +160,7 @@ sub eval_cmd {
         chdir $args[0];
     } else {
         warn "sh: unknown shell command: $exec";
-        $ExitCode = 254;
+        $ExitCode = 1;
         return;
     }
 }

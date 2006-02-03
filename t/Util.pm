@@ -67,8 +67,8 @@ sub process_not_found ($) {
 sub compare ($$$) {
     my ($got, $expected, $desc) = @_;
     return if not defined $expected;
-    if (ref $expected and ref $expected eq 'Regexp') {
-        Test::More::like($got, $expected, $desc);
+    if ($desc =~ /\w+_like/) {
+        Test::More::like($got, qr/$expected/s, $desc);
     } else {
         Test::More::is($got, $expected, $desc);
     }
@@ -99,8 +99,8 @@ sub test_shell_command ($$@) {
     }
 
     my $success2 = $block->success;
-    if ($success2 and $success2 =~ /\d+/s) {
-        $success2 = $&;
+    if ($success2 and $success2 =~ /\w+/s) {
+        $success2 = lc($&);
     }
 
     my $name = $block->name;
@@ -117,7 +117,11 @@ sub test_shell_command ($$@) {
     compare $stderr, $block->stderr, "stderr - $name";
     compare $stderr, $block->stderr_like, "stderr_like - $name";
     compare $errcode, $errcode2, "error_code - $name";
-    compare $success, $success2, "success - $name";
+    compare (
+        $success ? 'true' : 'false',
+        $success2,
+        "success - $name",
+    );
 }
 
 # returns ($error_code, $stdout, $stderr)

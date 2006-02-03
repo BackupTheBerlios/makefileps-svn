@@ -4,7 +4,7 @@
 
 use t::Shell;
 
-plan tests => 3 * blocks() - 4;
+plan tests => 3 * blocks();
 
 run_tests;
 
@@ -36,6 +36,8 @@ hello,    world
 --- cmd
 echo '\''
 --- stdout:
+--- stderr_like:  \w+
+--- success:      false
 
 
 
@@ -45,8 +47,7 @@ echo '\"'
 --- stdout
 \"
 --- stderr
---- error_code
-0
+--- success:      true
 
 
 
@@ -86,7 +87,9 @@ abcd
 === Test 8: ditto, yet another
 --- cmd
 echo ab'cd
---- stdout:
+--- stdout
+--- stderr_like:  \w+
+--- success:      false
 
 
 
@@ -107,5 +110,4 @@ echo \'
 --- stdout
 '
 --- stderr
---- error_code
-0
+--- success:     true
