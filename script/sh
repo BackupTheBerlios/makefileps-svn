@@ -37,7 +37,7 @@ sub process_prompt {
     while (<STDIN>) {
         chomp;
         #warn "Got shell [$_]";
-        last if /^\s*exit\s*$/;
+        last if /^\s*exit\s*$/o;
         eval {
             process_shell($_);
         };
@@ -53,7 +53,7 @@ sub process_shell {
     my $cmd = shift;
     #warn Dumper($cmd);
 
-    $cmd =~ s/\n+/ /gs;
+    $cmd =~ s/\n+/ /gso;
     my @raw_args = split_arg($cmd);
     my @args = process_args(0, @raw_args);
     return eval_cmd(@args);
@@ -68,7 +68,7 @@ sub process_args ($$) {
         #warn "----------\n";
         #warn Dumper(@args, $_, @raw_args);
         #warn "----------\n";
-        if (/^"(.*)"$/) {
+        if (/^"(.*)"$/o) {
             #warn "---------";
             #warn qq{Pusing "$1" into args\n};
             my $s = $1;
@@ -76,19 +76,18 @@ sub process_args ($$) {
             #warn "$s";
             subs_env($s);
             push @args, $s if $s ne '';
-        } elsif (/^'(.*)'$/) {
+        } elsif (/^'(.*)'$/o) {
             #warn "  Pusing '$1' into args\n";
             push @args, $1 if $1 ne '';
-        } elsif (/^['"]/) {
+        } elsif (/^['"]/o) {
             $ExitCode = 1;
             die "sh: unexpected EOF while looking for matching `$&'\n";
         } else {
             #warn "  Remaining: $_\n";
             my $s = $_;
-            if ($level == 0 and $s =~ /^\#/) {
+            if ($level == 0 and $s =~ /^\#/o) {
                 return @args;
             }
-            $s =~ s/\\(.)/$1/gs;
             process_unquoted($s, $level, \@args);
             #warn "~~~~~~~~~~~~~~\n";
             #warn Dumper(@args, $_, @raw_args);
@@ -102,12 +101,29 @@ sub process_unquoted {
     my ($s, $level, $rargs) = @_;
     return if $s eq '';
     my $other;
-    if ($level == 0 and $s =~ /(.*);(.*)/) {
-        $s = $1;
-        $other = $2;
+    if ($level == 0 and $s =~ /;/o) {
+        my ($before, $after);
+        while (1) {
+            next if ($s =~ /\G\\./gco);
+            if ($s =~ /\G;/gco) {
+                $before = $`;
+                $after  = $';
+                last;
+            } elsif ($s =~ /\G./gco) {
+                next;
+            } else {
+                last;
+            }
+        }
+        if (defined $before) {
+            $s     = $before;
+            $other = $after;
+            #warn Dumper($before, $after);
+        }
     }
+    $s =~ s/\\(.)/$1/gso;
     subs_env($s);
-    my @subargs = split_arg($s) if $s =~ / /;
+    my @subargs = split_arg($s) if $s =~ / /o;
     #warn Dumper(@subargs);
     if (@subargs > 1) {
         push @$rargs, process_args ($level+1, @subargs);
@@ -120,17 +136,21 @@ sub process_unquoted {
         }
     }
     if (defined $other) {
+        $other =~ s/^\s+|\s+$//go;
         #warn "^^^^^^^^^^^^^\n";
         #warn Dumper($rargs, $other);
         #warn "^^^^^^^^^^^^^\n";
         eval_cmd(@$rargs);
         @$rargs = ();
-        #process_unquoted($other, $level, $rargs);
+        process_unquoted($other, $level, $rargs) if $other;
+        #warn "^^^^^^^^^^^^^\n";
+        #warn Dumper($rargs, $other);
+        #warn "^^^^^^^^^^^^^\n";
     }
 }
 
 sub subs_env {
-    $_[0] =~ s/\$(\w+)/defined $ENV{$1} ? "$ENV{$1}" : ''/ge;
+    $_[0] =~ s/\$(\w+)/defined $ENV{$1} ? "$ENV{$1}" : ''/geo;
 }
 
 sub eval_cmd {

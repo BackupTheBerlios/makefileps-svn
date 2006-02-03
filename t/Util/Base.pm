@@ -51,12 +51,11 @@ sub split_arg ($) {
     #    undef,
     #    1,
     #);
-    my @flds = extract_many($text);
+    return extract_many($text);
     #@flds = grep { s/^\s+|\s+$//g; defined($_) && $_ ne '' } @flds;
     #warn "\n======================\n";
     #warn Dumper($text, @flds);
     #warn "======================\n";
-    return @flds;
 }
 
 sub process_escape (@) {

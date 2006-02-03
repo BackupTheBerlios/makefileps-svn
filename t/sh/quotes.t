@@ -36,7 +36,7 @@ hello,    world
 --- cmd
 echo '\''
 --- stdout:
---- stderr_like:  \w+
+--- stderr_like:  .*\w+.*
 --- success:      false
 
 
@@ -88,7 +88,7 @@ abcd
 --- cmd
 echo ab'cd
 --- stdout
---- stderr_like:  \w+
+--- stderr_like:  .*\w+.*
 --- success:      false
 
 

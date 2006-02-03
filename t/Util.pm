@@ -68,7 +68,7 @@ sub compare ($$$) {
     my ($got, $expected, $desc) = @_;
     return if not defined $expected;
     if ($desc =~ /\w+_like/) {
-        Test::More::like($got, qr/$expected/s, $desc);
+        Test::More::like($got, qr/^$expected$/ms, $desc);
     } else {
         Test::More::is($got, $expected, $desc);
     }

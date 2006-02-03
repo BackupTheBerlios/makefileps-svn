@@ -24,7 +24,7 @@ sub run_test ($) {
     process_pre($block);
 
     my $cmd = [ split_arg($SHELL), '-c', $block->cmd() ];
-    if ($^O eq 'MSWin32' and $block->stdout eq qq{\\"\n}) {
+    if ($^O eq 'MSWin32' and $block->stdout and $block->stdout eq qq{\\"\n}) {
         workaround($block, $cmd);
     } else {
         test_shell_command($block, $cmd);

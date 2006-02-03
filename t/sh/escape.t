@@ -16,11 +16,15 @@ echo \aa
 --- stdout
 aa
 
+
+
 === TEST 2: ditto
 --- cmd
 echo b\'a
 --- stdout
 b'a
+
+
 
 === TEST 3:
 --- cmd
@@ -28,11 +32,15 @@ echo \'ba
 --- stdout
 'ba
 
+
+
 === TEST 4:
 --- cmd
 echo \'\'\a\\
 --- stdout
 ''a\
+
+
 
 === TEST 5: in quoted argument
 --- cmd
