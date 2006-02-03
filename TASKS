@@ -1,8 +1,6 @@
 TASKS
 -----
 
-- add t/sh/semi_colon.t to test extra features `script/sh' already supports
-- improve 'rm' support in script/sh
 - report the IPC::Cmd bug on Win32 (\") to rt.cpan.org
 - send a mail to the GNU make team to ask permission to include their (ported)
   test suit in this distribution

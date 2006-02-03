@@ -164,12 +164,11 @@ sub eval_cmd {
     } elsif ($exec eq 'rm') {
         foreach my $file (@args) {
             $file =~ s/\s+$//;
-            if (! -e $file) {
-                warn "rm: cannot lstat `$file': No such file or directory\n";
+            if (not unlink $file) {
+                warn "rm: cannot lstat `$file': $!\n";
                 $ExitCode = 1;
                 return;
             }
-            unlink $file;
         }
         return 0;
     } elsif ($exec eq 'sleep') {
