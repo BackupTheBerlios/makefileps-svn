@@ -13,13 +13,13 @@
 #:   text on the line which should never execute since it should be
 #:   within a comment
 #:
-#: 2006-01-29 2006-01-31
+#: 2006-01-29 2006-02-03
 
 use t::Backend::Gnu;
 
 plan tests => 3 * blocks;
 
-run { run_test_make $_[0]; }
+run_tests;
 
 __DATA__
 

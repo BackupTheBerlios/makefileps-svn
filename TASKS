@@ -5,5 +5,3 @@ TASKS
   into t::Util, which will also supports `---stdout_like',
   `---stderr_like', and `---success' block sections
 - add interactive capability to script/sh
-- add shortcut `run_tests' for run {...} to t::Parser::Base
-- rename `run_make_test' to a more compact name, `run_test'.

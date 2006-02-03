@@ -7,7 +7,7 @@
 #:   Make sure escaping of whitespace works in target names.
 #:   Make sure that escaping of '#' works.
 #:
-#: 2006-01-31 2006-02-02
+#: 2006-01-31 2006-02-03
 
 use t::Backend::Gnu;
 
@@ -27,7 +27,7 @@ sharp: foo\#bar.ext
 foo\#bar.ext: ; @echo foo\#bar.ext = '$@'
 _EOC_
 
-run { run_test_make $_[0]; }
+run_tests;
 
 __DATA__
 

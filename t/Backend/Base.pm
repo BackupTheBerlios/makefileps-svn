@@ -1,6 +1,6 @@
 #: t/Backend/Base.pm
 #: Tester based on Test::Base
-#: 2006-01-29 2006-02-02
+#: 2006-01-29 2006-02-03
 
 package t::Backend::Base;
 
@@ -13,7 +13,7 @@ use FindBin;
 #use Data::Dumper::Simple;
 
 our @EXPORT = qw(
-    run_test_make create_file
+    run_test run_tests create_file
     $MAKE $PERL $SHELL
 );
 
@@ -49,7 +49,7 @@ BEGIN {
     clean_env();
 }
 
-sub run_test_make ($) {
+sub run_test ($) {
     my $block = shift;
 
     my $tempdir = tempdir();
@@ -77,6 +77,12 @@ sub run_test_make ($) {
     #warn "\nstderr: $stderr\nstdout: $stdout\n";
 
     process_output($block, $errcode, $stdout, $stderr);
+}
+
+sub run_tests () {
+    for my $block (blocks()) {
+        run_test($block);
+    }
 }
 
 sub preprocess ($) {

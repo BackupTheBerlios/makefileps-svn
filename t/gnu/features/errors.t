@@ -35,7 +35,7 @@ clean2:
 	rm foo
 _EOC_
 
-run { run_test_make $_[0]; }
+run_tests;
 
 __DATA__
 

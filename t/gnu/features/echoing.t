@@ -50,7 +50,7 @@ filters {
     not_found  => [qw< quote eval >],
 };
 
-run { run_test_make $_[0]; }
+run_tests;
 
 __DATA__
 

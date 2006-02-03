@@ -1,6 +1,6 @@
 #: t/Util.pm
 #: utilities shared among testers
-#: 2006-02-02 2006-02-02
+#: 2006-02-02 2006-02-03
 
 package t::Util;
 
