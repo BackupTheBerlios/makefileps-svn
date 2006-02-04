@@ -1,6 +1,13 @@
 TASKS
------
+=====
 
 - report the IPC::Cmd bug on Win32 (\") to rt.cpan.org
-- send a mail to the GNU make team to ask permission to include their (ported)
-  test suit in this distribution
+- develop svk-ci.pl and use it to commit updates to SVK repos,
+  because it will be able to update the "Last Update date" in
+  source file's header comments and invoke "dos2unix.exe"
+  automatically on MSWin32.
+- t/sh/: add wildcard.t, rm.t, sleep.t, cd.t, pwd.t, and ls.t
+- implement `ls' builtin command for script/sh
+- develop tb-index.pl which can index "TEST 0:", "TEST 1:", etc.,
+  automatically for tests based on Test::Base
+- port the remaining tests for t/gnu/features/
