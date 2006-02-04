@@ -1,13 +1,14 @@
 TASKS
 =====
 
-- report the IPC::Cmd bug on Win32 (\") to rt.cpan.org
-- develop svk-ci.pl and use it to commit updates to SVK repos,
-  because it will be able to update the "Last Update date" in
-  source file's header comments and invoke "dos2unix.exe"
-  automatically on MSWin32.
+- try to use IPC::Run3 instead of IPC::Cmd for the testers. IPC::Run3
+  seems to be more portable and more actively maintained.
 - t/sh/: add wildcard.t, rm.t, sleep.t, cd.t, pwd.t, and ls.t
 - implement `ls' builtin command for script/sh
 - develop tb-index.pl which can index "TEST 0:", "TEST 1:", etc.,
   automatically for tests based on Test::Base
 - port the remaining tests for t/gnu/features/
+- abstract out another project for a unified script/command testing
+  framework based on IPC::Run3 and Test::Base. I think I should call
+  it Test::Cmd::Base (Testing scripts/commands enjoying Test::Base's
+  power)
