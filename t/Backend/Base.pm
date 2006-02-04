@@ -1,6 +1,6 @@
 #: t/Backend/Base.pm
 #: Tester based on Test::Base
-#: 2006-01-29 2006-02-03
+#: 2006-01-29 2006-02-04
 
 package t::Backend::Base;
 
@@ -52,7 +52,7 @@ BEGIN {
 sub run_test ($) {
     my $block = shift;
 
-    my $tempdir = tempdir();
+    my $tempdir = tempdir( 'backend_XXXXXX', CLEANUP => 1 );
     my $saved_cwd = Cwd::cwd;
     chdir $tempdir;
 
