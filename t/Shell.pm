@@ -1,6 +1,6 @@
 #: t/Shell.pm
 #: Testing framework for t/sh/*.t
-#: 2006-02-02 2006-02-03
+#: 2006-02-02 2006-02-06
 
 package t::Shell;
 
@@ -44,7 +44,7 @@ sub workaround (@) {
 
     my $name = $block->name;
     SKIP: {
-        skip 'Skip the test uncovers IPC::Cmd buffer bug on Win32', 3
+        skip 'Skip the test uncovers quoting issue on Win32', 3
             if 1;
         is ($stdout, $stdout2, "stdout - $name");
         is ($stderr, $stderr2, "stderr - $name");

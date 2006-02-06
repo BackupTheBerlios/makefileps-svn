@@ -1,12 +1,12 @@
 #: t/Util.pm
 #: utilities shared among testers
-#: 2006-02-02 2006-02-03
+#: 2006-02-02 2006-02-06
 
 package t::Util;
 
 use t::Util::Base -Base;
 use Carp qw( confess );
-use IPC::Cmd;
+use IPC::Run3;
 #use Data::Dumper::Simple;
 
 our @EXPORT = qw(
@@ -90,8 +90,10 @@ sub test_shell_command ($$@) {
     my %filters  = @_;
     return if not defined $cmd;
 
-    my ($success, $errcode, $full, $stdout, $stderr)
-        = join_list IPC::Cmd::run( command => $cmd );
+    my ($stdout, $stderr);
+    run3($cmd, \undef, \$stdout, \$stderr);
+    my $errcode = $?;
+    my $success = ($errcode == 0);
 
     my $errcode2 = $block->error_code;
     if ($errcode2 and $errcode2 =~ /\d+/s) {
@@ -135,10 +137,13 @@ sub run_shell (@) {
     #$IPC::Cmd::USE_IPC_RUN = 1;
    
     #confess Dumper($cmd);
-    my @res = IPC::Cmd::run( command => $cmd, verbose => $verbose );
+    my ($stdout, $stderr);
+    run3($cmd, \undef, \$stdout, \$stderr);
+    my $errcode = $?;
+
     #warn "HERE!";
     #warn "^^^ Output: $res[2][0]";
-    return (join_list @res[1, 3, 4]);
+    return ($errcode, $stdout, $stderr);
 }
 
 1;
