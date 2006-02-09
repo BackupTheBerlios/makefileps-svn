@@ -5,7 +5,7 @@ TASKS
 - implement `ls' builtin command for script/sh
 - develop tb-index.pl which can index "TEST 0:", "TEST 1:", etc.,
   automatically for tests based on Test::Base
-- migrate to the up-to-date GNU make 3.81 beta4
+- migrate the test suit to the up-to-date GNU make 3.81 beta4
 - port the remaining tests for t/gnu/features/
 - abstract out another project for a unified script/command testing
   framework based on IPC::Run3 and Test::Base. I think I should call

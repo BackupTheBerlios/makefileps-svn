@@ -1,6 +1,6 @@
 #: t/Backend/Base.pm
 #: Tester based on Test::Base
-#: 2006-01-29 2006-02-04
+#: 2006-01-29 2006-02-07
 
 package t::Backend::Base;
 
@@ -10,6 +10,7 @@ use File::Temp qw( tempdir tempfile );
 use Cwd ();
 use File::Spec ();
 use FindBin;
+use IPC::Run3;
 #use Data::Dumper::Simple;
 
 our @EXPORT = qw(
@@ -25,10 +26,13 @@ our @MakeExe;
 sub set_make ($$) {
     my ($env_name, $default) = @_;
     $MAKE_PATH = $ENV{$env_name} || $default;
-    if ($MAKE_PATH =~ /\w*make\w*/i) {
-        $MAKE = $&;
+    my $stderr;
+    run3 [$MAKE_PATH, '-f', 'no/no/no'], \undef, \undef, \$stderr;
+    #die $stderr;
+    if ($stderr =~ /^(\S+)\s*:/) {
+        $MAKE = $1;
     } else {
-        $MAKE = 'make';
+        die "Can't spawn '$MAKE_PATH'.\n";
     }
 }
 
@@ -52,7 +56,7 @@ BEGIN {
 sub run_test ($) {
     my $block = shift;
 
-    my $tempdir = tempdir( 'backend_XXXXXX', CLEANUP => 1 );
+    my $tempdir = tempdir( 'backend_XXXXXX', TMPDIR => 1, CLEANUP => 1 );
     my $saved_cwd = Cwd::cwd;
     chdir $tempdir;
 
@@ -71,7 +75,6 @@ sub run_test ($) {
     process_found($block);
     process_not_found($block);
 
-    clean_temp();
     chdir $saved_cwd;
     #warn "\nstderr: $stderr\nstdout: $stdout\n";
 }
@@ -100,7 +103,6 @@ sub create_file ($$) {
     } else {
         open $fh, "> $filename" or
             confess("can't open $filename for writing: $!");
-        mark_temp($filename);
     }
     $content .= "\n\nSHELL=$SHELL" if $SHELL;
     print $fh $content;

@@ -1,6 +1,6 @@
 #: t/Backend/Util.pm
 #: utilities used in t::Backend::Base
-#: 2006-02-01 2006-02-03
+#: 2006-02-01 2006-02-07
 
 package t::Backend::Util;
 
@@ -10,11 +10,8 @@ use t::Util -Base;
 our @EXPORT = qw(
     process_args
     touch utouch
-    mark_temp clean_temp
     clean_env
 );
-
-our @TempFiles;
 
 sub process_args ($) {
     my $text = shift;
@@ -36,34 +33,29 @@ sub process_args ($) {
     return @args;
 }
 
-sub touch (@) {
-  for my $name (@_) {
-      my $fh;
-      open $fh, ">> $name" and print $fh "\n" and close $fh
-	      or confess("couldn't touch $name: $!");
-      mark_temp($name);
+sub touch (@)
+{
+  my ($file);
+
+  foreach $file (@_) {
+    (open(T, ">> $file") && print(T "\n") && close(T))
+	|| &error("Couldn't touch $file: $!\n", 1);
   }
 }
 
 # Touch with a time offset.  To DTRT, call touch() then use stat() to get the
 # access/mod time for each file and apply the offset.
 
-sub utouch (@) {
-  my $offset = shift;
-  touch(@_);
-  my @s = stat $_[0];
-  utime($s[8]+$offset, $s[9]+$offset, @_);
-}
+sub utouch (@)
+{
+  my ($off) = shift;
+  my ($file);
 
-sub mark_temp (@) {
-    push @TempFiles, @_;
-}
+  &touch(@_);
 
-sub clean_temp () {
-    for my $tmpfile (@TempFiles) {
-        unlink $tmpfile;
-    }
-    @TempFiles = ();
+  my (@s) = stat($_[0]);
+
+  utime($s[8]+$off, $s[9]+$off, @_);
 }
 
 # the current implementation of clean_env is buggy. haven't found a better approach

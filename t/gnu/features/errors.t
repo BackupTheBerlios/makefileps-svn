@@ -15,7 +15,7 @@
 #:   command is given with the -i option instead of the '-' in
 #:   front of the command.  They should run the same.
 #:
-#: 2006-01-30 2006-02-03
+#: 2006-01-30 2006-02-07
 
 use t::Backend::Gnu;
 use File::Spec;
@@ -50,7 +50,7 @@ rm cleanit
 rm foo
 --- stderr_like
 .*\w+.*
-\w+: \[clean\] Error [1-9]\d* \(ignored\)
+.+: \[clean\] Error [1-9]\d* \(ignored\)
 --- success:              true
 --- not_found:            foo
 
@@ -65,6 +65,6 @@ rm cleanit
 rm foo
 --- stderr_like
 .*\w+.*
-\w+: \[clean2\] Error [1-9]\d* \(ignored\)
+.+: \[clean2\] Error [1-9]\d* \(ignored\)
 --- success:               true
 --- not_found:             foo
