@@ -18,6 +18,7 @@ my %opts;
 getopts('c', \%opts);
 
 my $ExitCode = 0;
+my $RedirectIndex;
 
 $| = 1;
 
@@ -71,6 +72,9 @@ sub process_args ($$) {
         if ($_ eq ';') {
             eval_cmd(@args);
             @args = ();
+        } elsif ($_ eq '>' or $_ eq '>>' or $_ eq '<') {
+            $RedirectIndex = $#args;
+            push @args, $_;
         } elsif (/^"(.*)"$/o) {
             #warn "---------";
             #warn qq{Pusing "$1" into args\n};
@@ -126,10 +130,34 @@ sub subs_env {
 sub eval_cmd {
     my @args = @_;
     return 0 if not @args;
+    my $redir = $RedirectIndex;
+    undef $RedirectIndex;
     my $exec = shift @args;
     #warn Dumper($exec, @args);
     if ($exec eq 'echo') {
-        print "@args\n";
+        if ($redir) {
+            my $op = $args[$redir];
+            my @elems = @args[0..$redir-1];
+            if ($op eq '>') {
+                my $file = $args[$redir+1];
+                open my $out, "> $file" or
+                    die "Can't open $file for writing: $!\n";
+                print $out "@elems\n";
+                close $out;
+            } elsif ($op eq '>>') {
+                my $file = $args[$redir+1];
+                open my $out, ">> $file" or
+                    die "Can't open $file for writing: $!\n";
+                print $out "@elems\n";
+                close $out;
+            } elsif ($op eq '<') {
+                print "@elems\n";
+            } else {
+                die "Unexpected redirection operator: $op";
+            }
+        } else {
+            print "@args\n";
+        }
         return 0;
     } elsif ($exec eq 'rm') {
         foreach my $file (@args) {

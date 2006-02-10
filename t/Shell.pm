@@ -1,6 +1,6 @@
 #: t/Shell.pm
 #: Testing framework for t/sh/*.t
-#: 2006-02-02 2006-02-06
+#: 2006-02-02 2006-02-10
 
 package t::Shell;
 
@@ -15,6 +15,7 @@ our $SHELL;
 
 BEGIN {
     $SHELL = $ENV{TEST_SHELL_PATH} || "$^X $FindBin::Bin/../../script/sh";
+    no_diff();
 }
 
 sub run_test ($) {
@@ -30,6 +31,8 @@ sub run_test ($) {
         test_shell_command($block, $cmd);
     }
 
+    process_found($block);
+    process_not_found($block);
     process_post($block);
 }
 
