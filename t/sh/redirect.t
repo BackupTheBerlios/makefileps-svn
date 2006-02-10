@@ -5,7 +5,17 @@
 
 use t::Shell;
 
-plan tests => 4 * blocks() + 5;
+plan tests => 5 * blocks() - 1;
+
+sub check_file ($$$) {
+    my ($block, $filename, $expected) = @_;
+    open my $in, $filename or
+        die "Can't open $filename for reading: $!";
+    local $/;
+    my $got = <$in>;
+    close $in;
+    is ($got, $expected, "Check file content - ".$block->name);
+}
 
 run_tests;
 
@@ -17,12 +27,7 @@ echo abc >tmp
 --- stdout
 --- stderr
 --- found:         tmp
---- post
-open my $in, 'tmp';
-local $/;
-my $s = <$in>;
-is $s, "abc\n";
-close $in;
+--- post:          ::check_file($block, 'tmp', "abc\n");
 --- success:       true
 
 
@@ -33,12 +38,7 @@ echo abc > tmp
 --- stdout
 --- stderr
 --- found:         tmp
---- post
-open my $in, 'tmp';
-local $/;
-my $s = <$in>;
-is $s, "abc\n";
-close $in;
+--- post:          ::check_file($block, 'tmp', "abc\n");
 --- success:       true
 
 
@@ -49,12 +49,7 @@ echo abc> tmp
 --- stdout
 --- stderr
 --- found:         tmp
---- post
-open my $in, 'tmp';
-local $/;
-my $s = <$in>;
-is $s, "abc\n";
-close $in;
+--- post:          ::check_file($block, 'tmp', "abc\n");
 --- success:       true
 
 
@@ -65,12 +60,7 @@ echo abc>tmp
 --- stdout
 --- stderr
 --- found:         tmp
---- post
-open my $in, 'tmp';
-local $/;
-my $s = <$in>;
-is $s, "abc\n";
-close $in;
+--- post:          ::check_file($block, 'tmp', "abc\n");
 --- success:       true
 
 
@@ -81,7 +71,7 @@ echo abc '>' tmp
 --- stdout
 abc > tmp
 --- stderr
---- found:         tmp
+--- not_found:     tmp
 --- success:       true
 
 
@@ -92,10 +82,5 @@ echo 123 > tmp; echo abc >>tmp
 --- stdout
 --- stderr
 --- found:         tmp
---- post
-open my $in, 'tmp';
-local $/;
-my $s = <$in>;
-is $s, "123\nabc\n";
-close $in;
+--- post:          ::check_file($block, 'tmp', "123\nabc\n");
 --- success:       true

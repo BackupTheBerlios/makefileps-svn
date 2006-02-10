@@ -1,5 +1,6 @@
 #: t/Shell.pm
 #: Testing framework for t/sh/*.t
+#: Copyright (c) 2006 Agent Zhang
 #: 2006-02-02 2006-02-10
 
 package t::Shell;
@@ -7,9 +8,16 @@ package t::Shell;
 use Test::Base -Base;
 use t::Util;
 use FindBin;
+use Cwd;
+use File::Temp qw( tempdir );
 #use Data::Dumper::Simple;
 
 our @EXPORT = qw( run_tests run_test );
+
+filters {
+    cmd            => [qw< chomp >],
+    error_code     => [qw< eval >],
+};
 
 our $SHELL;
 
@@ -21,6 +29,10 @@ BEGIN {
 sub run_test ($) {
     my $block = shift;
     #warn Dumper($block->cmd);
+
+    my $tempdir = tempdir( 'backend_XXXXXX', TMPDIR => 1, CLEANUP => 1 );
+    my $saved_cwd = Cwd::cwd;
+    chdir $tempdir;
 
     process_pre($block);
 
@@ -34,6 +46,8 @@ sub run_test ($) {
     process_found($block);
     process_not_found($block);
     process_post($block);
+
+    chdir $saved_cwd;
 }
 
 sub workaround (@) {
@@ -60,10 +74,5 @@ sub run_tests () {
         run_test($block);
     }
 }
-
-filters {
-    cmd            => [qw< chomp >],
-    error_code     => [qw< eval >],
-};
 
 1;

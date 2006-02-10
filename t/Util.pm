@@ -1,6 +1,7 @@
 #: t/Util.pm
-#: utilities shared among testers
-#: 2006-02-02 2006-02-06
+#: Utilities shared among testers
+#: Copyright (c) 2006 Agent Zhang
+#: 2006-02-02 2006-02-10
 
 package t::Util;
 
@@ -45,7 +46,7 @@ sub process_found ($) {
     my @files = split /\s+/s, $buf;
     for my $file (@files) {
         Test::More::ok(
-            -f $file, 
+            (-f $file), 
             "File $file should be found - ".$block->name
         );
     }
@@ -58,7 +59,7 @@ sub process_not_found ($) {
     my @files = split /\s+/s, $buf;
     for my $file (@files) {
         Test::More::ok(
-            ! -f $file,
+            !(-f $file),
             "File $file should NOT be found - ".$block->name
         );
     }
