@@ -1,6 +1,6 @@
 #: t/Backend/Base.pm
 #: Tester based on Test::Base
-#: 2006-01-29 2006-02-07
+#: 2006-01-29 2006-02-10
 
 package t::Backend::Base;
 
@@ -22,6 +22,15 @@ our @EXPORT_BASE = qw(set_make set_shell);
 
 our ($SHELL, $PERL, $MAKE, $MAKE_PATH);
 our @MakeExe;
+
+# default filters for expected values
+filters {
+    source => [qw< preprocess >],
+    stdout => [qw< preprocess >],
+    stdour_like => [qw< quotemeta preprocess >],
+    stderr => [qw< preprocess >],
+    stderr_like => [qw< quotemeta preprocess >],
+};
 
 sub set_make ($$) {
     my ($env_name, $default) = @_;
@@ -62,7 +71,6 @@ sub run_test ($) {
 
     my $filename = $block->filename;
     my $source   = $block->source;
-    preprocess($source);
     $filename = create_file($filename, $source) if $source;
 
     process_pre($block);
@@ -83,15 +91,6 @@ sub run_tests () {
     for my $block (blocks()) {
         run_test($block);
     }
-}
-
-sub preprocess ($) {
-    return if not defined $_[0];
-    subs_var($_[0], 'PERL',     $PERL    );
-}
-
-sub subs_var ($$$) {
-    $_[0] =~ s/\$ [ { \( ] $_[1] [ \) } ]/$_[2]/gsx;
 }
 
 sub create_file ($$) {
@@ -161,6 +160,14 @@ use Test::Base::Filter -Base;
 
 sub quote {
     qq/"$_[0]"/;
+}
+
+sub preprocess {
+    my $s = shift;
+    return if not defined $s;
+    $s =~ s/\^PERL\^/$t::Backend::Base::PERL/gsi;
+    $s =~ s/\^MAKE\^/$t::Backend::Base::MAKE/gsi;
+    return $s;
 }
 
 1;

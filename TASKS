@@ -1,12 +1,13 @@
 TASKS
 =====
 
-- t/sh/: add wildcard.t, rm.t, sleep.t, cd.t, pwd.t, and ls.t
 - implement `ls' builtin command for script/sh
+- t/sh/: add wildcard.t, rm.t, sleep.t, cd.t, pwd.t, and ls.t
+- migrate the ported test suit to the up-to-date GNU make 3.81 beta4
+- port the remaining tests for t/gnu/features/
+- auto-smoke mechanisms for the tester (like Pugs)
 - develop tb-index.pl which can index "TEST 0:", "TEST 1:", etc.,
   automatically for tests based on Test::Base
-- migrate the test suit to the up-to-date GNU make 3.81 beta4
-- port the remaining tests for t/gnu/features/
 - abstract out another project for a unified script/command testing
   framework based on IPC::Run3 and Test::Base. I think I should call
   it Test::Cmd::Base (Testing scripts/commands enjoying Test::Base's
