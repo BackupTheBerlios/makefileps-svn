@@ -25,11 +25,10 @@ our @MakeExe;
 
 # default filters for expected values
 filters {
-    source => [qw< preprocess >],
     stdout => [qw< preprocess >],
-    stdour_like => [qw< quotemeta preprocess >],
+    stdour_like => [qw< preprocess_like >],
     stderr => [qw< preprocess >],
-    stderr_like => [qw< quotemeta preprocess >],
+    stderr_like => [qw< preprocess_like >],
 };
 
 sub set_make ($$) {
@@ -165,8 +164,14 @@ sub quote {
 sub preprocess {
     my $s = shift;
     return if not defined $s;
-    $s =~ s/\^PERL\^/$t::Backend::Base::PERL/gsi;
     $s =~ s/\^MAKE\^/$t::Backend::Base::MAKE/gsi;
+    return $s;
+}
+
+sub preprocess_like {
+    my $s = shift;
+    return if not defined $s;
+    $s =~ s/\^MAKE\^/quotemeta $t::Backend::Base::MAKE/gsie;
     return $s;
 }
 

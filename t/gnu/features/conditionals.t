@@ -5,7 +5,7 @@
 #: Details:
 #:   Attempt various different flavors of GNU make conditionals.
 #:
-#: 2006-01-29 2006-02-03
+#: 2006-01-29 2006-02-10
 
 use t::Backend::Gnu;
 
@@ -62,14 +62,14 @@ arg3 NOT equal arg4
 variable is undefined
 arg4 is defined
 --- stderr
---- error_code
-0
+--- success:        true
 
 
 
 === TEST 1: Test expansion of variables inside ifdef
+The following test is rejected by GNU make 3.80,
+but is accepted by version 3.81 beta4
 --- source
-
 foo = 1
 
 FOO = foo
@@ -86,10 +86,51 @@ ifdef $(F)oo
 DEF2 = yes
 endif
 
-all:; @echo DEF=$(DEF) DEF2=$(DEF2)
 
+DEF3 = no
+FUNC = $1
+ifdef $(call FUNC,DEF)3
+  DEF3 = yes
+endif
+
+all:; @echo DEF=$(DEF) DEF2=$(DEF2) DEF3=$(DEF3)
 --- stdout
-DEF=yes DEF2=yes
+DEF=yes DEF2=yes DEF3=yes
 --- stderr
---- error_code
-0
+--- success:        true
+
+
+
+=== TEST 2: Test all the different "else if..." constructs
+--- source
+arg1 = first
+arg2 = second
+arg3 = third
+arg4 = cc
+arg5 = fifth
+
+result =
+
+ifeq ($(arg1),$(arg2))
+  result += arg1 equals arg2
+else ifeq '$(arg2)' "$(arg5)"
+  result += arg2 equals arg5
+else ifneq '$(arg3)' '$(arg3)'
+  result += arg3 NOT equal arg4
+else ifndef arg5
+  result += variable is undefined
+else ifdef undefined
+  result += arg4 is defined
+else
+  result += success
+endif
+
+
+all: ; @echo $(result)
+--- stdout
+success
+--- stderr
+--- success:        true
+
+
+
