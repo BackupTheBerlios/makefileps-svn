@@ -148,3 +148,42 @@ endif
 arg1 NOT equal arg5
 --- stderr
 --- success:        true
+
+
+
+=== TEST 7: Can we indent variable definitions by tabs?
+--- source
+	arg1 = first
+all: ; @echo $(arg1)
+--- stdout
+first
+--- stderr
+--- success:        true
+
+
+
+=== TEST 8: White space in target name apparently is not allowed, but what if whitespace in variable names?
+--- source
+a b = A B
+all: ; @echo $(a b)
+--- stdout
+A B
+--- stderr
+--- success:        true
+
+
+
+=== TEST 9: variable expansion happened like C/C++ macros, no?
+--- source
+rule = all: h1.h h2.h
+$(rule)
+	@echo building all...
+
+h1.h: ; @echo h1.h
+h2.h: ; @echo h2.h
+--- stdout
+h1.h
+h2.h
+building all...
+--- stderr
+--- success:       true

@@ -11,14 +11,14 @@
 #:   Then we do the same thing for parallel builds: double-colon
 #:   targets should always be built serially.
 #:
-#: 2006-01-30 2006-02-03
+#: 2006-01-30 2006-02-10
 
 use t::Backend::Gnu;
 
 plan tests => 3 * blocks;
 
 filters {
-    source => [qw< quote eval >],
+    stderr => [qw< preprocess >],
 };
 
 our $source = <<'_EOC_';
@@ -51,7 +51,7 @@ run_tests;
 __DATA__
 
 === TEST 0: A simple double-colon rule that isn't the goal target.
---- source:            $::source
+--- source expand:    $::source
 --- goals:             all
 --- stdout
 aaa
@@ -63,7 +63,7 @@ bbb
 
 
 === TEST 1: As above, in parallel
---- source:            $::source
+--- source expand:     $::source
 --- options:           -j10
 --- goals:             all
 --- stdout
@@ -76,7 +76,7 @@ bbb
 
 
 === TEST 2: A simple double-colon rule that is the goal target
---- source:            $::source
+--- source expand:     $::source
 --- goals:             bar
 --- stdout
 aaa
@@ -89,7 +89,7 @@ bbb
 
 
 === TEST 3: As above, in parallel
---- source:            $::source
+--- source expand:     $::source
 --- options:           -j10
 --- goals:             bar
 --- stdout
@@ -103,11 +103,9 @@ bbb
 
 
 === TEST 4: Each double-colon rule is supposed to be run individually
---- source:            $::source
---- utouch
--5 f2.h
---- touch
-foo
+--- source expand:     $::source
+--- utouch:            -5 f2.h
+--- touch:             foo
 --- goals: foo
 --- stdout
 f1.h
@@ -119,7 +117,7 @@ foo FIRST
 
 
 === TEST 5: Again, in parallel.
---- source:            $::source
+--- source expand:     $::source
 --- options:           -j10
 --- utouch:            -5 f2.h
 --- touch:             foo
@@ -134,7 +132,7 @@ foo FIRST
 
 
 === TEST 6: Each double-colon rule is supposed to be run individually
---- source:            $::source
+--- source expand:     $::source
 --- utouch:            -5 f1.h
 --- touch:             foo
 --- goals:             foo
@@ -148,11 +146,11 @@ foo SECOND
 
 
 === TEST 7: Again, in parallel.
---- source:            $::source
---- options:           -j10
---- utouch:            -5 f1.h
---- touch:             foo
---- goals:             foo
+--- source expand:        $::source
+--- options:              -j10
+--- utouch:               -5 f1.h
+--- touch:                foo
+--- goals:                foo
 --- stdout
 f2.h
 foo SECOND
@@ -163,13 +161,13 @@ foo SECOND
 
 
 === TEST 8: Test circular dependency check; PR/1671
---- source:            $::source
---- goals:             d
+--- source expand:        $::source
+--- goals:                d
 --- stdout
 ok
 oops
---- stderr quote eval
-$::MAKE: Circular d <- d dependency dropped.
+--- stderr
+^MAKE^: Circular d <- d dependency dropped.
 --- error_code
 0
 
@@ -177,9 +175,9 @@ $::MAKE: Circular d <- d dependency dropped.
 
 === TEST 8: I don't grok why this is different than the above, but it is...
 Hmm... further testing indicates this might be timing-dependent?
---- source:            $::source
---- goals:             biz
---- options:           -j10
+--- source expand:        $::source
+--- goals:                biz
+--- options:              -j10
 --- stdout
 aaa
 two
@@ -187,3 +185,25 @@ bbb
 --- stderr
 --- error_code
 0
+
+
+
+=== TEST 9: make sure all rules in s double colon family get executed (Savannah bug #14334).
+--- touch:                one two
+--- source
+.PHONY: all
+all: result
+
+result:: one
+	@echo $^ >>$@
+	@echo $^
+
+result:: two
+	@echo $^ >>$@
+	@echo $^
+
+--- stdout
+one
+two
+--- stderr
+--- success:           true

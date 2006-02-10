@@ -175,4 +175,10 @@ sub preprocess_like {
     return $s;
 }
 
+sub expand {
+    my $s = shift;
+    return if not $s;
+    return eval(qq{"$s"});
+}
+
 1;
