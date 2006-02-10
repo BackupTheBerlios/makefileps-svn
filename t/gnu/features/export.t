@@ -51,7 +51,7 @@ run_tests;
 __DATA__
 
 === TEST 0: basics
---- source quote eval:         $::makefile
+--- source expand:             $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
@@ -61,14 +61,23 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 
 
-### `Test 1' has been moved to the end of file. It will cause problem
-### on Cygwin if I put it here. explanation?  -- agent
+=== TEST 1: make sure vars inherited from the parent are exported
+This test must be performed after TEST 3 and TEST 4, or the latters
+will fail on Cygwin.  -- agent
+--- pre:                       $::ExtraENV{FOO} = 1;
+--- source expand:             $::makefile
+--- stdout
+FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
+FOO=foo BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
+--- stderr
+--- error_code
+0
 
 
 
 === TEST 2: global export.  Explicit unexport takes precedence.
 --- options:                   EXPORT_ALL=1
---- source quote eval:         $::makefile
+--- source expand:             $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=
@@ -80,7 +89,7 @@ FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 === TEST 3: global unexport.  Explicit export takes precedence.
 --- options:                   UNEXPORT_ALL=1
---- source quote eval:         $::makefile
+--- source expand:             $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
@@ -92,7 +101,7 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 === TEST 4: both: in the above makefile the unexport comes last so that rules.
 --- options:                   EXPORT_ALL=1 UNEXPORT_ALL=1
---- source quote eval:         $::makefile
+--- source expand:             $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
@@ -104,7 +113,7 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 
 === TEST 5: test the pseudo target.
 --- options:                   EXPORT_ALL_PSEUDO=1
---- source quote eval:         $::makefile
+--- source expand:             $::makefile
 --- stdout
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=
@@ -204,11 +213,7 @@ A=a B=b C=c D=d E=e F=f G=g H=h I=i J=j
 === TEST 8: Test unexporting multiple variables on the same line
 --- pre
 
-@ENV{qw(A B C D E F G H I J)} = qw(1 2 3 4 5 6 7 8 9 10);
-
---- post
-
-delete @ENV{qw(A B C D E F G H I J)};
+@::ExtraENV{qw(A B C D E F G H I J)} = qw(1 2 3 4 5 6 7 8 9 10);
 
 --- source
 
@@ -232,21 +237,6 @@ unexport D E $(SOME)
 all: ; @echo A=$$A B=$$B C=$$C D=$$D E=$$E F=$$F G=$$G H=$$H I=$$I J=$$J
 --- stdout
 A= B= C= D= E= F= G= H= I= J=
---- stderr
---- error_code
-0
-
-
-
-=== TEST 1: make sure vars inherited from the parent are exported
-This test must be performed after TEST 3 and TEST 4, or the latters
-will fail on Cygwin.  -- agent
---- pre:                       $ENV{FOO} = 1;
---- post:                      delete $ENV{FOO};
---- source quote eval:         $::makefile
---- stdout
-FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
-FOO=foo BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=
 --- stderr
 --- error_code
 0

@@ -69,6 +69,8 @@ sub run_test ($) {
     my $saved_cwd = Cwd::cwd;
     chdir $tempdir;
 
+    %::ExtraENV = ();
+
     my $filename = $block->filename;
     my $source   = $block->source;
     $filename = create_file($filename, $source) if $source;
@@ -79,11 +81,17 @@ sub run_test ($) {
 
     #sleep(3);
 
+    my %savedENV = %ENV;
+    %ENV = (%ENV, %::ExtraENV) if %::ExtraENV;
+
     run_make($block, $filename);
 
     process_post($block);
     process_found($block);
     process_not_found($block);
+
+    %::ExtraENV = ();
+    %ENV = %savedENV;
 
     chdir $saved_cwd;
     #warn "\nstderr: $stderr\nstdout: $stdout\n";
