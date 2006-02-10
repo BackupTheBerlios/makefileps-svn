@@ -11,6 +11,7 @@ use Cwd ();
 use File::Spec ();
 use FindBin;
 use IPC::Run3;
+use Time::HiRes qw( time );
 #use Data::Dumper::Simple;
 
 our @EXPORT = qw(
@@ -24,12 +25,12 @@ our ($SHELL, $PERL, $MAKE, $MAKE_PATH);
 our @MakeExe;
 
 # default filters for expected values
-filters {
-    stdout => [qw< preprocess >],
-    stdour_like => [qw< preprocess_like >],
-    stderr => [qw< preprocess >],
-    stderr_like => [qw< preprocess_like >],
-};
+#filters {
+#    stdout => [qw< preprocess >],
+#    stdour_like => [qw< preprocess_like >],
+#    stderr => [qw< preprocess >],
+#    stderr_like => [qw< preprocess_like >],
+#};
 
 sub set_make ($$) {
     my ($env_name, $default) = @_;
@@ -76,6 +77,8 @@ sub run_test ($) {
     process_touch($block);
     process_utouch($block);
 
+    #sleep(3);
+
     run_make($block, $filename);
 
     process_post($block);
@@ -105,6 +108,7 @@ sub create_file ($$) {
     $content .= "\n\nSHELL=$SHELL" if $SHELL;
     print $fh $content;
     close $fh;
+    touch($filename);
     return $filename;
 }
 

@@ -15,7 +15,7 @@
 #:   command is given with the -i option instead of the '-' in
 #:   front of the command.  They should run the same.
 #:
-#: 2006-01-30 2006-02-07
+#: 2006-01-30 2006-02-10
 
 use t::Backend::Gnu;
 use File::Spec;
@@ -23,7 +23,8 @@ use File::Spec;
 plan tests => 4 * blocks;
 
 filters {
-    source => [qw< quote eval >],
+    source      => [qw< expand >],
+    stderr_like => [qw< preprocess >],
 };
 
 our $source = <<'_EOC_';
@@ -50,9 +51,10 @@ rm cleanit
 rm foo
 --- stderr_like
 .*\w+.*
-.+: \[clean\] Error [1-9]\d* \(ignored\)
+^MAKE^: \[clean\] Error [1-9]\d* \(ignored\)
 --- success:              true
 --- not_found:            foo
+
 
 
 === TEST 2: ignore cmd error with `-i' option open
@@ -65,6 +67,6 @@ rm cleanit
 rm foo
 --- stderr_like
 .*\w+.*
-.+: \[clean2\] Error [1-9]\d* \(ignored\)
+^MAKE^: \[clean2\] Error [1-9]\d* \(ignored\)
 --- success:               true
 --- not_found:             foo

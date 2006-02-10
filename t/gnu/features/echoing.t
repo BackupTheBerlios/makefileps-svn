@@ -28,7 +28,7 @@
 #:   the -s option and check that make did not echo the echo
 #:   command before printing the message.
 #:
-#: 2006-01-30 2006-02-03
+#: 2006-01-30 2006-02-10
 
 use t::Backend::Gnu;
 
@@ -44,17 +44,17 @@ clean:
 _EOC_
 
 filters {
-    source     => [qw< quote eval >],
-    touch      => [qw< quote eval >],
-    found      => [qw< quote eval >],
-    not_found  => [qw< quote eval >],
+    source     => [qw< expand >],
+    touch      => [qw< expand >],
+    found      => [qw< expand >],
+    not_found  => [qw< expand >],
 };
 
 run_tests;
 
 __DATA__
 
-=== TEST 1: echo both the command and the string to be echoed
+=== TEST #1: echo both the command and the string to be echoed
 --- source:      $::source
 --- touch:       $::example
 --- stdout
@@ -67,7 +67,7 @@ This makefile did not clean the dir... good
 
 
 
-=== TEST 2: take action, no command echo
+=== TEST #2: take action, no command echo
 --- source:      $::source
 --- touch:       $::example
 --- goals:       clean
@@ -79,12 +79,12 @@ This makefile did not clean the dir... good
 
 
 
-=== TEST 3: no action taken, echo command only
+=== TEST #3: no action taken, echo command only
 --- source:      $::source
 --- touch:       $::example
---- options:            -n
---- goals:              clean
---- stdout quote eval
+--- options:     -n
+--- goals:       clean
+--- stdout expand
 rm $::example
 --- stderr
 --- error_code
@@ -93,11 +93,11 @@ rm $::example
 
 
 
-=== TEST 4: quiet mode, only execute the echo command
+=== TEST #4: quiet mode, only execute the echo command
 --- source:      $::source
 --- touch:       $::example
 --- options:     -s
---- stdout quote eval
+--- stdout expand
 This makefile did not clean the dir... good
 --- stderr
 --- error_code

@@ -1,6 +1,6 @@
 #: t/Util/Base.pm
 #: facilities used by script/sh and also shared by the testers
-#: 2006-02-03 2006-02-03
+#: 2006-02-03 2006-02-10
 
 package t::Util::Base;
 
@@ -22,13 +22,15 @@ sub extract_many (@) {
     my @flds;
     while (1) {
         #warn '@flds = ', Dumper(@flds);
-        if ($text =~ /\G\s* ( (?:\\.)+ [^'"\s]* )/gcox) {
+        if ($text =~ /\G\s* (;|>>?|<) /gcox) {
+            push @flds, $1;
+        } elsif ($text =~ /\G\s* ( (?:\\.)+ [^'";><\s]* )/gcox) {
             push @flds, $1;
         } elsif ($text =~ /\G\s*('[^']*')/gco) {
             push @flds, $1;
         } elsif ($text =~ /\G\s*($DelimPat)/gco) {
             push @flds, $1;
-        } elsif ($text =~ /\G\s*( \S (?:[^'"\s\\]|\\.)* )/gcox) {
+        } elsif ($text =~ /\G\s*( \S (?:[^;><'"\s\\]|\\.)* )/gcox) {
             push @flds, $1;
         } else {
             last;
@@ -40,22 +42,7 @@ sub extract_many (@) {
 sub split_arg ($) {
     my $text = shift;
     return () if not defined $text;
-    #my @flds = extract_multiple(
-    #    $text,
-    #    [
-    #        qr/\G\s*\\./,
-    #        qr/\G\s*'[^']*'/,
-    #        qr/\G\s*$DelimPat/,
-    #        qr/\G\s*\S[^'"\s]*/,
-    #    ],
-    #    undef,
-    #    1,
-    #);
     return extract_many($text);
-    #@flds = grep { s/^\s+|\s+$//g; defined($_) && $_ ne '' } @flds;
-    #warn "\n======================\n";
-    #warn Dumper($text, @flds);
-    #warn "======================\n";
 }
 
 sub process_escape (@) {

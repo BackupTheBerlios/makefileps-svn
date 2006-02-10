@@ -1,11 +1,13 @@
 #: t/Backend/Util.pm
 #: utilities used in t::Backend::Base
-#: 2006-02-01 2006-02-07
+#: 2006-02-01 2006-02-10
 
 package t::Backend::Util;
 
 use t::Util -Base;
 #use Data::Dumper::Simple;
+
+our $TIME_SKEW = -10;
 
 our @EXPORT = qw(
     process_args
@@ -33,29 +35,24 @@ sub process_args ($) {
     return @args;
 }
 
-sub touch (@)
-{
-  my ($file);
-
-  foreach $file (@_) {
-    (open(T, ">> $file") && print(T "\n") && close(T))
-	|| &error("Couldn't touch $file: $!\n", 1);
-  }
+sub touch (@) {
+    utouch(0, @_);
 }
 
 # Touch with a time offset.  To DTRT, call touch() then use stat() to get the
 # access/mod time for each file and apply the offset.
 
-sub utouch (@)
-{
-  my ($off) = shift;
-  my ($file);
-
-  &touch(@_);
-
-  my (@s) = stat($_[0]);
-
-  utime($s[8]+$off, $s[9]+$off, @_);
+sub utouch (@) {
+    my ($off) = $TIME_SKEW + shift;
+    my @files = @_;
+    foreach my $file (@files) {
+        my $in;
+        open $in, ">>$file" or
+            print $in '' or close $in or
+            die "Can't touch $file: $!";
+    }
+    my (@s) = stat($files[0]);
+    utime($s[8] + $off, $s[9] + $off, @files);
 }
 
 # the current implementation of clean_env is buggy. haven't found a better approach

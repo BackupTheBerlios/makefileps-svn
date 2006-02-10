@@ -1,7 +1,7 @@
 #!perl
 #: sh
 #: Perl simulator for /bin/sh (Bourne Shell)
-#: 2006-02-01 2006-02-03
+#: 2006-02-01 2006-02-10
 
 use strict;
 use warnings;
@@ -68,7 +68,10 @@ sub process_args ($$) {
         #warn "----------\n";
         #warn Dumper(@args, $_, @raw_args);
         #warn "----------\n";
-        if (/^"(.*)"$/o) {
+        if ($_ eq ';') {
+            eval_cmd(@args);
+            @args = ();
+        } elsif (/^"(.*)"$/o) {
             #warn "---------";
             #warn qq{Pusing "$1" into args\n};
             my $s = $1;
@@ -100,27 +103,6 @@ sub process_args ($$) {
 sub process_unquoted {
     my ($s, $level, $rargs) = @_;
     return if $s eq '';
-    my $other;
-    if ($level == 0 and $s =~ /;/o) {
-        my ($before, $after);
-        while (1) {
-            next if ($s =~ /\G\\./gco);
-            if ($s =~ /\G;/gco) {
-                $before = $`;
-                $after  = $';
-                last;
-            } elsif ($s =~ /\G./gco) {
-                next;
-            } else {
-                last;
-            }
-        }
-        if (defined $before) {
-            $s     = $before;
-            $other = $after;
-            #warn Dumper($before, $after);
-        }
-    }
     $s =~ s/\\(.)/$1/gso;
     subs_env($s);
     my @subargs = split_arg($s) if $s =~ / /o;
@@ -134,18 +116,6 @@ sub process_unquoted {
         } else {
             push @$rargs, $s if $s ne '';
         }
-    }
-    if (defined $other) {
-        $other =~ s/^\s+|\s+$//go;
-        #warn "^^^^^^^^^^^^^\n";
-        #warn Dumper($rargs, $other);
-        #warn "^^^^^^^^^^^^^\n";
-        eval_cmd(@$rargs);
-        @$rargs = ();
-        process_unquoted($other, $level, $rargs) if $other;
-        #warn "^^^^^^^^^^^^^\n";
-        #warn Dumper($rargs, $other);
-        #warn "^^^^^^^^^^^^^\n";
     }
 }
 

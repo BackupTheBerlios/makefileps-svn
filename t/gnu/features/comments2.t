@@ -6,6 +6,11 @@ use t::Backend::Gnu;
 
 plan tests => 3 * blocks;
 
+filters {
+    stderr => [qw< preprocess >],
+    stdout => [qw< preprocess >],
+};
+
 run_tests;
 
 __DATA__
