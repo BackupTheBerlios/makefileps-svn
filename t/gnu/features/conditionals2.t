@@ -187,3 +187,40 @@ h2.h
 building all...
 --- stderr
 --- success:       true
+
+
+
+=== TEST 10: ditto, but trickier
+--- source
+rule = all:
+
+$(rule)
+	@echo building all...
+
+h1.h: ; @echo h1.h
+h2.h: ; @echo h2.h
+
+rule = all: h1.h h2.h
+--- stdout
+building all...
+--- stderr
+--- success:       true
+
+
+
+=== TEST 11: ditto, using chained varaibles
+--- source
+rule = all:
+rule2 = $(rule)
+
+$(rule2)
+	@echo building all...
+
+h1.h: ; @echo h1.h
+h2.h: ; @echo h2.h
+
+rule = all: h1.h h2.h
+--- stdout
+building all...
+--- stderr
+--- success:       true
