@@ -1,6 +1,7 @@
 #: comments.t
-#: test comments in shell
-#: 2006-02-03 2006-02-03
+#: Test comments in shell
+#: Copyright (c) 2006 Agent Zhang
+#: 2006-02-03 2006-02-10
 
 use t::Shell;
 
@@ -80,6 +81,17 @@ hi, #jim!
 echo hello, \#world
 --- stdout
 hello, #world
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 8: ditto, another example
+--- cmd
+echo foo\#bar.ext = 'foo#bar.ext'
+--- stdout
+foo#bar.ext = foo#bar.ext
 --- stderr
 --- error_code
 0
