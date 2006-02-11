@@ -1,7 +1,7 @@
 #!perl
 #: sh
 #: Perl simulator for /bin/sh (Bourne Shell)
-#: 2006-02-01 2006-02-10
+#: 2006-02-01 2006-02-11
 
 use strict;
 use warnings;
@@ -38,7 +38,7 @@ sub process_prompt {
     while (<STDIN>) {
         chomp;
         #warn "Got shell [$_]";
-        last if /^\s*exit\s*$/o;
+        last if /^\s*exit(?:\s+\d+)?\s*$/;
         eval {
             process_shell($_);
         };
@@ -176,6 +176,11 @@ sub eval_cmd {
         print Cwd::cwd(), "\n";
     } elsif ($exec eq 'cd') {
         chdir $args[0];
+    } elsif ($exec eq ':') {
+        return;
+    } elsif ($exec eq 'exit') {
+        $ExitCode = $args[0] if defined $args[0];
+        return;
     } else {
         warn "sh: unknown shell command: $exec";
         $ExitCode = 1;
