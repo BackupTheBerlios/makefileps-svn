@@ -127,6 +127,16 @@ sub subs_env {
     $_[0] =~ s/\$(\w+)/defined $ENV{$1} ? "$ENV{$1}" : ''/geo;
 }
 
+sub touch (@) {
+    my @files = @_;
+    foreach my $file (@files) {
+        my $in;
+        open $in, ">>$file" or
+            print $in '' or close $in or
+            die "Can't touch $file: $!";
+    }
+}
+
 sub eval_cmd {
     my @args = @_;
     return 0 if not @args;
@@ -176,6 +186,10 @@ sub eval_cmd {
         print Cwd::cwd(), "\n";
     } elsif ($exec eq 'cd') {
         chdir $args[0];
+    } elsif ($exec eq 'touch') {
+        touch(@args);
+        $ExitCode = 0;
+        return;
     } elsif ($exec eq ':') {
         return;
     } elsif ($exec eq 'exit') {
