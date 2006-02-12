@@ -1,6 +1,7 @@
 #: t/Backend/Base.pm
-#: Tester based on Test::Base
-#: 2006-01-29 2006-02-10
+#: Base class for Makefile::Parser::* backend tester frameworks
+#: Copyright (c) 2006 Agent Zhang
+#: 2006-01-29 2006-02-12
 
 package t::Backend::Base;
 
@@ -12,17 +13,18 @@ use File::Spec ();
 use FindBin;
 use IPC::Run3;
 use Time::HiRes qw( time );
-#use Data::Dumper::Simple;
+use Data::Dumper::Simple;
 
 our @EXPORT = qw(
     run_test run_tests create_file
     $MAKE $PERL $SHELL
 );
 
-our @EXPORT_BASE = qw(set_make set_shell);
+our @EXPORT_BASE = qw(set_make set_shell set_filters);
 
 our ($SHELL, $PERL, $MAKE, $MAKE_PATH);
 our @MakeExe;
+our %Filters;
 
 # default filters for expected values
 #filters {
@@ -116,7 +118,6 @@ sub create_file ($$) {
     $content .= "\n\nSHELL=$SHELL" if $SHELL;
     print $fh $content;
     close $fh;
-    touch($filename);
     return $filename;
 }
 
@@ -134,6 +135,10 @@ sub process_utouch ($) {
     utouch(split /\s+/, $buf);
 }
 
+sub set_filters (@) {
+    %Filters = @_;
+}
+
 # returns ($errcode, $stdout, $stderr) or $errcode
 sub run_make($$) {
     my ($block, $filename) = @_;
@@ -148,22 +153,10 @@ sub run_make($$) {
     }
     my $cmd = [ @args, process_args("$options $goals") ];
     #warn Dumper($cmd);
+    
+    #warn Dumper(%Filters);
 
-    # fixed the problem due to recursive invoking of `make' via filters:
-    test_shell_command(
-        $block, $cmd,
-        stdout => sub {
-            return unless $_[0];
-            $_[0] =~ s/^ $MAKE \[ \d+ \] :
-                \s* (?: Leaving | Entering ) \s*
-                directory [^\n]+ \n//gsmix;
-            $_[0] =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
-        },
-        stderr => sub {
-            return unless $_[0];
-            $_[0] =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
-        },
-    );
+    test_shell_command( $block, $cmd, %Filters );
 }
 
 package t::Backend::Base::Filter;

@@ -7,7 +7,7 @@
 #:   Make sure escaping of whitespace works in target names.
 #:   Make sure that escaping of '#' works.
 #:
-#: 2006-01-31 2006-02-10
+#: 2006-01-31 2006-02-12
 
 use t::Backend::Gnu;
 
@@ -17,8 +17,9 @@ filters {
     source     => [qw< quote eval >],
 };
 
+# variable `path' override the PATH env on Win32, so I rename it to `path2'
 our $source = <<'_EOC_';
-$(path)foo : ; @echo cp $^ $@
+$(path2)foo : ; @echo cp $^ $@
 
 foo\ bar: ; @echo 'touch "$@"'
 
@@ -42,7 +43,7 @@ cp foo
 
 === TEST 2: This one should fail, since the ":" is unquoted.
 --- source:               $::source
---- options:              path=p:
+--- options:              path2=p:
 --- filename:             Makefile
 --- stdout
 --- stderr
@@ -54,7 +55,7 @@ false
 
 === TEST 3: This one should work, since we escape the ":".
 --- source:               $::source
---- options:              'path=p\:'
+--- options:              'path2=p\:'
 --- filename:             Makefile
 --- stdout
 cp p:foo
@@ -66,7 +67,7 @@ cp p:foo
 
 === TEST 4: This one should fail, since the escape char is escaped.
 --- source:               $::source
---- options:              'path=p\\:'
+--- options:              'path2=p\\:'
 --- filename:             Makefile
 --- stdout
 --- stderr

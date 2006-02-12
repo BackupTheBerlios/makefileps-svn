@@ -1,16 +1,39 @@
 #: t/Backend/Gnu.pm
-#: 2006-02-01 2006-02-02
+#: Makefile::Parser::Gnu backend tester framework
+#: subclassed t::Backend::Base
+#: Copyright (c) 2006 Agent Zhang
+#: 2006-02-01 2006-02-12
 
 package t::Backend::Gnu;
 
 use t::Backend::Base -Base;
 use FindBin;
+use Data::Dumper::Simple;
 
 my $UTIL_PATH = File::Spec->catdir($FindBin::Bin, '../../../script');
 my $sh_vm  = $PERL . ' ' . File::Spec->catfile($UTIL_PATH, 'sh');
 
 set_make('GNU_MAKE_PATH', 'make');
 set_shell('GNU_SHELL_PATH', $sh_vm);
+set_filters(
+    stdout => sub {
+        my ($s) = @_;
+        return $s unless $s;
+        $s =~ s/^ $MAKE \[ \d+ \] :
+            \s* (?: Leaving | Entering ) \s*
+            directory [^\n]+ \n//gsmix;
+        $s =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
+        return $s;
+    },
+    stderr => sub {
+        my ($s) = @_;
+        return $s unless $s;
+        $s =~ s/^$MAKE\[\d+\]: /$MAKE: /gsm;
+        $s =~ s/^$MAKE:\s+Warning:\s+File `\S+' has modification time \S+ s in the future\n//gsmi;
+        $s =~ s/^$MAKE:\s+warning:  Clock skew detected\.  Your build may be incomplete\.\n//gsmi;
+        return $s;
+    },
+);
 
 # to ease debugging (the output is normally small)
 no_diff();

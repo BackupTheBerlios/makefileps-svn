@@ -1,7 +1,7 @@
 #: redirect.t
 #: test the redirection operator support of script/sh
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-02-10 2006-02-10
+#: 2006-02-10 2006-02-12
 
 use t::Shell;
 
@@ -83,4 +83,16 @@ echo 123 > tmp; echo abc >>tmp
 --- stderr
 --- found:         tmp
 --- post:          ::check_file($block, 'tmp', "123\nabc\n");
+--- success:       true
+
+
+
+=== TEST 6: complex
+--- cmd
+echo '1: ; @echo ONE; sleep 2; echo TWO' > foo
+--- stdout
+--- stderr
+--- found:         foo
+--- post
+::check_file($block, 'foo', '1: ; @echo ONE; sleep 2; echo TWO'."\n");
 --- success:       true

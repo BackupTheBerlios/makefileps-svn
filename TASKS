@@ -1,11 +1,10 @@
 TASKS
 =====
 
-- implement `ls' builtin command for script/sh
-- t/sh/: add wildcard.t, rm.t, sleep.t, cd.t, pwd.t, and ls.t
-- migrate the ported test suit to the up-to-date GNU make 3.81 beta4
-- port the remaining tests for t/gnu/features/
+- port the remaining GNU make 3.81 tests to t/gnu/features/
 - auto-smoke mechanisms for the tester (like Pugs)
+- implement `ls' builtin command for script/sh
+- t/sh/: add wildcard.t, rm.t, cd.t, pwd.t, and ls.t
 - develop tb-index.pl which can index "TEST 0:", "TEST 1:", etc.,
   automatically for tests based on Test::Base
 - abstract out another project for a unified script/command testing

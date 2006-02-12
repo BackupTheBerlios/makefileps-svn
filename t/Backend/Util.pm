@@ -1,13 +1,11 @@
 #: t/Backend/Util.pm
 #: utilities used in t::Backend::Base
-#: 2006-02-01 2006-02-10
+#: 2006-02-01 2006-02-12
 
 package t::Backend::Util;
 
 use t::Util -Base;
 #use Data::Dumper::Simple;
-
-our $TIME_SKEW = -10;
 
 our @EXPORT = qw(
     process_args
@@ -43,7 +41,7 @@ sub touch (@) {
 # access/mod time for each file and apply the offset.
 
 sub utouch (@) {
-    my ($off) = $TIME_SKEW + shift;
+    my $off = shift;
     my @files = @_;
     foreach my $file (@files) {
         my $in;

@@ -1,7 +1,7 @@
 #!perl
 #: sh
 #: Perl simulator for /bin/sh (Bourne Shell)
-#: 2006-02-01 2006-02-11
+#: 2006-02-01 2006-02-12
 
 use strict;
 use warnings;
@@ -194,6 +194,9 @@ sub eval_cmd {
         return;
     } elsif ($exec eq 'exit') {
         $ExitCode = $args[0] if defined $args[0];
+        return;
+    } elsif ($exec =~ /make/i or ($args[0] and $args[0] =~ /make/i)) {
+        $ExitCode = system $exec, @args;
         return;
     } else {
         warn "sh: unknown shell command: $exec";

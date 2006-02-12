@@ -1,7 +1,7 @@
 #: t/Util.pm
 #: Utilities shared among testers
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-02-02 2006-02-10
+#: 2006-02-02 2006-02-12
 
 package t::Util;
 
@@ -109,9 +109,11 @@ sub test_shell_command ($$@) {
     my $name = $block->name;
 
     while (my ($key, $val) = each %filters) {
-        if ($key =~ /stdout|stderr/) {
-            no strict 'refs';
-            $val->(${"$key"}) if ref $val eq 'CODE';
+        #warn "$key $val";
+        if ($key eq 'stdout') {
+            $stdout = $val->($stdout);
+        } elsif ($key eq 'stderr') {
+            $stderr = $val->($stderr);
         }
     }
 
