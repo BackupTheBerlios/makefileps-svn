@@ -2,6 +2,7 @@ TASKS
 =====
 
 - port the remaining GNU make 3.81 tests to t/gnu/features/
+- replace `--- success: false' stuff with `--- error_code:  <digit> * 256'
 - auto-smoke mechanisms for the tester (like Pugs)
 - implement `ls' builtin command for script/sh
 - t/sh/: add wildcard.t, rm.t, cd.t, pwd.t, and ls.t

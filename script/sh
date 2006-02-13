@@ -1,7 +1,7 @@
 #!perl
 #: sh
 #: Perl simulator for /bin/sh (Bourne Shell)
-#: 2006-02-01 2006-02-12
+#: 2006-02-01 2006-02-13
 
 use strict;
 use warnings;
@@ -75,6 +75,15 @@ sub process_args ($$) {
         } elsif ($_ eq '>' or $_ eq '>>' or $_ eq '<') {
             $RedirectIndex = $#args;
             push @args, $_;
+        } elsif ($_ eq '&&') {
+            eval_cmd(@args);
+            return if $ExitCode != 0;
+            @args = ();
+        } elsif ($_ eq '||') {
+            eval_cmd(@args);
+            return if $ExitCode == 0;
+            $ExitCode = 0;
+            @args = ();
         } elsif (/^"(.*)"$/o) {
             #warn "---------";
             #warn qq{Pusing "$1" into args\n};
@@ -131,8 +140,8 @@ sub touch (@) {
     my @files = @_;
     foreach my $file (@files) {
         my $in;
-        open $in, ">>$file" or
-            print $in '' or close $in or
+        open $in, ">>$file" and
+            print $in '' and close $in or
             die "Can't touch $file: $!";
     }
 }
@@ -194,7 +203,7 @@ sub eval_cmd {
         return;
     } elsif ($exec eq 'exit') {
         $ExitCode = $args[0] if defined $args[0];
-        return;
+        exit($ExitCode);
     } elsif ($exec =~ /make/i or ($args[0] and $args[0] =~ /make/i)) {
         $ExitCode = system $exec, @args;
         return;
