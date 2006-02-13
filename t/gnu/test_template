@@ -1,0 +1,42 @@
+#: XXX <file-name>
+#:
+#: Description:
+#:   XXX $description
+#: Details:
+#:   XXX $details
+#:
+#: XXX <create-date> <last-modif-date>
+
+use t::Backend::Gnu;
+
+plan tests => 3 * blocks();
+
+XXX necessary intializatio goes here...
+
+run_tests;
+
+__DATA__
+
+=== TEST 0: XXX Test title
+XXX Description goes here
+--- stdout
+XXX Expected stdout
+--- stderr
+XXX Expected stderr
+--- error_code:         XXX Exit code
+
+
+
+=== TEST 1: XXX
+XXX
+--- stdout_like
+XXX expected stdout using regex
+--- stderr_like
+XXX expected stderr using regex
+--- success:            XXX true OR false
+
+
+XXX More tests go on...
+
+
+XXX Foot note: this is the template for */*.t
