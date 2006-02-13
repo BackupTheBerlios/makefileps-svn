@@ -1,7 +1,7 @@
 #: t/Backend/Base.pm
 #: Base class for Makefile::Parser::* backend tester frameworks
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-01-29 2006-02-12
+#: 2006-01-29 2006-02-13
 
 package t::Backend::Base;
 
@@ -115,7 +115,7 @@ sub create_file ($$) {
         open $fh, "> $filename" or
             confess("can't open $filename for writing: $!");
     }
-    $content .= "\n\nSHELL=$SHELL" if $SHELL;
+    #$content .= "\n\nSHELL=$SHELL" if $SHELL;
     print $fh $content;
     close $fh;
     return $filename;
@@ -151,11 +151,11 @@ sub run_make($$) {
     if ($filename) {
         push @args, '-f', $filename;
     }
+    if ($SHELL and $options !~ m/SHELL\s*=\s*/) {
+        push @args, "SHELL=$SHELL";
+    }
     my $cmd = [ @args, process_args("$options $goals") ];
     #warn Dumper($cmd);
-    
-    #warn Dumper(%Filters);
-
     test_shell_command( $block, $cmd, %Filters );
 }
 

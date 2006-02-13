@@ -7,7 +7,7 @@
 #:   settings, override and non-override, and using various variable expansion
 #:   rules, semicolon interference, etc.
 #:
-#: 2006-02-12 2006-02-12
+#: 2006-02-12 2006-02-13
 
 use t::Backend::Gnu;
 
@@ -135,7 +135,6 @@ ccc ddd
 foo foo
 --- stderr
 --- success:            true
---- SKIP
 
 
 

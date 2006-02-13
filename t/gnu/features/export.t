@@ -4,7 +4,7 @@
 #:   Check GNU make export/unexport commands.
 #: Details:
 #:
-#: 2006-01-31 2006-02-10
+#: 2006-01-31 2006-02-13
 
 # t::Backend cleans out our environment for us during startup 
 # so we don't have to worry about that here.
@@ -148,7 +148,7 @@ foo=f-ok bar=b-ok
 --- stderr
 --- error_code
 0
---- SKIP
+
 
 
 === TEST 7: Test the expansion of variables inside unexport
