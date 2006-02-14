@@ -11,15 +11,11 @@
 #:   Then we do the same thing for parallel builds: double-colon
 #:   targets should always be built serially.
 #:
-#: 2006-01-30 2006-02-10
+#: 2006-01-30 2006-02-14
 
 use t::Backend::Gnu;
 
 plan tests => 3 * blocks;
-
-filters {
-    stderr => [qw< preprocess >],
-};
 
 our $source = <<'_EOC_';
 
@@ -166,8 +162,8 @@ foo SECOND
 --- stdout
 ok
 oops
---- stderr
-^MAKE^: Circular d <- d dependency dropped.
+--- stderr preprocess
+#MAKE#: Circular d <- d dependency dropped.
 --- error_code
 0
 

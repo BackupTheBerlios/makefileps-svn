@@ -4,7 +4,7 @@
 #:   Test pattern rules.
 #: Details:
 #:
-#: 2006-02-13 2006-02-13
+#: 2006-02-13 2006-02-14
 
 # Removed unnecessary $(dir) and $dir from the tests.
 #   -- agent
@@ -21,6 +21,7 @@ __DATA__
 Make sure that multiple patterns where the same target
 can be built are searched even if the first one fails
 to match properly.
+--- filename:           Makefile
 --- source
 .PHONY: all
 
@@ -30,7 +31,7 @@ a: void
 # 1 - existing file
 %.1: void
 	@exit 1
-%.1: #MAKEFILE#
+%.1: Makefile
 	@exit 0
 
 # 2 - phony
@@ -120,7 +121,7 @@ foo.bar:
 
 --- stdout
 --- stderr preprocess
-^MAKE^: *** [foo.bar] Error 1
+#MAKE#: *** [foo.bar] Error 1
 --- error_code eval
 2 * 256
 

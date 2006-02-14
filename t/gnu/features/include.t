@@ -8,15 +8,11 @@
 #:   sincludes (should not give an error) and make sure that errors are reported
 #:   for targets that were also -included.
 #:
-#: 2006-02-11 2006-02-11
+#: 2006-02-11 2006-02-14
 
 use t::Backend::Gnu;
 
 plan tests => 3 * blocks();
-
-filters {
-    stderr => [qw< preprocess >],
-};
 
 run_tests;
 
@@ -81,8 +77,8 @@ makefile run phase).
 error: foo.mk ; @echo $@
 
 --- stdout
---- stderr
-^MAKE^: *** No rule to make target `foo.mk', needed by `error'.  Stop.
+--- stderr preprocess
+#MAKE#: *** No rule to make target `foo.mk', needed by `error'.  Stop.
 --- success:      false
 
 

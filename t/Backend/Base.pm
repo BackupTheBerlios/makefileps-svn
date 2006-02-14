@@ -1,7 +1,7 @@
 #: t/Backend/Base.pm
 #: Base class for Makefile::Parser::* backend tester frameworks
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-01-29 2006-02-13
+#: 2006-01-29 2006-02-14
 
 package t::Backend::Base;
 
@@ -169,14 +169,16 @@ sub quote {
 sub preprocess {
     my $s = shift;
     return if not defined $s;
-    $s =~ s/\^MAKE\^/$t::Backend::Base::MAKE/gsi;
+    $s =~ s/\#MAKE\#/$t::Backend::Base::MAKE/gsi;
+    $s =~ s/\#MAKEPATH\#/$t::Backend::Base::MAKE_PATH/gsi;
     return $s;
 }
 
 sub preprocess_like {
     my $s = shift;
     return if not defined $s;
-    $s =~ s/\^MAKE\^/quotemeta $t::Backend::Base::MAKE/gsie;
+    $s =~ s/\#MAKE\#/quotemeta $t::Backend::Base::MAKE/gsie;
+    $s =~ s/\#MAKEPATH\#/quotemeta $t::Backend::Base::MAKE_PATH/gsie;
     return $s;
 }
 

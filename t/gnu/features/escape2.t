@@ -1,15 +1,11 @@
 #: escape2.t
 #: extention of escape.t
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-02-10 2006-02-10
+#: 2006-02-10 2006-02-14
 
 use t::Backend::Gnu;
 
 plan tests => 3 * blocks;
-
-filters {
-    stderr => [qw< preprocess >],
-};
 
 run_tests;
 
@@ -31,8 +27,8 @@ foo#bar.ext = foo#bar.ext
 sharp: foo\\#bar.ext
 foo\#bar.ext: ; @echo foo#bar.ext = '$@'
 --- stdout
---- stderr
-^MAKE^: *** No rule to make target `foo\', needed by `sharp'.  Stop.
+--- stderr preprocess
+#MAKE#: *** No rule to make target `foo\', needed by `sharp'.  Stop.
 --- success:        false
 
 

@@ -13,7 +13,7 @@
 #:   and third commands will appear before the first if indeed
 #:   make is running all of these commands in parallel.
 #:
-#: 2006-02-11 2006-02-12
+#: 2006-02-11 2006-02-14
 
 use t::Backend::Gnu;
 
@@ -143,8 +143,8 @@ Fail
 Fail
 Ok done
 --- stderr preprocess
-^MAKE^: *** [fail.1] Error 1
-^MAKE^: *** Waiting for unfinished jobs....
-^MAKE^: *** [fail.2] Error 1
-^MAKE^: *** [fail.3] Error 1
+#MAKE#: *** [fail.1] Error 1
+#MAKE#: *** Waiting for unfinished jobs....
+#MAKE#: *** [fail.2] Error 1
+#MAKE#: *** [fail.3] Error 1
 --- success:      false

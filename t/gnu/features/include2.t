@@ -1,7 +1,7 @@
 #: include2.t
 #: Extension to include.t
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-02-11 2006-02-11
+#: 2006-02-11 2006-02-14
 
 use t::Backend::Gnu;
 
@@ -22,7 +22,7 @@ foo: bar; @:
 --- stdout
 --- stderr preprocess
 makefile:4: foo: No such file or directory
-^MAKE^: *** No rule to make target `bar', needed by `foo'.  Stop.
+#MAKE#: *** No rule to make target `bar', needed by `foo'.  Stop.
 --- success:      false
 
 

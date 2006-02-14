@@ -1,15 +1,10 @@
 #: comments2.t
 #: some complementary tests for comments.t
-#: 2006-02-10 2006-02-10
+#: 2006-02-10 2006-02-14
 
 use t::Backend::Gnu;
 
 plan tests => 3 * blocks;
-
-filters {
-    stderr => [qw< preprocess >],
-    stdout => [qw< preprocess >],
-};
 
 run_tests;
 
@@ -37,8 +32,8 @@ target: this ; is just a comment
 	@echo This is within a comment. 
 	@echo There should be no errors for this makefile.
 --- stdout
---- stderr
-^MAKE^: *** No rule to make target `this', needed by `target'.  Stop.
+--- stderr preprocess
+#MAKE#: *** No rule to make target `this', needed by `target'.  Stop.
 --- success:    false
 
 
@@ -49,7 +44,7 @@ target: this ; is just a comment
 target: # this ; is just a comment \
 	@echo This is within a comment. \
 	@echo There should be no errors for this makefile.
---- stdout
-^MAKE^: Nothing to be done for `target'.
+--- stdout preprocess
+#MAKE#: Nothing to be done for `target'.
 --- stderr
 --- success:    true

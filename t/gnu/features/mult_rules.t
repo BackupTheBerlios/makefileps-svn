@@ -14,7 +14,7 @@
 #:   on the make command line as extradeps=extra.h which adds yet
 #:   another dependency to the targets.
 #:
-#: 2006-02-11 2006-02-11
+#: 2006-02-11 2006-02-14
 
 use t::Backend::Gnu;
 
@@ -36,7 +36,7 @@ $(objects) : config.h $(extradeps)
 	@echo EXTRA EXTRA
 
 --- stderr preprocess
-^MAKE^: *** No rule to make target `extra.h', needed by `foo.o'.  Stop.
+#MAKE#: *** No rule to make target `extra.h', needed by `foo.o'.  Stop.
 --- stdout
 --- success:      false
 

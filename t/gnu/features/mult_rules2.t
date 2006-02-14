@@ -1,7 +1,7 @@
 #: mult_rules2.t
 #: Extension to mult_rules.t
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-02-11 2006-02-11
+#: 2006-02-11 2006-02-14
 
 use t::Backend::Gnu;
 
@@ -36,7 +36,7 @@ foo.o: defs.h
 foo.o: test.h
 	@echo hello
 --- stderr preprocess
-^MAKE^: *** No rule to make target `test.h', needed by `foo.o'.  Stop.
+#MAKE#: *** No rule to make target `test.h', needed by `foo.o'.  Stop.
 --- stdout
 --- success:      false
 
@@ -49,7 +49,7 @@ foo.o: defs.h
 foo.o: test.h
 	@echo hello
 --- stderr preprocess
-^MAKE^: *** No rule to make target `defs.h', needed by `foo.o'.  Stop.
+#MAKE#: *** No rule to make target `defs.h', needed by `foo.o'.  Stop.
 --- stdout
 --- success:      false
 
