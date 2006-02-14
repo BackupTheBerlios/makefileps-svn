@@ -64,10 +64,9 @@ success
 
 === TEST 2: Test parallelism with included files
 this time recurse first and make sure the jobserver works.
---- filename:     MAKEFILE
---- source
+--- source preprocess
 
-recurse: ; @$(MAKE) --no-print-directory -f MAKEFILE INC=yes all
+recurse: ; @$(MAKE) --no-print-directory -f #MAKEFILE# INC=yes all
 all: 1 2; @echo success
 
 INC = no

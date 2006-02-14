@@ -22,7 +22,7 @@ our @EXPORT = qw(
 
 our @EXPORT_BASE = qw(set_make set_shell set_filters);
 
-our ($SHELL, $PERL, $MAKE, $MAKE_PATH);
+our ($SHELL, $PERL, $MAKE, $MAKE_PATH, $MAKEFILE);
 our @MakeExe;
 our %Filters;
 
@@ -62,6 +62,9 @@ BEGIN {
 
     # Get a clean environment
     clean_env();
+
+    # Delay the Test::Base filters
+    filters_delay();
 }
 
 sub run_test ($) {
@@ -73,15 +76,32 @@ sub run_test ($) {
 
     %::ExtraENV = ();
 
+
     my $filename = $block->filename;
+    chomp $filename if $filename;
     my $source   = $block->source;
-    $filename = create_file($filename, $source) if $source;
+
+    if (defined $source) {
+        my $fh;
+        if (not $filename) {
+            ($fh, $filename) = 
+                tempfile( "Makefile_XXXXX", DIR => '.', UNLINK => 1 );
+        } else {
+            open $fh, "> $filename" or
+                confess("can't open $filename for writing: $!");
+        }
+        $MAKEFILE = $filename;
+        $block->run_filters;
+        print $fh $block->source;
+        close $fh;
+    } else {
+        $block->run_filters;
+        $filename = $block->filename;
+    }
 
     process_pre($block);
     process_touch($block);
     process_utouch($block);
-
-    #sleep(3);
 
     my %savedENV = %ENV;
     %ENV = (%ENV, %::ExtraENV) if %::ExtraENV;
@@ -170,15 +190,17 @@ sub preprocess {
     my $s = shift;
     return if not defined $s;
     $s =~ s/\#MAKE\#/$t::Backend::Base::MAKE/gsi;
-    $s =~ s/\#MAKEPATH\#/$t::Backend::Base::MAKE_PATH/gsi;
+    $s =~ s/\#MAKEPATH\#/$t::Backend::Base::MAKE_PATH/gs;
+    $s =~ s/\#MAKEFILE\#/$t::Backend::Base::MAKEFILE/gs;
     return $s;
 }
 
 sub preprocess_like {
     my $s = shift;
     return if not defined $s;
-    $s =~ s/\#MAKE\#/quotemeta $t::Backend::Base::MAKE/gsie;
-    $s =~ s/\#MAKEPATH\#/quotemeta $t::Backend::Base::MAKE_PATH/gsie;
+    $s =~ s/\#MAKE\#/quotemeta $t::Backend::Base::MAKE/gse;
+    $s =~ s/\#MAKEPATH\#/quotemeta $t::Backend::Base::MAKE_PATH/gse;
+    $s =~ s/\#MAKEFILE\#/quotemeta $t::Backend::Base::MAKEFILE/gse;
     return $s;
 }
 

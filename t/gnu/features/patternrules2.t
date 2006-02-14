@@ -1,7 +1,7 @@
 #: patternrules2.t
 #: Extension to patternrules.t
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-02-13 2006-02-13
+#: 2006-02-13 2006-02-14
 
 use t::Backend::Gnu;
 
@@ -28,7 +28,7 @@ foo.c
 
 
 
-=== TEST 2: target of multi-target implicit rules should be considered immediate file
+=== TEST 2: target of multi-target implicit rules should be considered intermediate file
 a variant for TEST #5 in patternrules.t
 --- source
 .PHONY: all

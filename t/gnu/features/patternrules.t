@@ -21,8 +21,7 @@ __DATA__
 Make sure that multiple patterns where the same target
 can be built are searched even if the first one fails
 to match properly.
---- filename:           Makefile
---- source
+--- source preprocess
 .PHONY: all
 
 all: case.1 case.2 case.3
@@ -31,7 +30,7 @@ a: void
 # 1 - existing file
 %.1: void
 	@exit 1
-%.1: Makefile
+%.1: #MAKEFILE#
 	@exit 0
 
 # 2 - phony
