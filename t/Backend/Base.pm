@@ -22,7 +22,7 @@ our @EXPORT = qw(
 
 our @EXPORT_BASE = qw(set_make set_shell set_filters);
 
-our ($SHELL, $PERL, $MAKE, $MAKE_PATH, $MAKEFILE);
+our ($SHELL, $PERL, $MAKE, $MAKEPATH, $MAKEFILE, $PWD);
 our @MakeExe;
 our %Filters;
 
@@ -36,14 +36,14 @@ our %Filters;
 
 sub set_make ($$) {
     my ($env_name, $default) = @_;
-    $MAKE_PATH = $ENV{$env_name} || $default;
+    $MAKEPATH = $ENV{$env_name} || $default;
     my $stderr;
-    run3 [$MAKE_PATH, '-f', 'no/no/no'], \undef, \undef, \$stderr;
+    run3 [$MAKEPATH, '-f', 'no/no/no'], \undef, \undef, \$stderr;
     #die $stderr;
     if ($stderr =~ /^(\S+)\s*:/) {
         $MAKE = $1;
     } else {
-        die "Can't spawn '$MAKE_PATH'.\n";
+        die "Can't spawn '$MAKEPATH'.\n";
     }
 }
 
@@ -73,6 +73,7 @@ sub run_test ($) {
     my $tempdir = tempdir( 'backend_XXXXXX', TMPDIR => 1, CLEANUP => 1 );
     my $saved_cwd = Cwd::cwd;
     chdir $tempdir;
+    $PWD = $tempdir;
 
     %::ExtraENV = ();
 
@@ -165,7 +166,7 @@ sub run_make($$) {
     my $options  = $block->options || '';
     my $goals    = $block->goals || '';
 
-    @MakeExe = split_arg($MAKE_PATH) if not @MakeExe;
+    @MakeExe = split_arg($MAKEPATH) if not @MakeExe;
     my @args = @MakeExe;
     #warn Dumper($filename);
     if ($filename) {
@@ -190,8 +191,9 @@ sub preprocess {
     my $s = shift;
     return if not defined $s;
     $s =~ s/\#MAKE\#/$t::Backend::Base::MAKE/gsi;
-    $s =~ s/\#MAKEPATH\#/$t::Backend::Base::MAKE_PATH/gs;
+    $s =~ s/\#MAKEPATH\#/$t::Backend::Base::MAKEPATH/gs;
     $s =~ s/\#MAKEFILE\#/$t::Backend::Base::MAKEFILE/gs;
+    $s =~ s/\#PWD\#/$t::Backend::Base::PWD/gs;
     return $s;
 }
 
@@ -199,8 +201,9 @@ sub preprocess_like {
     my $s = shift;
     return if not defined $s;
     $s =~ s/\#MAKE\#/quotemeta $t::Backend::Base::MAKE/gse;
-    $s =~ s/\#MAKEPATH\#/quotemeta $t::Backend::Base::MAKE_PATH/gse;
+    $s =~ s/\#MAKEPATH\#/quotemeta $t::Backend::Base::MAKEPATH/gse;
     $s =~ s/\#MAKEFILE\#/quotemeta $t::Backend::Base::MAKEFILE/gse;
+    $s =~ s/\#PWD\#/quotemeta $t::Backend::Base::PWD/gse;
     return $s;
 }
 
