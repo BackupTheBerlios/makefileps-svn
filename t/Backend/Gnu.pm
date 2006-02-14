@@ -26,8 +26,8 @@ set_filters(
     stderr => sub {
         my ($s) = @_;
         return $s unless $s;
-        $s =~ s/^$MAKE:\s+Warning:\s+File `\S+' has modification time \S+ s in the future\n//gsmi;
-        $s =~ s/^$MAKE:\s+warning:  Clock skew detected\.  Your build may be incomplete\.\n//gsmi;
+        $s =~ s/^$MAKE(?:\[\d+\])?:\s+Warning:\s+File `\S+' has modification time \S+ s in the future\n//gsmi;
+        $s =~ s/^$MAKE(?:\[\d+\])?:\s+warning:  Clock skew detected\.  Your build may be incomplete\.\n//gsmi;
         return $s;
     },
 );

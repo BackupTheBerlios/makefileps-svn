@@ -37,6 +37,7 @@ our %Filters;
 sub set_make ($$) {
     my ($env_name, $default) = @_;
     $MAKEPATH = $ENV{$env_name} || $default;
+    $MAKEPATH =~ s,\\,/,g;
     my $stderr;
     run3 [$MAKEPATH, '-f', 'no/no/no'], \undef, \undef, \$stderr;
     #die $stderr;
@@ -74,6 +75,7 @@ sub run_test ($) {
     my $saved_cwd = Cwd::cwd;
     chdir $tempdir;
     $PWD = $tempdir;
+    $PWD =~ s,\\,/,g;
 
     %::ExtraENV = ();
 
@@ -92,6 +94,7 @@ sub run_test ($) {
                 confess("can't open $filename for writing: $!");
         }
         $MAKEFILE = $filename;
+        $MAKEFILE =~ s,\\,/,g;
         $block->run_filters;
         print $fh $block->source;
         close $fh;
