@@ -1,8 +1,7 @@
 #: Makefile/Parser.pm
 #: Implementation for Makefile::Parser
-#: v0.12
-#: Copyright (c) 2005 Agent Zhang
-#: 2005-09-24 2006-01-25
+#: Copyright (c) 2005-2006 Agent Zhang
+#: 2005-09-24 2006-02-21
 
 package Makefile::Parser;
 
@@ -11,9 +10,10 @@ use warnings;
 use Carp qw(carp croak);
 #use Data::Dumper;
 
+our $VERSION = '1.00';
+
 #our $Debug = 0;
 our $Strict = 0;
-our $VERSION = '0.12';
 our $Error;
 
 # usage: $class->new;
@@ -773,7 +773,7 @@ Agent Zhang, E<lt>agent2002@126.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005 Agent Zhang.
+Copyright (c) 2005-2006 Agent Zhang.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

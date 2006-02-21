@@ -1,4 +1,5 @@
 #: Makefile/Tokenizer/Gnu.pm
+#: The GNU make Makefile Tokenizer
 #: Copyright (c) 2006 Agent Zhang
 #: 2006-02-21 2006-02-21
 
