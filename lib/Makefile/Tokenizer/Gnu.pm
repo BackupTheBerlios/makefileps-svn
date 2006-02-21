@@ -41,7 +41,7 @@ sub new {
 		}
 	} elsif ( ref $arg eq 'SCALAR' ) {
 		$self->{source} = $$arg;
-    } elsif ( ref $arg eq 'ARRAY') ) {
+    } elsif ( ref $arg eq 'ARRAY' ) {
 		$self->{source} = join "\n", @$arg;
 	} else {
 		# We don't support whatever this is
@@ -69,7 +69,7 @@ sub _error {
 
 sub _slurp {
     my $fname = shift;
-    open my $in, $fname;
+    open(my $in, $fname);
     if (not $in) {
         _error("Can't open $fname for reading: $!");
         return undef;
@@ -115,6 +115,10 @@ breaking strings of Perl source code into Tokens.
 
 =over
 
+=item $obj = Makefile::Tokenizer::Gnu->new
+
+XXX
+
 =item $token = $obj->get_token
 
 When using the Makefile::Tokenizer::Gnu object as an iterator, 
@@ -132,12 +136,29 @@ This means that a number of Tokenizer objects can be created, and
 won't consume significant CPU until you actually begin to pull tokens
 from it.
 
-Return a L<PPI::Token> object on success, C<0> if the Tokenizer had
+Return a L<Makefile::Token> object on success, C<0> if the Tokenizer had
 reached the end of the file, or C<undef> on error.
+
+=item $array_ref = $obj->all_tokens
+
+When not being used as an iterator, the C<all_tokens> method tells
+the Tokenizer to parse the entire file and return all of the tokens
+in a single ARRAY reference.
+
+It should be noted that C<all_tokens> does B<NOT> interfere with the
+use of the Tokenizer object as an iterator (does not modify the token
+cursor) and use of the two different mechanisms can be mixed safely.
+
+Returns a reference to an ARRAY of L<Makefile::Token> objects on success,
+C<0> in the special case that the file/string contains NO tokens at
+all, or C<undef> on error.
 
 =item $str = $obj->errstr
 
-Return the error message of the last failed operation.
+For any error that occurs, you can use the C<errstr>, as either
+a static or object method, to access the error message.
+
+If no error occurs for any particular action, C<errstr> will return false.
 
 =back
 

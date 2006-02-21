@@ -59,6 +59,10 @@ a "Token" is a L<Makefile::Element> that directly represents bytes of source cod
 
 =over
 
+=item $obj = Makefile::Token->new
+
+XXX
+
 =item $obj->content
 
 Return the string in a Token.
@@ -97,3 +101,5 @@ Copyright (c) 2006 Agent Zhang.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
+
+=cut
