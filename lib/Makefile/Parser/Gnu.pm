@@ -8,6 +8,8 @@ package Makefile::Parser::Gnu;
 use strict;
 use warnings;
 
+our $VERSION = '1.00';
+
 sub new {
     my $proto = shift;
     my $class = ref $proto || $proto;
@@ -33,7 +35,7 @@ Makefile::Parser::Gnu - Full-fledged parser for GNU make Makefiles
 
 =head1 VERSION
 
-This document describes Makefile::Parser::Gnu released on March XX, 2006.
+This document describes Makefile::Parser::Gnu 1.00 released on March XX, 2006.
 
 =head1 SYNOPSIS
 

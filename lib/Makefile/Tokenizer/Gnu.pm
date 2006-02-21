@@ -7,6 +7,8 @@ package Makefile::Tokenizer::Gnu;
 use strict;
 use warnings;
 
+our $VERSION = '1.00';
+
 our $Error;
 
 sub new {
