@@ -62,3 +62,10 @@ L<Makefile::Parser>, GNU make Manual L<http://www.gnu.org/software/make/manual/m
 =head1 AUTHOR
 
 Agent Zhang L<mailto:agentzh@gmail.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2006 Agent Zhang.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
