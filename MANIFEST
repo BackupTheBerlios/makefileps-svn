@@ -6,3 +6,4 @@ READTHEM
 t/pod-coverage.t
 t/pod.t
 lib/Makefile/Parser.pm
+lib/Makefile/Parser/Gnu.pm
