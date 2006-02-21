@@ -1,0 +1,28 @@
+#!perl
+#: pgmake
+#: GNU make-like utility using Makefile::Parser::Gnu
+#: Copyright (c) 2006 Agent Zhang
+#: 2006-02-21 2006-02-21
+
+use strict;
+use warnings;
+
+use Makefile::Parser::Gnu;
+
+__END__
+
+=head1 NAME
+
+pgmake - GNU make-like utility using Makefile::Parser::Gnu
+
+=head1 VERSION
+
+This document describes the `pgmake' utility released on March XX, 2006.
+
+=head1 SEE ALSO
+
+L<Makefile::Parser::Gnu>, L<plmake>.
+
+=head1 AUTHOR
+
+Agent Zhang L<mailto:agentzh@gmail.com>

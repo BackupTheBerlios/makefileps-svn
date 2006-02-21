@@ -3,12 +3,25 @@
 #: Copyright (c) 2006 Agent Zhang
 #: 2006-02-21 2006-02-21
 
-package Makefile::Parser2;
+package Makefile::Parser::Gnu;
 
 use strict;
 use warnings;
 
 sub new {
+    my $proto = shift;
+    my $class = ref $proto || $proto;
+    my $self = bless {
+    }, $class;
+    if (@_) {
+        $self->parse(@_);
+    }
+    return $self;
+}
+
+sub parse {
+    my $self = shift;
+    my %opts = @_;
 }
 
 1;
@@ -29,6 +42,18 @@ This document describes Makefile::Parser::Gnu released on March XX, 2006.
 This is a GNU make 3.81beta4 compatible parser written in pure Perl.
 
 =head1 METHODS
+
+=over
+
+=item $obj = $class->new;
+
+=item $obj2 = $obj1->new;
+
+=item $obj = $class->new(...);
+
+=item $obj->parse(...);
+
+=back
 
 =head1 SEE ALSO
 
