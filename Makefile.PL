@@ -2,10 +2,7 @@ use strict;
 use inc::Module::Install;
 my $plmake = "script/plmake";
 
-name            ('Makefile-Parser');
-version_from    ('lib/Makefile/Parser.pm');
-abstract        ( 'A Simple Parser for Makefiles' );
-author          ('Agent Zhang <agent2002@126.com>');
+all_from    ('lib/Makefile/Parser.pm');
 license         ('perl');
 
 install_script  ($plmake);
@@ -14,8 +11,7 @@ install_script  ($plmake);
 
 build_requires  ('Test::Simple');
 build_requires  ('Test::Base');
-build_requires  ('IPC::Run');
-build_requires  ('IPC::Cmd');
+build_requires  ('IPC::Run3');
 build_requires  ('File::Temp');
 build_requires  ('File::Spec');
 build_requires  ('Cwd');
