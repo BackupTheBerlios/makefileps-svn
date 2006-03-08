@@ -2,13 +2,13 @@
 #: Makefile::Parser::Gnu backend tester framework
 #: subclassed t::Backend::Base
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-02-01 2006-02-14
+#: 2006-02-01 2006-03-08
 
 package t::Backend::Gnu;
 
 use t::Backend::Base -Base;
 use FindBin;
-use Data::Dumper::Simple;
+#use Data::Dumper::Simple;
 
 my $UTIL_PATH = File::Spec->catdir($FindBin::Bin, '../../../script');
 my $sh_vm  = $PERL . ' ' . File::Spec->catfile($UTIL_PATH, 'sh');

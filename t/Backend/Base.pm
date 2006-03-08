@@ -1,7 +1,7 @@
 #: t/Backend/Base.pm
 #: Base class for Makefile::Parser::* backend tester frameworks
 #: Copyright (c) 2006 Agent Zhang
-#: 2006-01-29 2006-02-14
+#: 2006-01-29 2006-03-08
 
 package t::Backend::Base;
 
@@ -13,7 +13,7 @@ use File::Spec ();
 use FindBin;
 use IPC::Run3;
 use Time::HiRes qw( time );
-use Data::Dumper::Simple;
+#use Data::Dumper::Simple;
 
 our @EXPORT = qw(
     run_test run_tests create_file

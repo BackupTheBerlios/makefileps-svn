@@ -2,7 +2,8 @@ use strict;
 use inc::Module::Install;
 my $plmake = "script/plmake";
 
-all_from    ('lib/Makefile/Parser.pm');
+name            ('Makefile-Parser');
+all_from        ('lib/Makefile/Parser.pm');
 license         ('perl');
 
 install_script  ($plmake);

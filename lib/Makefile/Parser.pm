@@ -1,10 +1,11 @@
 #: Makefile/Parser.pm
 #: Implementation for Makefile::Parser
 #: Copyright (c) 2005-2006 Agent Zhang
-#: 2005-09-24 2006-02-21
+#: 2005-09-24 2006-03-08
 
 package Makefile::Parser;
 
+use 5.006001;
 use strict;
 use warnings;
 use Carp qw(carp croak);
