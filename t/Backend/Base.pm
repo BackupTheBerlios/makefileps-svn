@@ -39,12 +39,12 @@ sub set_make ($$) {
     $MAKEPATH = $ENV{$env_name} || $default;
     $MAKEPATH =~ s,\\,/,g;
     my $stderr;
-    run3 [$MAKEPATH, '-f', 'no/no/no'], \undef, \undef, \$stderr;
+    run3 [split(/\s+/, $MAKEPATH), '-f', 'no/no/no'], \undef, \undef, \$stderr;
     #die $stderr;
     if ($stderr =~ /^(\S+)\s*:/) {
         $MAKE = $1;
     } else {
-        die "Can't spawn '$MAKEPATH'.\n";
+        die "Can't spawn '$MAKEPATH':\n$stderr";
     }
 }
 
