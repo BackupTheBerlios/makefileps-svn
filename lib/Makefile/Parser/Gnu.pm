@@ -8,22 +8,36 @@ package Makefile::Parser::Gnu;
 use strict;
 use warnings;
 
+use Makefile::Gnu::AST;
+use MK::DOM;
+
 our $VERSION = '1.00';
 
-sub new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
-    my $self = bless {
-    }, $class;
-    if (@_) {
-        $self->parse(@_);
+sub parse {
+    my $self->shift;
+    my $input = shift;
+    my $in;
+    if (ref $input) {
+        open $in, '<', $input or die;
+    } else {
+        open $in, $input or
+            die "Can't open $input for reading: $!";
     }
-    return $self;
+    my $ast = $self->_parse($in);
+    close $in;
+    $ast;
 }
 
-sub parse {
-    my $self = shift;
-    my %opts = @_;
+sub _parse {
+    shift;
+    my $fh = shift;
+}
+
+sub desugar {
+    shift;
+    my $dom = shift;
+    my $ast;
+    return $ast;
 }
 
 1;

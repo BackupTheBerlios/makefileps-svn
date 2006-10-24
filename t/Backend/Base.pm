@@ -44,7 +44,7 @@ sub set_make ($$) {
     if ($stderr =~ /^(\S+)\s*:/) {
         $MAKE = $1;
     } else {
-        die "Can't spawn '$MAKEPATH':\n$stderr";
+        $MAKE = '';
     }
 }
 
