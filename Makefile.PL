@@ -1,14 +1,17 @@
 use strict;
 use inc::Module::Install;
-my $plmake = "script/plmake";
 
 name            ('Makefile-Parser');
 all_from        ('lib/Makefile/Parser.pm');
 license         ('perl');
 
-install_script  ($plmake);
+install_script  ('script/pgmake');
 
-#requires        ('Data::Dumper::Simple');
+requires        ('List::MoreUtils');
+requires        ('Params::Util');
+requires        ('Scalar::Util');
+requires        ('Clone');
+requires        ('Carp');
 
 build_requires  ('Test::Simple');
 build_requires  ('Test::Base');
@@ -29,4 +32,3 @@ makemaker_args  (
 print "--" x 30, "\n";
 do 'script/checkenv';
 print "--" x 30, "\n";
-
