@@ -7,7 +7,7 @@ use Text::Balanced qw( gen_extract_tagged );
 use MDOM;
 use Data::Dump::Streamer;
 use base 'MDOM::Node';
-use List::MoreUtils qw( before );
+use List::MoreUtils qw( before all );
 
 my %_map;
 BEGIN {
@@ -329,10 +329,9 @@ sub _parse_normal {
     elsif (@seq >= 2 && $seq[0] eq ':' and $seq[1] eq ':') {
         my $rule = MDOM::Rule::StaticPattern->new;
         my @t = before { $_ eq ';' } @tokens;
-        if (@t) {
-            $rule->__add_elements(@t);
-            splice @tokens, 0, scalar(@t);
-
+        $rule->__add_elements(@t);
+        splice @tokens, 0, scalar(@t);
+        if (@tokens) {
             my @prefix = shift @tokens;
             if ($tokens[0] && $tokens[0]->isa('MDOM::Token::Whitespace')) {
                 push @prefix, shift @tokens;
@@ -357,7 +356,16 @@ sub _parse_normal {
     } elsif (@tokens == 1) {
         return $tokens[0];
     }
-    @tokens;
+    if (all {
+                $_->isa('MDOM::Token::Comment')    ||
+                $_->isa('MDOM::Token::Whitespace') 
+            } @tokens) {
+        @tokens;
+    } else {
+        my $node = MDOM::Unknown->new;
+        $node->__add_elements(@tokens);
+        $node;
+    }
 }
 
 sub _dump_tokens {

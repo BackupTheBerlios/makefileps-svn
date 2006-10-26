@@ -14,8 +14,8 @@ run {
     my $dumper = MDOM::Dumper->new($dom);
     my $got = $dumper->string;
     my $expected = $block->dom;
-    $got =~ s/(?x) [ \t]+? (?= \' [^\n]* \' )/    /gs;
-    $expected =~ s/(?x) [ \t]+? (?= \' [^\n]* \' )/    /gs;
+    $got =~ s/(?x) [ \t]+? (?= \' [^\n]* \' )/\t\t/gs;
+    $expected =~ s/(?x) [ \t]+? (?= \' [^\n]* \' )/\t\t/gs;
     is $got, $expected, "$name - DOM structure ok";
     #warn $dumper->string if $name =~ /TEST 0/;
 };
@@ -101,24 +101,24 @@ a: b # hello! \
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare    'a'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Bare    'b'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Comment    '# hello! \\n\tthis is comment too! \\n so is this line'
-    MDOM::Token::Whitespace  '\n'
-  MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Bare           'a'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Bare           'b'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Comment        '# hello! \\n\tthis is comment too! \\n so is this line'
+    MDOM::Token::Whitespace     '\n'
+  MDOM::Token::Whitespace       '\n'
   MDOM::Command
-    MDOM::Token::Separator    '\t'
-    MDOM::Token::Bare    '# this is a cmd'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Separator      '\t'
+    MDOM::Token::Bare           '# this is a cmd'
+    MDOM::Token::Whitespace     '\n'
   MDOM::Command
-    MDOM::Token::Separator    '\t'
-    MDOM::Token::Separator    '+'
-    MDOM::Token::Bare    'touch '
-    MDOM::Token::Interpolation '$$'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Separator      '\t'
+    MDOM::Token::Separator      '+'
+    MDOM::Token::Bare           'touch '
+    MDOM::Token::Interpolation  '$$'
+    MDOM::Token::Whitespace     '\n'
 
 
 
@@ -133,19 +133,19 @@ a :
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare    'a'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Bare           'a'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     '\n'
   MDOM::Command
-    MDOM::Token::Separator    '\t'
-    MDOM::Token::Separator    '-'
-    MDOM::Token::Bare    ' mv \#\\n\t+ e \\n  \\'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Separator      '\t'
+    MDOM::Token::Separator      '-'
+    MDOM::Token::Bare           ' mv \#\\n\t+ e \\n  \\'
+    MDOM::Token::Whitespace     '\n'
   MDOM::Command
-    MDOM::Token::Separator    '\t'
-    MDOM::Token::Separator    '@'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Separator      '\t'
+    MDOM::Token::Separator      '@'
+    MDOM::Token::Whitespace     '\n'
 
 
 
@@ -168,9 +168,9 @@ MDOM::Document::Gmake
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare         '@a'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Continuation '\\n'
+    MDOM::Token::Bare          '@a'
+    MDOM::Token::Separator     ':'
+    MDOM::Token::Continuation  '\\n'
     MDOM::Token::Whitespace    '\t '
     MDOM::Token::Bare          '@b'
     MDOM::Token::Whitespace    '   '
@@ -180,18 +180,18 @@ MDOM::Document::Gmake
   MDOM::Rule::Simple
     MDOM::Token::Bare          '@b'
     MDOM::Token::Whitespace    ' '
-    MDOM::Token::Separator    ':'
+    MDOM::Token::Separator     ':'
     MDOM::Token::Whitespace    ' '
     MDOM::Command
-      MDOM::Token::Separator    ';'
-      MDOM::Token::Whitespace    '\n'
+      MDOM::Token::Separator   ';'
+      MDOM::Token::Whitespace  '\n'
   MDOM::Rule::Simple
-    MDOM::Token::Bare         '@c'
-    MDOM::Token::Separator    ':'
+    MDOM::Token::Bare          '@c'
+    MDOM::Token::Separator     ':'
     MDOM::Command
-      MDOM::Token::Separator    ';'
-      MDOM::Token::Bare         ';'
-      MDOM::Token::Whitespace    '\n'
+      MDOM::Token::Separator   ';'
+      MDOM::Token::Bare        ';'
+      MDOM::Token::Whitespace  '\n'
 
 
 
@@ -206,20 +206,20 @@ a: \
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare    'a'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Continuation    '\\n'
-    MDOM::Token::Whitespace    '\t'
-    MDOM::Token::Bare    'b'
-    MDOM::Token::Continuation    '\\n'
-    MDOM::Token::Whitespace    '    '
-    MDOM::Token::Bare    'c'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Continuation    '\\n'
-    MDOM::Token::Whitespace    '    '
-    MDOM::Token::Bare    'd'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Bare           'a'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Continuation   '\\n'
+    MDOM::Token::Whitespace     '\t'
+    MDOM::Token::Bare           'b'
+    MDOM::Token::Continuation   '\\n'
+    MDOM::Token::Whitespace     '    '
+    MDOM::Token::Bare           'c'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Continuation   '\\n'
+    MDOM::Token::Whitespace     '    '
+    MDOM::Token::Bare           'd'
+    MDOM::Token::Whitespace     '\n'
 
 
 
@@ -234,16 +234,16 @@ a: \
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare         'a'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Continuation    '\\n'
-    MDOM::Token::Whitespace    '\t'
-    MDOM::Token::Bare          'b'
+    MDOM::Token::Bare           'a'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Continuation   '\\n'
+    MDOM::Token::Whitespace     '\t'
+    MDOM::Token::Bare           'b'
     MDOM::Command
-      MDOM::Token::Separator   ';'
-      MDOM::Token::Bare    '\\n    c \\n    d'
-      MDOM::Token::Whitespace    '\n'
+      MDOM::Token::Separator    ';'
+      MDOM::Token::Bare         '\\n    c \\n    d'
+      MDOM::Token::Whitespace   '\n'
 
 
 
@@ -254,25 +254,25 @@ all: $a $(a) ${c}
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare    'all'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Interpolation    '$a'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Interpolation    '$(a)'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Interpolation    '${c}'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Bare               'all'
+    MDOM::Token::Separator          ':'
+    MDOM::Token::Whitespace         ' '
+    MDOM::Token::Interpolation      '$a'
+    MDOM::Token::Whitespace         ' '
+    MDOM::Token::Interpolation      '$(a)'
+    MDOM::Token::Whitespace         ' '
+    MDOM::Token::Interpolation      '${c}'
+    MDOM::Token::Whitespace         '\n'
   MDOM::Command
-    MDOM::Token::Separator    '\t'
-    MDOM::Token::Bare    'echo '
-    MDOM::Token::Interpolation    '$@'
-    MDOM::Token::Bare    ' '
-    MDOM::Token::Interpolation    '$a'
-    MDOM::Token::Interpolation    '${a}'
-    MDOM::Token::Interpolation    '${abc}'
-    MDOM::Token::Interpolation    '${}'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Separator          '\t'
+    MDOM::Token::Bare               'echo '
+    MDOM::Token::Interpolation      '$@'
+    MDOM::Token::Bare               ' '
+    MDOM::Token::Interpolation      '$a'
+    MDOM::Token::Interpolation      '${a}'
+    MDOM::Token::Interpolation      '${abc}'
+    MDOM::Token::Interpolation      '${}'
+    MDOM::Token::Whitespace         '\n'
 
 
 
@@ -282,15 +282,15 @@ all: ; echo \$a
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare    'all'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare               'all'
+    MDOM::Token::Separator          ':'
+    MDOM::Token::Whitespace         ' '
     MDOM::Command
-      MDOM::Token::Separator    ';'
-      MDOM::Token::Whitespace    ' '
-      MDOM::Token::Bare          'echo \'
-      MDOM::Token::Interpolation '$a'
-      MDOM::Token::Whitespace    '\n'
+      MDOM::Token::Separator        ';'
+      MDOM::Token::Whitespace       ' '
+      MDOM::Token::Bare             'echo \'
+      MDOM::Token::Interpolation    '$a'
+      MDOM::Token::Whitespace       '\n'
 
 
 
@@ -300,12 +300,12 @@ all: foo\\# hello
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare    'all'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Bare    'foo\\'
-    MDOM::Token::Comment    '# hello'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Bare           'all'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Bare           'foo\\'
+    MDOM::Token::Comment        '# hello'
+    MDOM::Token::Whitespace     '\n'
 
 
 
@@ -315,12 +315,12 @@ MDOM::Document::Gmake
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::Simple
-    MDOM::Token::Bare    '\#a'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Bare    'foo'
-    MDOM::Token::Comment    '#hello'
-    MDOM::Token::Whitespace    '\n'
+    MDOM::Token::Bare           '\#a'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Bare           'foo'
+    MDOM::Token::Comment        '#hello'
+    MDOM::Token::Whitespace     '\n'
 
 
 
@@ -383,29 +383,77 @@ foo.o bar.o: %.o: %.c ; echo blah
 --- dom
 MDOM::Document::Gmake
   MDOM::Rule::StaticPattern
-    MDOM::Token::Bare    'foo.o'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Bare    'bar.o'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Bare    '%.o'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
-    MDOM::Token::Bare    '%.c'
-    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare           'foo.o'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Bare           'bar.o'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Bare           '%.o'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
+    MDOM::Token::Bare           '%.c'
+    MDOM::Token::Whitespace     ' '
     MDOM::Command
       MDOM::Token::Separator    ';'
-      MDOM::Token::Whitespace    ' '
-      MDOM::Token::Bare    'echo blah'
-      MDOM::Token::Whitespace    '\n'
-  MDOM::Token::Whitespace    '\n'
+      MDOM::Token::Whitespace   ' '
+      MDOM::Token::Bare         'echo blah'
+      MDOM::Token::Whitespace   '\n'
+  MDOM::Token::Whitespace       '\n'
   MDOM::Rule::Simple
-    MDOM::Token::Bare    '%.c'
-    MDOM::Token::Separator    ':'
-    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare           '%.c'
+    MDOM::Token::Separator      ':'
+    MDOM::Token::Whitespace     ' '
     MDOM::Command
       MDOM::Token::Separator    ';'
-      MDOM::Token::Whitespace    ' '
-      MDOM::Token::Bare    'echo '
+      MDOM::Token::Whitespace   ' '
+      MDOM::Token::Bare         'echo '
       MDOM::Token::Interpolation    '$@'
-      MDOM::Token::Whitespace    '\n'
+      MDOM::Token::Whitespace       '\n'
+
+
+
+=== TEST 19: static pattern rules without ";" commands
+--- src
+
+foo.o bar.o: %.o: %.c
+	@echo blah
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Rule::StaticPattern
+    MDOM::Token::Bare          'foo.o'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare          'bar.o'
+    MDOM::Token::Separator     ':'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare          '%.o'
+    MDOM::Token::Separator     ':'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare          '%.c'
+    MDOM::Token::Whitespace    '\n'
+  MDOM::Command
+    MDOM::Token::Separator     '\t'
+    MDOM::Token::Separator     '@'
+    MDOM::Token::Bare          'echo blah'
+    MDOM::Token::Whitespace    '\n'
+
+
+
+=== TEST 20: unknown entities
+--- src
+
+a $(foo)
+	echo $@
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Unknown
+    MDOM::Token::Bare               'a'
+    MDOM::Token::Whitespace         ' '
+    MDOM::Token::Interpolation      '$(foo)'
+    MDOM::Token::Whitespace         '\n'
+  MDOM::Command
+    MDOM::Token::Separator          '\t'
+    MDOM::Token::Bare               'echo '
+    MDOM::Token::Interpolation      '$@'
+    MDOM::Token::Whitespace         '\n'
