@@ -304,7 +304,10 @@ sub _parse_normal {
     my @tokens = @_;
     my @seq = grep { $_->isa('MDOM::Token::Separator') } @tokens;
     #_dump_tokens2(@seq);
-    if (@seq >= 2 && $seq[0] eq ':' and $seq[1] eq ';') {
+    if (@tokens == 1) {
+        return $tokens[0];
+    }
+    elsif (@seq >= 2 && $seq[0] eq ':' and $seq[1] eq ';') {
         my $rule = MDOM::Rule::Simple->new;
         my @t = before { $_ eq ';' } @tokens;
         $rule->__add_elements(@t);
@@ -348,13 +351,18 @@ sub _parse_normal {
         }
         $saved_context = RULE;
         return $rule;
-    } elsif (@seq == 1 && $seq[0] eq ':') {
+    }
+    elsif (@seq == 1 && $seq[0] eq ':') {
         my $rule = MDOM::Rule::Simple->new;
         $rule->__add_elements(@tokens);
         $saved_context = RULE;
         return $rule;
-    } elsif (@tokens == 1) {
-        return $tokens[0];
+    }
+    elsif (@seq && $seq[0] eq '=') {
+        my $assign = MDOM::Assignment->new;
+        $assign->__add_elements(@tokens);
+        $saved_context = VOID;
+        return $assign;
     }
     if (all {
                 $_->isa('MDOM::Token::Comment')    ||

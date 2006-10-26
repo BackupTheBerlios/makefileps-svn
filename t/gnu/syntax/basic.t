@@ -280,3 +280,18 @@ blah
 --- stderr
 --- error_code
 0
+
+
+
+=== TEST 17: var assignment changed the "rule context" to VOID
+--- source
+
+a: b
+foo = bar
+	echo $@
+
+--- stdout
+--- stderr preprocess
+#MAKEFILE#:3: *** commands commence before first target.  Stop.
+--- error_code
+512

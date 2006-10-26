@@ -476,7 +476,7 @@ MDOM::Document::Gmake
     MDOM::Token::Whitespace           '\n'
   MDOM::Token::Whitespace             '\n'
   MDOM::Rule::Simple
-    MDOM::Token::Bare         '.c.o'
+    MDOM::Token::Bare                 '.c.o'
     MDOM::Token::Separator            ':'
     MDOM::Token::Whitespace           '\n'
   MDOM::Command
@@ -485,3 +485,86 @@ MDOM::Document::Gmake
     MDOM::Token::Interpolation                '$<'
     MDOM::Token::Bare         '!"'
     MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 22: special targets:
+--- src
+
+.SECONDEXPAN:
+
+/tmp/foo.o:
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         '.SECONDEXPAN'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Token::Whitespace             '\n'
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         '/tmp/foo.o'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 23: simply expanded variable setting
+--- src
+
+foo = bar
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            '='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'bar'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 24: simply expanded variable setting (more complex)
+--- src
+
+$(foo) = baz $(hey)
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Interpolation        '$(foo)'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            '='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'baz'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Interpolation        '$(hey)'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 25: var assignment changed the "rule context" to VOID
+--- src
+a: b
+foo = bar
+	# hello!
+--- dom
+MDOM::Document::Gmake
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         'a'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'b'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Assignment
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            '='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'bar'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Token::Whitespace            '\t'
+  MDOM::Token::Comment               '# hello!'
+  MDOM::Token::Whitespace            '\n'
