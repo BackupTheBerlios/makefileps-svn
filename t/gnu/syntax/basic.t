@@ -101,3 +101,103 @@ a: \3b
 #MAKE#: *** No rule to make target `\3b', needed by `a'.  Stop.
 --- error_code
 512
+
+
+
+=== TEST 7: line continuation
+--- source
+a: \
+	echo c
+	echo "a"
+
+echo: ; echo $@
+
+c: ; echo $@
+
+--- stdout
+echo echo
+echo
+echo c
+c
+echo "a"
+a
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 7: line continuation
+--- source
+a: \
+	b; \
+    echo $@
+
+b: ; echo $@
+
+--- stdout
+echo b
+b
+\
+    echo a
+a
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 8: variables with a single character name:
+--- source
+a = foo
+all: ; echo $a
+--- stdout
+echo foo
+foo
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 9: escaped $
+--- source
+a = foo
+all: ; echo \$a
+--- stdout
+echo \foo
+foo
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 10: unescaped '#'
+--- source
+
+all: foo\\# hello
+foo\\: ; echo $@
+
+--- stdout
+echo foo\
+foo\
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 11: when no space between words and '#'
+--- source
+
+\#a: foo#hello
+
+foo:;echo $@
+
+--- stdout
+echo foo
+foo
+--- stderr
+--- error_code
+0

@@ -117,6 +117,10 @@ sub test_shell_command ($$@) {
         }
     }
 
+    #warn "!!!~~~~ $stdout";
+    #warn "!!!~~~~ ", $block->stdout;
+    #use Test::Differences;
+    #eq_or_diff $stdout, $block->stdout;
     compare $stdout, $block->stdout, "stdout - $name";
     compare $stdout, $block->stdout_like, "stdout_like - $name";
     compare $stderr, $block->stderr, "stderr - $name";

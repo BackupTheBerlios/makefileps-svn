@@ -14,6 +14,7 @@ use constant {
     COMMAND => 2,
     RULE    => 3,
     VOID    => 4,
+    UNKNOWN => 5,
 };
 
 
@@ -41,15 +42,13 @@ sub new {
         open $in, $input or
             die "Can't open $input for reading: $!";
     }
-    my $toplevel = _tokenize($in);
     my $self = $class->SUPER::new;
-    $self->__add_elements(@$toplevel);
+    $self->_tokenize($in);
     $self;
 }
 
 sub _tokenize {
-    my ($fh) = @_;
-    my @toplevel;
+    my ($self, $fh) = @_;
     $context = VOID;
     my @tokens;
     while (<$fh>) {
@@ -68,7 +67,7 @@ sub _tokenize {
                 }
                 my $cmd = MDOM::Command->new;
                 $cmd->__add_elements(@tokens);
-                push @toplevel, $cmd;
+                $self->__add_element($cmd);
                 next;
             } else {
                 @tokens = _tokenize_normal($_);
@@ -78,38 +77,59 @@ sub _tokenize {
                     $context = COMMENT;
                     $tokens[-2]->add_content("\\\n");
                     pop @tokens;
+                    $self->__add_elements( _parse_normal(@tokens) );
+                } elsif ($tokens[-1]->isa('MDOM::Token::Continuation')) {
+                    $saved_context = $context;
+                    $context = UNKNOWN;
+                } else {
+                    $self->__add_elements( _parse_normal(@tokens) );
                 }
             }
-            #_dump_tokens(@tokens);
-            #_dump_tokens2(@tokens);
-            push @toplevel, _parse_normal(@tokens);
         } elsif ($context == COMMENT) {
             @tokens = _tokenize_comment($_);
             if (! $tokens[-1]->isa('MDOM::Token::Continuation')) {
                 $context = $saved_context;
                 my $last = pop @tokens;
-                $toplevel[-1]->last_token->add_content(join '', @tokens);
-                $toplevel[-1]->last_token->parent->__add_element($last);
+                $self->last_token->add_content(join '', @tokens);
+                $self->last_token->parent->__add_element($last);
             } else {
                 $tokens[-2]->add_content("\\\n");
                 pop @tokens;
-                $toplevel[-1]->last_token->add_content(join '', @tokens);
+                $self->last_token->add_content(join '', @tokens);
             }
         } elsif ($context == COMMAND) {
             @tokens = _tokenize_command($_);
             if (! $tokens[-1]->isa('MDOM::Token::Continuation')) {
                 $context = RULE;
                 my $last = pop @tokens;
-                $toplevel[-1]->last_token->add_content(join '', @tokens);
-                $toplevel[-1]->last_token->parent->__add_element($last);
+                $self->last_token->add_content(join '', @tokens);
+                $self->last_token->parent->__add_element($last);
             } else {
                 $tokens[-2]->add_content("\\\n");
                 pop @tokens;
-                $toplevel[-1]->last_token->add_content(join '', @tokens);
+                $self->last_token->add_content(join '', @tokens);
             }
+        } elsif ($context == UNKNOWN) {
+            push @tokens, _tokenize_normal($_);
+            if (@tokens >= 2 && $tokens[-1]->isa('MDOM::Token::Continuation') &&
+                    $tokens[-2]->isa('MDOM::Token::Comment')) {
+                $context = COMMENT;
+                $tokens[-2]->add_content("\\\n");
+                pop @tokens;
+                $self->__add_elements( _parse_normal(@tokens) );
+            } elsif ($tokens[-1]->isa('MDOM::Token::Continuation')) {
+                # do nothing here...stay in the UNKNOWN context...
+            } else {
+                $self->__add_elements( _parse_normal(@tokens) );
+                $context = $saved_context;
+            }
+        } else {
+            die "Unkown state: $context";
         }
     }
-    \@toplevel;
+    if ($context != RULE && $context != VOID) {
+        warn "unexpected end of input at line $.";
+    }
 }
 
 sub _tokenize_normal {
@@ -126,13 +146,19 @@ sub _tokenize_normal {
             #warn "!#@$@#@#@#" if $& eq "\n";
             $next_token = MDOM::Token::Whitespace->new($&);
             #push @tokens, $next_token;
-        } elsif (/(?x) \G (?: := | \?= | \+= | [=:;] )/gc) {
+        }
+        elsif (/(?x) \G (?: := | \?= | \+= | [=:;] )/gc) {
             $next_token = MDOM::Token::Separator->new($&);
-        } elsif (my $res = extract_interp($_)) {
+        }
+        elsif (my $res = extract_interp($_)) {
             $next_token = MDOM::Token::Interpolation->new($res);
             #die "!!!???";
             #_dump_tokens($next_token);
-        } elsif (/(?x) \G \\ (.) /gcs) {
+        }
+        elsif (/(?x) \G \$. /gc) {
+            $next_token = MDOM::Token::Interpolation->new($&);
+        }
+        elsif (/(?x) \G \\ (.) /gcs) {
             my $c = $1;
             if ($c eq "\n") {
                 push @tokens, MDOM::Token::Bare->new($token) if $token;
@@ -141,7 +167,8 @@ sub _tokenize_normal {
             } else {
                 $token .= "\\$c";
             }
-        } elsif (/(?x) \G (\# [^\n]*) \\ \n/sgc) {
+        }
+        elsif (/(?x) \G (\# [^\n]*) \\ \n/sgc) {
             my $s = $1;
             push @tokens, MDOM::Token::Bare->new($token) if $token;
             push @tokens, MDOM::Token::Comment->new($s);
@@ -173,43 +200,37 @@ sub _tokenize_command {
     if (/(?x) \G [\@+\-] /gc) {
         push @tokens, MDOM::Token::Separator->new($&);
     }
+    my $strlen = length;
     my $token = '';
     my $next_token;
     while (1) {
         #warn '@tokens = ', Dumper(@tokens);
         #warn "TOKEN = *$token*\n";
         #warn "LEFT: *", (substr $_, pos $_), "*\n";
+        my $last = 0;
         if (/(?x) \G \n /gc) {
             #warn "!!!";
-            push @tokens, MDOM::Token::Bare->new($token) if $token;
-            push @tokens, MDOM::Token::Whitespace->new("\n");
-            return @tokens;
+            $next_token = MDOM::Token::Whitespace->new("\n");
             #push @tokens, $next_token;
         }
         elsif (my $res = extract_interp($_)) {
             $next_token = MDOM::Token::Interpolation->new($res);
         }
-        elsif (/(?x) \G \$\$ /gc) {
-            $token .= '$$';
-        }
         elsif (/(?x) \G \$. /gc) {
             $next_token = MDOM::Token::Interpolation->new($&);
         }
-        elsif (/(?x) \G \\ (.) /gcs) {
+        elsif (/(?x) \G \\ ([\#\\\n]) /gcs) {
             my $c = $1;
-            if ($c eq "\n") {
-                push @tokens, MDOM::Token::Bare->new($token) if $token;
-                push @tokens, MDOM::Token::Continuation->new("\\\n");
-                return @tokens;
+            if ($c eq "\n" and pos == $strlen) {
+                $next_token = MDOM::Token::Continuation->new("\\\n");
             } else {
                 $token .= "\\$c";
             }
         }
         elsif (/(?x) \G . /gc) {
             $token .= $&;
-        }
-        else {
-            last;
+        } else {
+            $last = 1;
         }
         if ($next_token) {
             if ($token) {
@@ -219,6 +240,7 @@ sub _tokenize_command {
             push @tokens, $next_token;
             $next_token = undef;
         }
+        last if $last;
     }
     @tokens;
 }
@@ -257,7 +279,7 @@ sub _parse_normal {
     my @tokens = @_;
     my @seq = grep { $_->isa('MDOM::Token::Separator') } @tokens;
     #_dump_tokens2(@seq);
-    if (@seq == 2 && $seq[0] eq ':' and $seq[1] eq ';') {
+    if (@seq >= 2 && $seq[0] eq ':' and $seq[1] eq ';') {
         my $rule = MDOM::Rule::Simple->new;
         my @t = before { $_ eq ';' } @tokens;
         $rule->__add_elements(@t);
