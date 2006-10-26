@@ -229,3 +229,54 @@ hi
 --- stderr
 --- error_code
 0
+
+
+
+=== TEST 14: dynamics of rules
+--- source
+foo = : b
+a $(foo)
+	echo $@
+b:; echo $@
+--- stdout
+echo b
+b
+echo a
+a
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 15: disabled suffix rules
+--- source
+.SUFFIXES:
+
+all: .c.o
+.c.o:
+	echo "hello $<!"
+--- stdout
+echo "hello !"
+hello !
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 16: static pattern rules with ";" command
+--- source
+
+foo.o bar.o: %.o: %.c ; echo blah
+
+%.c: ; echo $@
+
+--- stdout
+echo foo.c
+foo.c
+echo blah
+blah
+--- stderr
+--- error_code
+0

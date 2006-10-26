@@ -22,7 +22,7 @@ BEGIN {
 
 use constant \%_map;
 
-my %_rmap = reverse %_map;
+my %_rev_map = reverse %_map;
 
 my $extract_interp_1 = gen_extract_tagged('\$[(]', '[)]');
 my $extract_interp_2 = gen_extract_tagged('\$[{]', '[}]');
@@ -59,7 +59,7 @@ sub _tokenize {
     my @tokens;
     while (<$fh>) {
         #warn "!!! tokenizing $_";
-        #warn "CONTEXT = ", $_rmap{$context};
+        #warn "CONTEXT = ", $_rev_map{$context};
         $_ .= "\n" if !/\n$/s;
         if ($context == VOID || $context == RULE) {
             if ($context == VOID && s/(?x) ^ (\t\s*) (?= \# ) //) {
@@ -111,7 +111,7 @@ sub _tokenize {
             @tokens = _tokenize_comment($_);
             if (! $tokens[-1]->isa('MDOM::Token::Continuation')) {
                 #warn "finishing comment slurping...(switch back to ",
-                #    $_rmap{$saved_context}, ")";
+                #    $_rev_map{$saved_context}, ")";
                 $context = $saved_context;
                 my $last = pop @tokens;
                 $self->last_token->add_content(join '', @tokens);
@@ -323,6 +323,30 @@ sub _parse_normal {
         my $cmd = MDOM::Command->new;
         $cmd->__add_elements(@tokens);
         $rule->__add_elements($cmd);
+        $saved_context = RULE;
+        return $rule;
+    }
+    elsif (@seq >= 2 && $seq[0] eq ':' and $seq[1] eq ':') {
+        my $rule = MDOM::Rule::StaticPattern->new;
+        my @t = before { $_ eq ';' } @tokens;
+        if (@t) {
+            $rule->__add_elements(@t);
+            splice @tokens, 0, scalar(@t);
+
+            my @prefix = shift @tokens;
+            if ($tokens[0] && $tokens[0]->isa('MDOM::Token::Whitespace')) {
+                push @prefix, shift @tokens;
+            }
+
+            @tokens = (@prefix, _tokenize_command(join '', @tokens));
+            if ($tokens[-1]->isa('MDOM::Token::Continuation')) {
+                $saved_context = $context;
+                $context = COMMAND;
+            }
+            my $cmd = MDOM::Command->new;
+            $cmd->__add_elements(@tokens);
+            $rule->__add_elements($cmd);
+        }
         $saved_context = RULE;
         return $rule;
     } elsif (@seq == 1 && $seq[0] eq ':') {
