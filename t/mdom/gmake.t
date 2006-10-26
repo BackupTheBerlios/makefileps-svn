@@ -457,3 +457,31 @@ MDOM::Document::Gmake
     MDOM::Token::Bare               'echo '
     MDOM::Token::Interpolation      '$@'
     MDOM::Token::Whitespace         '\n'
+
+
+
+=== TEST 21: suffix (-like) rules
+--- src
+
+.SUFFIXES:
+
+.c.o:
+	echo "hello $<!"
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         '.SUFFIXES'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Token::Whitespace             '\n'
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         '.c.o'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Command
+    MDOM::Token::Separator            '\t'
+    MDOM::Token::Bare         'echo "hello '
+    MDOM::Token::Interpolation                '$<'
+    MDOM::Token::Bare         '!"'
+    MDOM::Token::Whitespace           '\n'
