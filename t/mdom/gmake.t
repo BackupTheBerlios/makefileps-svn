@@ -346,3 +346,27 @@ MDOM::Document::Gmake
 MDOM::Document::Gmake
   MDOM::Token::Comment    '# hello \\n\tworld\\n    !'
   MDOM::Token::Whitespace '\n'
+
+
+
+=== TEST 16: comments indented by a tab
+--- src
+	# blah
+--- dom
+MDOM::Document::Gmake
+  MDOM::Token::Whitespace    '\t'
+  MDOM::Token::Comment       '# blah'
+  MDOM::Token::Whitespace    '\n'
+
+
+
+=== TEST 17: multi-line comment indented with tabs
+--- src
+	# blah \
+hello!\
+	# hehe
+--- dom
+MDOM::Document::Gmake
+  MDOM::Token::Whitespace    '\t'
+  MDOM::Token::Comment       '# blah \\nhello!\\n\t# hehe'
+  MDOM::Token::Whitespace    '\n'

@@ -9,14 +9,20 @@ use Data::Dump::Streamer;
 use base 'MDOM::Node';
 use List::MoreUtils qw( before );
 
-use constant {
-    COMMENT => 1,
-    COMMAND => 2,
-    RULE    => 3,
-    VOID    => 4,
-    UNKNOWN => 5,
-};
+my %_map;
+BEGIN {
+    %_map = (
+        COMMENT => 1,
+        COMMAND => 2,
+        RULE    => 3,
+        VOID    => 4,
+        UNKNOWN => 5,
+    );
+}
 
+use constant \%_map;
+
+my %_rmap = reverse %_map;
 
 my $extract_interp_1 = gen_extract_tagged('\$[(]', '[)]');
 my $extract_interp_2 = gen_extract_tagged('\$[{]', '[}]');
@@ -53,10 +59,23 @@ sub _tokenize {
     my @tokens;
     while (<$fh>) {
         #warn "!!! tokenizing $_";
-        #warn "CONTEXT = ", $context;
+        #warn "CONTEXT = ", $_rmap{$context};
         $_ .= "\n" if !/\n$/s;
         if ($context == VOID || $context == RULE) {
-            if (s/^\t//) {
+            if ($context == VOID && s/(?x) ^ (\t\s*) (?= \# ) //) {
+                @tokens = (
+                    MDOM::Token::Whitespace->new($1),
+                    _tokenize_comment($_)
+                );
+                if ($tokens[-1]->isa('MDOM::Token::Continuation')) {
+                    $saved_context = $context;
+                    $context = COMMENT;
+                    $tokens[-2]->add_content("\\\n");
+                    pop @tokens;
+                }
+                $self->__add_elements( @tokens );
+            }
+            elsif (s/^\t//) {
                 @tokens = _tokenize_command($_);
                 unshift @tokens, MDOM::Token::Separator->new("\t");
                 if ($tokens[-1]->isa('MDOM::Token::Continuation')) {
@@ -73,21 +92,26 @@ sub _tokenize {
                 @tokens = _tokenize_normal($_);
                 if (@tokens >= 2 && $tokens[-1]->isa('MDOM::Token::Continuation') &&
                         $tokens[-2]->isa('MDOM::Token::Comment')) {
+                    #warn "trailing comments found...";
                     $saved_context = $context;
                     $context = COMMENT;
                     $tokens[-2]->add_content("\\\n");
                     pop @tokens;
                     $self->__add_elements( _parse_normal(@tokens) );
                 } elsif ($tokens[-1]->isa('MDOM::Token::Continuation')) {
+                    #warn "continuation found...";
                     $saved_context = $context;
                     $context = UNKNOWN;
                 } else {
+                    #warn "line parsed....";
                     $self->__add_elements( _parse_normal(@tokens) );
                 }
             }
         } elsif ($context == COMMENT) {
             @tokens = _tokenize_comment($_);
             if (! $tokens[-1]->isa('MDOM::Token::Continuation')) {
+                #warn "finishing comment slurping...(switch back to ",
+                #    $_rmap{$saved_context}, ")";
                 $context = $saved_context;
                 my $last = pop @tokens;
                 $self->last_token->add_content(join '', @tokens);
@@ -249,17 +273,18 @@ sub _tokenize_comment {
     local $_ = shift;
     my @tokens;
     my $token = '';
+    #warn "COMMENT: $_";
     while (1) {
         if (/(?x) \G \n /gc) {
-            push @tokens, MDOM::Token::Bare->new($token) if $token;
+            push @tokens, MDOM::Token::Comment->new($token) if $token;
             push @tokens, MDOM::Token::Whitespace->new("\n");
             return @tokens;
             #push @tokens, $next_token;
         }
-        elsif (/(?x) \G \\ (.) /gcs) {
+        elsif (/(?x) \G \\ ([\\\n]) /gcs) {
             my $c = $1;
             if ($c eq "\n") {
-                push @tokens, MDOM::Token::Bare->new($token) if $token;
+                push @tokens, MDOM::Token::Comment->new($token) if $token;
                 push @tokens, MDOM::Token::Continuation->new("\\\n");
                 return @tokens;
             } else {
@@ -298,10 +323,12 @@ sub _parse_normal {
         my $cmd = MDOM::Command->new;
         $cmd->__add_elements(@tokens);
         $rule->__add_elements($cmd);
+        $saved_context = RULE;
         return $rule;
     } elsif (@seq == 1 && $seq[0] eq ':') {
         my $rule = MDOM::Rule::Simple->new;
         $rule->__add_elements(@tokens);
+        $saved_context = RULE;
         return $rule;
     } elsif (@tokens == 1) {
         return $tokens[0];

@@ -201,3 +201,31 @@ foo
 --- stderr
 --- error_code
 0
+
+
+
+=== TEST 12: comment indented with tabs
+--- source
+	# blah
+a: ; echo hi
+--- stdout
+echo hi
+hi
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 13: multi-line comment indented with tabs
+--- source
+	# blah \
+hello!\
+	# hehe
+a: ; echo hi
+--- stdout
+echo hi
+hi
+--- stderr
+--- error_code
+0
