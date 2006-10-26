@@ -568,3 +568,20 @@ MDOM::Document::Gmake
   MDOM::Token::Whitespace            '\t'
   MDOM::Token::Comment               '# hello!'
   MDOM::Token::Whitespace            '\n'
+
+
+
+=== TEST 26: recursively-expanded var assignment
+--- src
+
+a := $($($(x)))
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'a'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            ':='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Interpolation                '$($($(x)))'
+    MDOM::Token::Whitespace           '\n'
