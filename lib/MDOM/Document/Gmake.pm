@@ -404,8 +404,14 @@ sub _parse_normal {
         # XXX directive support given here...
         # filter out significant tokens:
         my ($fst, $snd) = grep { $_->significant } @tokens;
+        #_dump_tokens2($fst, $snd);
         my $is_directive;
-        if ($fst eq 'override' && $snd eq 'define' ||
+        if ($fst eq '-include') {
+            $fst->set_content('include');
+            unshift @tokens, MDOM::Token::Modifier->new('-');
+            $is_directive = 1;
+        }
+        elsif ($fst eq 'override' && $snd eq 'define' ||
             (any { $fst eq $_ } @keywords)) {
             $is_directive = 1;
         }

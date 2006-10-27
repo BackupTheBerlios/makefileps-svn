@@ -874,3 +874,61 @@ MDOM::Document::Gmake
 
 
 
+=== TEST 39: the vpath directive
+--- src
+
+vpath %.1 %.c src
+  vpath %h include
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Directive
+    MDOM::Token::Bare         'vpath'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '%.1'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare           '%.c'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'src'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Directive
+    MDOM::Token::Whitespace          '  '
+    MDOM::Token::Bare                'vpath'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                '%h'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'include'
+    MDOM::Token::Whitespace          '\n'
+
+
+
+=== TEST 40: the include directive
+--- src
+include foo *.mk $(bar)
+--- dom
+MDOM::Document::Gmake
+  MDOM::Directive
+    MDOM::Token::Bare         'include'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '*.mk'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Interpolation                '$(bar)'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 41: the -include directive
+--- src
+
+-include filenames...
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Directive
+    MDOM::Token::Modifier             '-'
+    MDOM::Token::Bare          'include'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare          'filenames...'
+    MDOM::Token::Whitespace           '\n'
