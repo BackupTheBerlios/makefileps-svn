@@ -25,7 +25,10 @@ use constant \%_map;
 
 my %_rev_map = reverse %_map;
 
-my @keywords = qw( vpath include ifdef ifndef else endif define endef export );
+my @keywords = qw(
+    vpath include ifdef ifndef else endif 
+    define endef export unexport
+);
 
 my $extract_interp_1 = gen_extract_tagged('\$[(]', '[)]', '');
 my $extract_interp_2 = gen_extract_tagged('\$[{]', '[}]', '');
