@@ -388,7 +388,8 @@ sub _parse_normal {
         $saved_context = RULE;
         return $rule;
     }
-    elsif (@sep && ($sep[0] eq '=' || $sep[0] eq ':=')) {
+    elsif (@sep && ($sep[0] eq '=' || $sep[0] eq ':=' || $sep[0] eq '+=' ||
+                    $sep[0] eq '?=')) {
         my $assign = MDOM::Assignment->new;
         $assign->__add_elements(@tokens);
         $saved_context = VOID;

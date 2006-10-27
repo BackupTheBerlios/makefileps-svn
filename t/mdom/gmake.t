@@ -511,7 +511,7 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 23: simply expanded variable setting
+=== TEST 23: recursively expanded variable setting
 --- src
 
 foo = bar
@@ -528,7 +528,7 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 24: simply expanded variable setting (more complex)
+=== TEST 24: recursively expanded variable setting (more complex)
 --- src
 
 $(foo) = baz $(hey)
@@ -573,7 +573,7 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 26: recursively-expanded var assignment
+=== TEST 26: simply-expanded var assignment
 --- src
 
 a := $($($(x)))
@@ -590,7 +590,7 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 27: multi-line var assignment (simply-expanded)
+=== TEST 27: multi-line var assignment
 --- src
 
 define remote-file
@@ -667,7 +667,7 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 30: multi-line var assignment (simply-expanded)
+=== TEST 30: multi-line var assignment (recursively-expanded)
 --- src
 
 SOURCES = count_words.c \
@@ -693,7 +693,7 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 31: multi-line var assignment (recursively-expanded)
+=== TEST 31: multi-line var assignment (simply-expanded)
 --- src
 
 SOURCES := count_words.c \
@@ -719,7 +719,7 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 32: multi-line command
+=== TEST 32: multi-line commands
 --- src
 
 compile_all:
@@ -737,6 +737,140 @@ MDOM::Document::Gmake
   MDOM::Command
     MDOM::Token::Separator            '\t'
     MDOM::Token::Bare         'for d in '
-    MDOM::Token::Interpolation                '$(source_dirs)'
-    MDOM::Token::Bare		'; \\n\tdo                       \\n\t\t$(JAVAC) $$d/*.java; \\n\tdone'
+    MDOM::Token::Interpolation        '$(source_dirs)'
+    MDOM::Token::Bare	'; \\n\tdo                       \\n\t\t$(JAVAC) $$d/*.java; \\n\tdone'
     MDOM::Token::Whitespace		'\n'
+
+
+
+=== TEST 33: other assignment variations (simply-expanded)
+--- src
+
+override foo := 32
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'override'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            ':='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '32'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 34: override + assignment (=)
+--- src
+
+override foo = 32
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'override'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            '='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '32'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 35: override + assignment (:=)
+--- src
+
+override foo := 32
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'override'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            ':='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '32'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 36: override + assignment (+=)
+--- src
+
+override CFLAGS += $(patsubst %,-I%,$(subst :, ,$(VPATH)))
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare                'override'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'CFLAGS'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Separator           '+='
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Interpolation       '$(patsubst %,-I%,$(subst :, ,$(VPATH)))'
+    MDOM::Token::Whitespace          '\n'
+
+
+
+=== TEST 37: override + assignment (?=)
+--- src
+
+override files ?=  main.o kbd.o command.o display.o \
+            insert.o search.o files.o utils.o
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare                'override'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'files'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Separator           '?='
+    MDOM::Token::Whitespace          '  '
+    MDOM::Token::Bare                'main.o'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'kbd.o'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'command.o'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'display.o'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Continuation                '\\n'
+    MDOM::Token::Whitespace          '            '
+    MDOM::Token::Bare                'insert.o'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'search.o'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'files.o'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'utils.o'
+    MDOM::Token::Whitespace          '\n'
+
+
+
+=== TEST 38: export + assignment (:=)
+--- src
+
+export foo := 32
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'export'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            ':='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '32'
+    MDOM::Token::Whitespace           '\n'
+
+
+
