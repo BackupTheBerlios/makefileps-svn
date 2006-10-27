@@ -602,7 +602,7 @@ endef
 --- dom
 MDOM::Document::Gmake
   MDOM::Directive
-    MDOM::Token::Keyword         'define'
+    MDOM::Token::Bare         'define'
     MDOM::Token::Whitespace           ' '
     MDOM::Token::Bare         'remote-file'
     MDOM::Token::Whitespace           '\n'
@@ -611,7 +611,7 @@ MDOM::Document::Gmake
     MDOM::Token::Interpolation '$(if $(filter unix, $($1.type)), \\n    /net/$($1.host)/$($1.path), \\n    //$($1.host)/$($1.path))'
     MDOM::Token::Whitespace           '\n'
   MDOM::Directive
-    MDOM::Token::Keyword         'endef'
+    MDOM::Token::Bare         'endef'
     MDOM::Token::Whitespace           '\n'
 
 
@@ -664,3 +664,79 @@ MDOM::Document::Gmake
     MDOM::Token::Modifier             '-'
     MDOM::Token::Bare                 'blah!'
     MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 30: multi-line var assignment (simply-expanded)
+--- src
+
+SOURCES = count_words.c \
+          lexer.c	\
+		counter.c
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'SOURCES'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            '='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'count_words.c'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Continuation         '\\n'
+    MDOM::Token::Whitespace           '          '
+    MDOM::Token::Bare         'lexer.c'
+    MDOM::Token::Whitespace           '\t'
+    MDOM::Token::Continuation         '\\n'
+    MDOM::Token::Whitespace           '\t\t'
+    MDOM::Token::Bare         'counter.c'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 31: multi-line var assignment (recursively-expanded)
+--- src
+
+SOURCES := count_words.c \
+          lexer.c	\
+		counter.c
+--- dom
+MDOM::Document::Gmake
+  MDOM::Assignment
+    MDOM::Token::Bare         'SOURCES'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Separator            ':='
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'count_words.c'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Continuation         '\\n'
+    MDOM::Token::Whitespace           '          '
+    MDOM::Token::Bare         'lexer.c'
+    MDOM::Token::Whitespace           '\t'
+    MDOM::Token::Continuation         '\\n'
+    MDOM::Token::Whitespace           '\t\t'
+    MDOM::Token::Bare         'counter.c'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 32: multi-line command
+--- src
+
+compile_all:
+	for d in $(source_dirs); \
+	do                       \
+		$(JAVAC) $$d/*.java; \
+	done
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         'compile_all'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Command
+    MDOM::Token::Separator            '\t'
+    MDOM::Token::Bare         'for d in '
+    MDOM::Token::Interpolation                '$(source_dirs)'
+    MDOM::Token::Bare		'; \\n\tdo                       \\n\t\t$(JAVAC) $$d/*.java; \\n\tdone'
+    MDOM::Token::Whitespace		'\n'

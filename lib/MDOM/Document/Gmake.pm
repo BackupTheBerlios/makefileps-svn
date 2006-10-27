@@ -31,9 +31,9 @@ my $extract_interp_1 = gen_extract_tagged('\$[(]', '[)]', '');
 my $extract_interp_2 = gen_extract_tagged('\$[{]', '[}]', '');
 
 sub extract_interp {
-    my $res = $extract_interp_1->($_[0]);
+    my ($res) = $extract_interp_1->($_[0]);
     if (!$res) {
-        $res = $extract_interp_2->($_[0]);
+        ($res) = $extract_interp_2->($_[0]);
     }
     $res;
 }
@@ -63,9 +63,11 @@ sub _tokenize {
     while (<$fh>) {
         #warn "!!! tokenizing $_";
         #warn "CONTEXT = ", $_rev_map{$context};
+        s/\r\n/\n/g;
         $_ .= "\n" if !/\n$/s;
         if ($context == VOID || $context == RULE) {
             if ($context == VOID && s/(?x) ^ (\t\s*) (?= \# ) //) {
+                #warn "Found comment in VOID context...";
                 @tokens = (
                     MDOM::Token::Whitespace->new($1),
                     _tokenize_comment($_)
@@ -79,9 +81,12 @@ sub _tokenize {
                 $self->__add_elements( @tokens );
             }
             elsif (s/^\t//) {
+                #warn "Found command in VOID/RULE context... ($_)";
                 @tokens = _tokenize_command($_);
+                #warn "*@tokens*";
                 unshift @tokens, MDOM::Token::Separator->new("\t");
                 if ($tokens[-1]->isa('MDOM::Token::Continuation')) {
+                    #warn "From ", $_rev_map{$context}, " to COMMAND...";
                     $saved_context = $context;
                     $context = COMMAND;
                     $tokens[-2]->add_content("\\\n");
@@ -185,7 +190,7 @@ sub _tokenize_normal {
         elsif (/(?x) \G \$. /gc) {
             $next_token = MDOM::Token::Interpolation->new($&);
         }
-        elsif (/(?x) \G \\ (.) /gcs) {
+        elsif (/(?x) \G \\ ([\#\\\n]) /gcs) {
             my $c = $1;
             if ($c eq "\n") {
                 push @tokens, MDOM::Token::Bare->new($token) if $token;
@@ -222,12 +227,13 @@ sub _tokenize_normal {
 }
 
 sub _tokenize_command {
-    local $_ = shift;
+    my $s = shift;
     my @tokens;
     my $token = '';
     my $next_token;
-    my $strlen = length;
-    if (/(?x) \G (\s*) ([\@+\-]) /gc) {
+    my $strlen = length $s;
+    #warn "$strlen <=> ", pos $_, "===========";
+    if ($s =~ /(?x) \G (\s*) ([\@+\-]) /gc) {
         my ($whitespace, $modifier) = ($1, $2);
         if ($whitespace) {
             push @tokens, MDOM::Token::Whitespace->new($whitespace);
@@ -241,28 +247,35 @@ sub _tokenize_command {
         #warn "   (2) !~! *@tokens* !~!\n";
         #warn '@tokens = ', Dumper(@tokens);
         #warn "TOKEN = *$token*\n";
-        #warn "LEFT: *", (substr $_, pos $_), "*\n";
+        #warn "LEFT: *", (substr $s, pos $s), "*\n";
+        #warn "pos before substitution: ", pos $s;
         my $last = 0;
-        if (/(?x) \G \n /gc) {
+        if ($s =~ /(?x) \G \n /gc) {
             #warn "!!!";
             $next_token = MDOM::Token::Whitespace->new("\n");
             #push @tokens, $next_token;
         }
-        elsif (my $res = extract_interp($_)) {
+        elsif (my $res = extract_interp($s)) {
+            #pos $s += length($res);
+            #warn "!!!!!!$s!!!!!";
+            #warn "pos after substitution: ", pos $s;
             $next_token = MDOM::Token::Interpolation->new($res);
         }
-        elsif (/(?x) \G \$. /gc) {
+        elsif ($s =~ /(?x) \G \$. /gc) {
             $next_token = MDOM::Token::Interpolation->new($&);
         }
-        elsif (/(?x) \G \\ ([\#\\\n]) /gcs) {
+        elsif ($s =~ /(?x) \G \\ ([\#\\\n]) /gcs) {
+            #warn "!!!~~~~ *$&*\n";
+            #warn pos $s, " == $strlen\n";
             my $c = $1;
-            if ($c eq "\n" and pos == $strlen) {
+            if ($c eq "\n" && pos $s == $strlen) {
+                #warn "!!!~~~";
                 $next_token = MDOM::Token::Continuation->new("\\\n");
             } else {
                 $token .= "\\$c";
             }
         }
-        elsif (/(?x) \G . /gc) {
+        elsif ($s =~ /(?x) \G . /gc) {
             #warn "appending '$&' to token...";
             $token .= $&;
         } else {
@@ -277,6 +290,10 @@ sub _tokenize_command {
             $next_token = undef;
         }
         last if $last;
+    }
+    if ($token) {
+        push @tokens, MDOM::Token::Bare->new($token);
+        $token = '';
     }
     #warn "(3) !~! *@tokens* !~!\n";
     @tokens;
@@ -386,24 +403,19 @@ sub _parse_normal {
         # XXX directive support given here...
         # filter out significant tokens:
         my ($fst, $snd) = grep { $_->significant } @tokens;
-        my $is_unknown;
-        if ($fst eq 'override' && $snd eq 'define') {
-            bless $fst, 'MDOM::Token::Keyword';
-            bless $snd, 'MDOM::Token::Keyword';
-        } elsif (any { $fst eq $_ } @keywords) {
-            bless $fst, 'MDOM::Token::Keyword';
-        } else {
-            # XXX support for -include, etc.
-            $is_unknown = 1;
+        my $is_directive;
+        if ($fst eq 'override' && $snd eq 'define' ||
+            (any { $fst eq $_ } @keywords)) {
+            $is_directive = 1;
         }
         my $node;
-        if ($is_unknown) {
+        if ($is_directive) {
+            $node = MDOM::Directive->new;
+            $node->__add_elements(@tokens);
+        } else {
             #warn "!!!! It's unkown: *@tokens* !!!!";
             @tokens = _tokenize_command(join '', @tokens);
             $node = MDOM::Unknown->new;
-            $node->__add_elements(@tokens);
-        } else {
-            $node = MDOM::Directive->new;
             $node->__add_elements(@tokens);
         }
         $node;
