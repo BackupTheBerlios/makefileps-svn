@@ -10,5 +10,6 @@ use MDOM::Token;
 use MDOM::Command;
 use MDOM::Assignment;
 use MDOM::Unknown;
+use MDOM::Directive;
 
 1;

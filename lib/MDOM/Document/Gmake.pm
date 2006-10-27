@@ -7,8 +7,8 @@ use Text::Balanced qw( gen_extract_tagged );
 use MDOM;
 use Data::Dump::Streamer;
 use base 'MDOM::Node';
-use List::MoreUtils qw( before all );
-use List::Util qw( first );
+use List::MoreUtils qw( before all any );
+#use List::Util qw( first );
 
 my %_map;
 BEGIN {
@@ -25,8 +25,10 @@ use constant \%_map;
 
 my %_rev_map = reverse %_map;
 
-my $extract_interp_1 = gen_extract_tagged('\$[(]', '[)]');
-my $extract_interp_2 = gen_extract_tagged('\$[{]', '[}]');
+my @keywords = qw( vpath include ifdef ifndef else endif define endef export );
+
+my $extract_interp_1 = gen_extract_tagged('\$[(]', '[)]', '');
+my $extract_interp_2 = gen_extract_tagged('\$[{]', '[}]', '');
 
 sub extract_interp {
     my $res = $extract_interp_1->($_[0]);
@@ -222,6 +224,9 @@ sub _tokenize_normal {
 sub _tokenize_command {
     local $_ = shift;
     my @tokens;
+    my $token = '';
+    my $next_token;
+    my $strlen = length;
     if (/(?x) \G (\s*) ([\@+\-]) /gc) {
         my ($whitespace, $modifier) = ($1, $2);
         if ($whitespace) {
@@ -229,10 +234,11 @@ sub _tokenize_command {
         }
         push @tokens, MDOM::Token::Modifier->new($modifier);
     }
-    my $strlen = length;
-    my $token = '';
-    my $next_token;
+    #warn "!>! ~!$_!~ !>!\n";
+    #warn "!>! ~@tokens~ !>!";
+    #warn "(1) !~! *@tokens* !~!\n";
     while (1) {
+        #warn "   (2) !~! *@tokens* !~!\n";
         #warn '@tokens = ', Dumper(@tokens);
         #warn "TOKEN = *$token*\n";
         #warn "LEFT: *", (substr $_, pos $_), "*\n";
@@ -257,6 +263,7 @@ sub _tokenize_command {
             }
         }
         elsif (/(?x) \G . /gc) {
+            #warn "appending '$&' to token...";
             $token .= $&;
         } else {
             $last = 1;
@@ -271,6 +278,7 @@ sub _tokenize_command {
         }
         last if $last;
     }
+    #warn "(3) !~! *@tokens* !~!\n";
     @tokens;
 }
 
@@ -307,12 +315,12 @@ sub _tokenize_comment {
 
 sub _parse_normal {
     my @tokens = @_;
-    my @seq = grep { $_->isa('MDOM::Token::Separator') } @tokens;
-    #_dump_tokens2(@seq);
+    my @sep = grep { $_->isa('MDOM::Token::Separator') } @tokens;
+    #_dump_tokens2(@sep);
     if (@tokens == 1) {
         return $tokens[0];
     }
-    elsif (@seq >= 2 && $seq[0] eq ':' and $seq[1] eq ';') {
+    elsif (@sep >= 2 && $sep[0] eq ':' and $sep[1] eq ';') {
         my $rule = MDOM::Rule::Simple->new;
         my @t = before { $_ eq ';' } @tokens;
         $rule->__add_elements(@t);
@@ -334,7 +342,7 @@ sub _parse_normal {
         $saved_context = RULE;
         return $rule;
     }
-    elsif (@seq >= 2 && $seq[0] eq ':' and $seq[1] eq ':') {
+    elsif (@sep >= 2 && $sep[0] eq ':' and $sep[1] eq ':') {
         my $rule = MDOM::Rule::StaticPattern->new;
         my @t = before { $_ eq ';' } @tokens;
         $rule->__add_elements(@t);
@@ -357,13 +365,13 @@ sub _parse_normal {
         $saved_context = RULE;
         return $rule;
     }
-    elsif (@seq == 1 && $seq[0] eq ':') {
+    elsif (@sep == 1 && $sep[0] eq ':') {
         my $rule = MDOM::Rule::Simple->new;
         $rule->__add_elements(@tokens);
         $saved_context = RULE;
         return $rule;
     }
-    elsif (@seq && ($seq[0] eq '=' || $seq[0] eq ':=')) {
+    elsif (@sep && ($sep[0] eq '=' || $sep[0] eq ':=')) {
         my $assign = MDOM::Assignment->new;
         $assign->__add_elements(@tokens);
         $saved_context = VOID;
@@ -376,8 +384,28 @@ sub _parse_normal {
         @tokens;
     } else {
         # XXX directive support given here...
-        my $node = MDOM::Unknown->new;
-        $node->__add_elements(@tokens);
+        # filter out significant tokens:
+        my ($fst, $snd) = grep { $_->significant } @tokens;
+        my $is_unknown;
+        if ($fst eq 'override' && $snd eq 'define') {
+            bless $fst, 'MDOM::Token::Keyword';
+            bless $snd, 'MDOM::Token::Keyword';
+        } elsif (any { $fst eq $_ } @keywords) {
+            bless $fst, 'MDOM::Token::Keyword';
+        } else {
+            # XXX support for -include, etc.
+            $is_unknown = 1;
+        }
+        my $node;
+        if ($is_unknown) {
+            #warn "!!!! It's unkown: *@tokens* !!!!";
+            @tokens = _tokenize_command(join '', @tokens);
+            $node = MDOM::Unknown->new;
+            $node->__add_elements(@tokens);
+        } else {
+            $node = MDOM::Directive->new;
+            $node->__add_elements(@tokens);
+        }
         $node;
     }
 }

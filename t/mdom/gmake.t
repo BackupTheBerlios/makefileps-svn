@@ -269,8 +269,11 @@ MDOM::Document::Gmake
     MDOM::Token::Interpolation      '$@'
     MDOM::Token::Bare               ' '
     MDOM::Token::Interpolation      '$a'
+    MDOM::Token::Bare               ' '
     MDOM::Token::Interpolation      '${a}'
+    MDOM::Token::Bare               ' '
     MDOM::Token::Interpolation      '${abc}'
+    MDOM::Token::Bare               ' '
     MDOM::Token::Interpolation      '${}'
     MDOM::Token::Whitespace         '\n'
 
@@ -448,8 +451,7 @@ a $(foo)
 --- dom
 MDOM::Document::Gmake
   MDOM::Unknown
-    MDOM::Token::Bare               'a'
-    MDOM::Token::Whitespace         ' '
+    MDOM::Token::Bare               'a '
     MDOM::Token::Interpolation      '$(foo)'
     MDOM::Token::Whitespace         '\n'
   MDOM::Command
@@ -600,13 +602,18 @@ endef
 --- dom
 MDOM::Document::Gmake
   MDOM::Directive
-    MDOM::Token::Bare         'define'
+    MDOM::Token::Keyword         'define'
     MDOM::Token::Whitespace           ' '
     MDOM::Token::Bare         'remote-file'
     MDOM::Token::Whitespace           '\n'
   MDOM::Unknown
-    MDOM::Token::Whitespace           '  '
---- SKIP
+    MDOM::Token::Bare             '  '
+    MDOM::Token::Interpolation '$(if $(filter unix, $($1.type)), \\n    /net/$($1.host)/$($1.path), \\n    //$($1.host)/$($1.path))'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Directive
+    MDOM::Token::Keyword         'endef'
+    MDOM::Token::Whitespace           '\n'
+
 
 
 === TEST 28: whitespace before command modifiers (@)
