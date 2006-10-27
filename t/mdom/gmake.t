@@ -902,7 +902,33 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 40: the include directive
+=== TEST 40: multi-line vpath directive
+--- src
+
+vpath %.1 %.c src \
+    %h include
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Directive
+    MDOM::Token::Bare         'vpath'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '%.1'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare           '%.c'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'src'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Continuation                '\\n'
+    MDOM::Token::Whitespace          '    '
+    MDOM::Token::Bare                '%h'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'include'
+    MDOM::Token::Whitespace          '\n'
+
+
+
+=== TEST 41: the include directive
 --- src
 include foo *.mk $(bar)
 --- dom
@@ -919,7 +945,31 @@ MDOM::Document::Gmake
 
 
 
-=== TEST 41: the -include directive
+=== TEST 42: multi-line include directive
+--- src
+include foo *.mk $(bar) \
+    blah blah
+--- dom
+MDOM::Document::Gmake
+  MDOM::Directive
+    MDOM::Token::Bare         'include'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'foo'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         '*.mk'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Interpolation                '$(bar)'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Continuation                '\\n'
+    MDOM::Token::Whitespace          '    '
+    MDOM::Token::Bare                'blah'
+    MDOM::Token::Whitespace          ' '
+    MDOM::Token::Bare                'blah'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 43: the -include directive
 --- src
 
 -include filenames...
@@ -931,4 +981,29 @@ MDOM::Document::Gmake
     MDOM::Token::Bare          'include'
     MDOM::Token::Whitespace    ' '
     MDOM::Token::Bare          'filenames...'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 44: multi-line -include directive
+--- src
+
+-include foo bar \
+    $@ $^
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Directive
+    MDOM::Token::Modifier             '-'
+    MDOM::Token::Bare          'include'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare          'foo'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Bare          'bar'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Continuation                '\\n'
+    MDOM::Token::Whitespace    '    '
+    MDOM::Token::Interpolation         '$@'
+    MDOM::Token::Whitespace    ' '
+    MDOM::Token::Interpolation         '$^'
     MDOM::Token::Whitespace           '\n'
