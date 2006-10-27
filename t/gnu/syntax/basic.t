@@ -6,7 +6,7 @@ run_tests;
 
 __DATA__
 
-=== TEST 0: rules with no command
+=== TEST 1: rules with no command
 --- source
 a: b
 b: c
@@ -20,7 +20,7 @@ hello!
 
 
 
-=== TEST 1: command at beginning
+=== TEST 2: command at beginning
 --- source
 	a: b
 b: c
@@ -33,7 +33,7 @@ c:; echo  'hello!'
 
 
 
-=== TEST 2: escaped line continuator
+=== TEST 3: escaped line continuator
 --- source
 a: # \\
 b: c
@@ -46,7 +46,7 @@ c:; echo  'hello!'
 
 
 
-=== TEST 3: rule context
+=== TEST 4: rule context
 --- source
 a: b
 
@@ -62,7 +62,7 @@ a
 
 
 
-=== TEST 4: empty command
+=== TEST 5: empty command
 --- source
 a: b
 	
@@ -78,7 +78,7 @@ a
 
 
 
-=== TEST 5: escaped '#'
+=== TEST 6: escaped '#'
 --- source
 a: \#b
 	echo "a"
@@ -90,7 +90,7 @@ a: \#b
 
 
 
-=== TEST 6: escaped '3'
+=== TEST 7: escaped '3'
 --- source
 a: \3b
 	echo "a"
@@ -104,7 +104,7 @@ a: \3b
 
 
 
-=== TEST 7: line continuation
+=== TEST 8: line continuation
 --- source
 a: \
 	echo c
@@ -127,7 +127,7 @@ a
 
 
 
-=== TEST 7: line continuation
+=== TEST 9: line continuation
 --- source
 a: \
 	b; \
@@ -147,7 +147,7 @@ a
 
 
 
-=== TEST 8: variables with a single character name:
+=== TEST 10: variables with a single character name:
 --- source
 a = foo
 all: ; echo $a
@@ -160,7 +160,7 @@ foo
 
 
 
-=== TEST 9: escaped $
+=== TEST 11: escaped $
 --- source
 a = foo
 all: ; echo \$a
@@ -173,7 +173,7 @@ foo
 
 
 
-=== TEST 10: unescaped '#'
+=== TEST 12: unescaped '#'
 --- source
 
 all: foo\\# hello
@@ -188,7 +188,7 @@ foo\
 
 
 
-=== TEST 11: when no space between words and '#'
+=== TEST 13: when no space between words and '#'
 --- source
 
 \#a: foo#hello
@@ -204,7 +204,7 @@ foo
 
 
 
-=== TEST 12: comment indented with tabs
+=== TEST 14: comment indented with tabs
 --- source
 	# blah
 a: ; echo hi
@@ -217,7 +217,7 @@ hi
 
 
 
-=== TEST 13: multi-line comment indented with tabs
+=== TEST 15: multi-line comment indented with tabs
 --- source
 	# blah \
 hello!\
@@ -232,7 +232,7 @@ hi
 
 
 
-=== TEST 14: dynamics of rules
+=== TEST 16: dynamics of rules
 --- source
 foo = : b
 a $(foo)
@@ -249,7 +249,7 @@ a
 
 
 
-=== TEST 15: disabled suffix rules
+=== TEST 17: disabled suffix rules
 --- source
 .SUFFIXES:
 
@@ -265,7 +265,7 @@ hello !
 
 
 
-=== TEST 16: static pattern rules with ";" command
+=== TEST 18: static pattern rules with ";" command
 --- source
 
 foo.o bar.o: %.o: %.c ; echo blah
@@ -283,7 +283,7 @@ blah
 
 
 
-=== TEST 17: var assignment changed the "rule context" to VOID
+=== TEST 19: var assignment changed the "rule context" to VOID
 --- source
 
 a: b
@@ -295,3 +295,91 @@ foo = bar
 #MAKEFILE#:3: *** commands commence before first target.  Stop.
 --- error_code
 512
+
+
+
+=== TEST 20: whitespace before command modifier
+--- source
+
+all:
+	  @ echo $@
+
+--- stdout
+all
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 21: multi-word define directive
+--- source
+
+define a b
+foo
+endef
+
+$(a b):
+	echo $@
+
+--- stdout
+echo foo
+foo
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 22: odd define directive
+--- source
+
+define a = 3
+foo
+endef
+
+$(a = 3):
+	echo $@
+
+--- stdout
+echo foo
+foo
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 23: define directive with a preceding tab
+--- source
+
+	define a
+foo
+endef
+
+$(a):
+	echo $@
+
+--- stdout
+echo foo
+foo
+--- stderr
+--- error_code
+0
+
+
+
+=== TEST 24: variable assignment with a preceding tab
+--- source
+
+	a = foo
+
+$(a):
+	echo $@
+
+--- stdout
+echo foo
+foo
+--- stderr
+--- error_code
+0

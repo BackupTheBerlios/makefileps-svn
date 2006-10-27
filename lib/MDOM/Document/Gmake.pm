@@ -8,6 +8,7 @@ use MDOM;
 use Data::Dump::Streamer;
 use base 'MDOM::Node';
 use List::MoreUtils qw( before all );
+use List::Util qw( first );
 
 my %_map;
 BEGIN {
@@ -221,8 +222,12 @@ sub _tokenize_normal {
 sub _tokenize_command {
     local $_ = shift;
     my @tokens;
-    if (/(?x) \G [\@+\-] /gc) {
-        push @tokens, MDOM::Token::Separator->new($&);
+    if (/(?x) \G (\s*) ([\@+\-]) /gc) {
+        my ($whitespace, $modifier) = ($1, $2);
+        if ($whitespace) {
+            push @tokens, MDOM::Token::Whitespace->new($whitespace);
+        }
+        push @tokens, MDOM::Token::Modifier->new($modifier);
     }
     my $strlen = length;
     my $token = '';
@@ -370,6 +375,7 @@ sub _parse_normal {
             } @tokens) {
         @tokens;
     } else {
+        # XXX directive support given here...
         my $node = MDOM::Unknown->new;
         $node->__add_elements(@tokens);
         $node;

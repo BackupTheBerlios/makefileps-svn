@@ -82,7 +82,7 @@ MDOM::Document::Gmake
     MDOM::Token::Whitespace      '\n'
   MDOM::Command
     MDOM::Token::Separator    '\t'
-    MDOM::Token::Separator    '@'
+    MDOM::Token::Modifier     '@'
     MDOM::Token::Bare         'echo ...'
     MDOM::Token::Whitespace   '\n'
 
@@ -115,7 +115,7 @@ MDOM::Document::Gmake
     MDOM::Token::Whitespace     '\n'
   MDOM::Command
     MDOM::Token::Separator      '\t'
-    MDOM::Token::Separator      '+'
+    MDOM::Token::Modifier       '+'
     MDOM::Token::Bare           'touch '
     MDOM::Token::Interpolation  '$$'
     MDOM::Token::Whitespace     '\n'
@@ -139,12 +139,12 @@ MDOM::Document::Gmake
     MDOM::Token::Whitespace     '\n'
   MDOM::Command
     MDOM::Token::Separator      '\t'
-    MDOM::Token::Separator      '-'
+    MDOM::Token::Modifier       '-'
     MDOM::Token::Bare           ' mv \#\\n\t+ e \\n  \\'
     MDOM::Token::Whitespace     '\n'
   MDOM::Command
     MDOM::Token::Separator      '\t'
-    MDOM::Token::Separator      '@'
+    MDOM::Token::Modifier       '@'
     MDOM::Token::Whitespace     '\n'
 
 
@@ -433,7 +433,7 @@ MDOM::Document::Gmake
     MDOM::Token::Whitespace    '\n'
   MDOM::Command
     MDOM::Token::Separator     '\t'
-    MDOM::Token::Separator     '@'
+    MDOM::Token::Modifier      '@'
     MDOM::Token::Bare          'echo blah'
     MDOM::Token::Whitespace    '\n'
 
@@ -584,4 +584,76 @@ MDOM::Document::Gmake
     MDOM::Token::Separator            ':='
     MDOM::Token::Whitespace           ' '
     MDOM::Token::Interpolation                '$($($(x)))'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 27: multi-line var assignment (simply-expanded)
+--- src
+
+define remote-file
+  $(if $(filter unix, $($1.type)), \
+    /net/$($1.host)/$($1.path), \
+    //$($1.host)/$($1.path))
+endef
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Directive
+    MDOM::Token::Bare         'define'
+    MDOM::Token::Whitespace           ' '
+    MDOM::Token::Bare         'remote-file'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Unknown
+    MDOM::Token::Whitespace           '  '
+--- SKIP
+
+
+=== TEST 28: whitespace before command modifiers (@)
+--- src
+
+all:
+	  @ echo $@
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         'all'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Command
+    MDOM::Token::Separator            '\t'
+    MDOM::Token::Whitespace           '  '
+    MDOM::Token::Modifier             '@'
+    MDOM::Token::Bare         ' echo '
+    MDOM::Token::Interpolation                '$@'
+    MDOM::Token::Whitespace           '\n'
+
+
+
+=== TEST 29: whitespace before command modifiers (+/-)
+--- src
+
+all:
+	  + echo $@
+		-blah!
+
+--- dom
+MDOM::Document::Gmake
+  MDOM::Rule::Simple
+    MDOM::Token::Bare         'all'
+    MDOM::Token::Separator            ':'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Command
+    MDOM::Token::Separator            '\t'
+    MDOM::Token::Whitespace           '  '
+    MDOM::Token::Modifier             '+'
+    MDOM::Token::Bare         ' echo '
+    MDOM::Token::Interpolation                '$@'
+    MDOM::Token::Whitespace           '\n'
+  MDOM::Command
+    MDOM::Token::Separator            '\t'
+    MDOM::Token::Whitespace           '\t'
+    MDOM::Token::Modifier             '-'
+    MDOM::Token::Bare                 'blah!'
     MDOM::Token::Whitespace           '\n'

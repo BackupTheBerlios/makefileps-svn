@@ -39,6 +39,8 @@ use MDOM::Token::Separator             ();
 use MDOM::Token::Continuation          ();
 use MDOM::Token::Bare                  ();
 use MDOM::Token::Interpolation         ();
+use MDOM::Token::Modifier              ();
+use MDOM::Token::Keyword               ();
 
 #####################################################################
 # Constructor and Related
